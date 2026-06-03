@@ -1491,6 +1491,32 @@
         }
       }
     },
+    "/api/v1/picks/overview": {
+      "get": {
+        "tags": [
+          "picks"
+        ],
+        "summary": "Get Pickem Overview",
+        "operationId": "get_pickem_overview_api_v1_picks_overview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickemOverviewResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/picks/groups": {
       "get": {
         "tags": [
@@ -2927,6 +2953,37 @@
         ],
         "title": "BracketPickRequest"
       },
+      "BracketPickemStatus": {
+        "properties": {
+          "is_available": {
+            "type": "boolean",
+            "title": "Is Available"
+          },
+          "editable": {
+            "type": "boolean",
+            "title": "Editable"
+          },
+          "has_submitted": {
+            "type": "boolean",
+            "title": "Has Submitted"
+          },
+          "slots": {
+            "items": {
+              "$ref": "#/components/schemas/BracketSlotPickemOverview"
+            },
+            "type": "array",
+            "title": "Slots"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_available",
+          "editable",
+          "has_submitted",
+          "slots"
+        ],
+        "title": "BracketPickemStatus"
+      },
       "BracketPredictionPublicResponse": {
         "properties": {
           "id": {
@@ -2994,6 +3051,43 @@
           "points_awarded"
         ],
         "title": "BracketPredictionResponse"
+      },
+      "BracketSlotPickemOverview": {
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Slot Id"
+          },
+          "slot_index": {
+            "type": "integer",
+            "title": "Slot Index"
+          },
+          "phase": {
+            "type": "string",
+            "title": "Phase"
+          },
+          "predicted_winner_team_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Winner Team Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slot_id",
+          "slot_index",
+          "phase",
+          "predicted_winner_team_id"
+        ],
+        "title": "BracketSlotPickemOverview"
       },
       "BracketSlotResponse": {
         "properties": {
@@ -3910,6 +4004,33 @@
         ],
         "title": "GroupPickRequest"
       },
+      "GroupPickemOverview": {
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Group Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "teams": {
+            "items": {
+              "$ref": "#/components/schemas/TeamPickemEntry"
+            },
+            "type": "array",
+            "title": "Teams"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_id",
+          "name",
+          "teams"
+        ],
+        "title": "GroupPickemOverview"
+      },
       "GroupResponse": {
         "properties": {
           "id": {
@@ -3936,6 +4057,37 @@
           "name"
         ],
         "title": "GroupResponse"
+      },
+      "GroupStagePickemStatus": {
+        "properties": {
+          "is_available": {
+            "type": "boolean",
+            "title": "Is Available"
+          },
+          "editable": {
+            "type": "boolean",
+            "title": "Editable"
+          },
+          "has_submitted": {
+            "type": "boolean",
+            "title": "Has Submitted"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GroupPickemOverview"
+            },
+            "type": "array",
+            "title": "Groups"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_available",
+          "editable",
+          "has_submitted",
+          "groups"
+        ],
+        "title": "GroupStagePickemStatus"
       },
       "GroupStagePredictionPublicResponse": {
         "properties": {
@@ -4369,6 +4521,22 @@
         ],
         "title": "Phase"
       },
+      "PickemOverviewResponse": {
+        "properties": {
+          "group_stage": {
+            "$ref": "#/components/schemas/GroupStagePickemStatus"
+          },
+          "bracket": {
+            "$ref": "#/components/schemas/BracketPickemStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_stage",
+          "bracket"
+        ],
+        "title": "PickemOverviewResponse"
+      },
       "PlayerResponse": {
         "properties": {
           "id": {
@@ -4751,6 +4919,30 @@
           "picks"
         ],
         "title": "SubmitGroupStagePickemRequest"
+      },
+      "TeamPickemEntry": {
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Team Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "predicted_position": {
+            "type": "integer",
+            "title": "Predicted Position"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id",
+          "name",
+          "predicted_position"
+        ],
+        "title": "TeamPickemEntry"
       },
       "TeamResponse": {
         "properties": {
