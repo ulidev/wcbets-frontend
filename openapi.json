@@ -1,0 +1,5052 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WC Bets API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/change-password": {
+      "put": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Change Password",
+        "operationId": "change_password_api_v1_auth_change_password_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Get Profile",
+        "operationId": "get_profile_api_v1_users_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Edit Profile",
+        "operationId": "edit_profile_api_v1_users_me_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "List Users",
+        "operationId": "list_users_api_v1_users_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserAdminView"
+                  },
+                  "type": "array",
+                  "title": "Response List Users Api V1 Users Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/pending": {
+      "get": {
+        "tags": [
+          "users"
+        ],
+        "summary": "List Pending Users",
+        "operationId": "list_pending_users_api_v1_users_pending_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserAdminView"
+                  },
+                  "type": "array",
+                  "title": "Response List Pending Users Api V1 Users Pending Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{user_id}/approve": {
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Approve User",
+        "operationId": "approve_user_api_v1_users__user_id__approve_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}/deactivate": {
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Deactivate User",
+        "operationId": "deactivate_user_api_v1_users__user_id__deactivate_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}/promote": {
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Promote To Admin",
+        "operationId": "promote_to_admin_api_v1_users__user_id__promote_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}/demote": {
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Demote To Player",
+        "operationId": "demote_to_player_api_v1_users__user_id__demote_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/teams": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "List Teams",
+        "operationId": "list_teams_api_v1_tournament_teams_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TeamResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Teams Api V1 Tournament Teams Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "Create Team",
+        "operationId": "create_team_api_v1_tournament_teams_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTeamRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/stadiums": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "List Stadiums",
+        "operationId": "list_stadiums_api_v1_tournament_stadiums_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StadiumResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Stadiums Api V1 Tournament Stadiums Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "Create Stadium",
+        "operationId": "create_stadium_api_v1_tournament_stadiums_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStadiumRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StadiumResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/rounds": {
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "List Rounds",
+        "operationId": "list_rounds_api_v1_tournament_rounds_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoundResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Rounds Api V1 Tournament Rounds Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "Create Round",
+        "operationId": "create_round_api_v1_tournament_rounds_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoundRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoundResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/teams/bulk": {
+      "post": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "Bulk Create Teams",
+        "operationId": "bulk_create_teams_api_v1_tournament_teams_bulk_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateTeamsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkCreateTeamsResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/stadiums/bulk": {
+      "post": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "Bulk Create Stadiums",
+        "operationId": "bulk_create_stadiums_api_v1_tournament_stadiums_bulk_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateStadiumsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkCreateStadiumsResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/teams/{team_id}/players": {
+      "post": {
+        "tags": [
+          "players"
+        ],
+        "summary": "Create Player",
+        "operationId": "create_player_api_v1_tournament_teams__team_id__players_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlayerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "players"
+        ],
+        "summary": "List Players",
+        "operationId": "list_players_api_v1_tournament_teams__team_id__players_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerResponse"
+                  },
+                  "title": "Response List Players Api V1 Tournament Teams  Team Id  Players Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/teams/{team_id}/players/bulk": {
+      "post": {
+        "tags": [
+          "players"
+        ],
+        "summary": "Bulk Create Players",
+        "operationId": "bulk_create_players_api_v1_tournament_teams__team_id__players_bulk_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreatePlayersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkCreatePlayersResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/groups": {
+      "get": {
+        "tags": [
+          "groups"
+        ],
+        "summary": "List Groups",
+        "operationId": "list_groups_api_v1_tournament_groups_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GroupResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Groups Api V1 Tournament Groups Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "groups"
+        ],
+        "summary": "Create Group",
+        "operationId": "create_group_api_v1_tournament_groups_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/groups/{group_id}/teams": {
+      "post": {
+        "tags": [
+          "groups"
+        ],
+        "summary": "Assign Team",
+        "operationId": "assign_team_api_v1_tournament_groups__group_id__teams_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Group Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignTeamToGroupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/groups/{group_id}/standings": {
+      "patch": {
+        "tags": [
+          "groups"
+        ],
+        "summary": "Set Final Standings",
+        "operationId": "set_final_standings_api_v1_tournament_groups__group_id__standings_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Group Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetGroupFinalStandingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/groups/{group_id}/score": {
+      "post": {
+        "tags": [
+          "groups"
+        ],
+        "summary": "Score Group Stage Pickem",
+        "operationId": "score_group_stage_pickem_api_v1_tournament_groups__group_id__score_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Group Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Score Group Stage Pickem Api V1 Tournament Groups  Group Id  Score Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/matches": {
+      "get": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "List Matches",
+        "operationId": "list_matches_api_v1_tournament_matches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MatchResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Matches Api V1 Tournament Matches Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "Schedule Match",
+        "operationId": "schedule_match_api_v1_tournament_matches_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleMatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/matches/bulk": {
+      "post": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "Bulk Schedule Matches",
+        "operationId": "bulk_schedule_matches_api_v1_tournament_matches_bulk_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkScheduleMatchesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkScheduleMatchesResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/matches/{match_id}/status": {
+      "patch": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "Update Match Status",
+        "operationId": "update_match_status_api_v1_tournament_matches__match_id__status_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "match_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Match Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMatchStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/matches/{match_id}/result": {
+      "patch": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "Set Match Result",
+        "operationId": "set_match_result_api_v1_tournament_matches__match_id__result_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "match_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Match Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMatchResultRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/matches/{match_id}/result/override": {
+      "patch": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "Override Match Result",
+        "operationId": "override_match_result_api_v1_tournament_matches__match_id__result_override_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "match_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Match Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMatchResultRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/matches/{match_id}/predictions": {
+      "get": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "Get Match Predictions All",
+        "operationId": "get_match_predictions_all_api_v1_tournament_matches__match_id__predictions_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "match_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Match Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MatchPredictionPublicResponse"
+                  },
+                  "title": "Response Get Match Predictions All Api V1 Tournament Matches  Match Id  Predictions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/picks/groups": {
+      "get": {
+        "tags": [
+          "picks"
+        ],
+        "summary": "Get Group Stage Pickem",
+        "operationId": "get_group_stage_pickem_api_v1_picks_groups_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GroupStagePredictionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Group Stage Pickem Api V1 Picks Groups Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "picks"
+        ],
+        "summary": "Submit Group Stage Pickem",
+        "operationId": "submit_group_stage_pickem_api_v1_picks_groups_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitGroupStagePickemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GroupStagePredictionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Submit Group Stage Pickem Api V1 Picks Groups Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/picks/groups/users/{user_id}": {
+      "get": {
+        "tags": [
+          "picks"
+        ],
+        "summary": "Get User Group Pickem",
+        "operationId": "get_user_group_pickem_api_v1_picks_groups_users__user_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GroupStagePredictionPublicResponse"
+                  },
+                  "title": "Response Get User Group Pickem Api V1 Picks Groups Users  User Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/picks/bracket": {
+      "get": {
+        "tags": [
+          "picks"
+        ],
+        "summary": "Get Bracket Pickem",
+        "operationId": "get_bracket_pickem_api_v1_picks_bracket_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BracketPredictionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Bracket Pickem Api V1 Picks Bracket Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "picks"
+        ],
+        "summary": "Submit Bracket Pickem",
+        "operationId": "submit_bracket_pickem_api_v1_picks_bracket_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitBracketPickemRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BracketPredictionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Submit Bracket Pickem Api V1 Picks Bracket Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/picks/bracket/users/{user_id}": {
+      "get": {
+        "tags": [
+          "picks"
+        ],
+        "summary": "Get User Bracket Pickem",
+        "operationId": "get_user_bracket_pickem_api_v1_picks_bracket_users__user_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BracketPredictionPublicResponse"
+                  },
+                  "title": "Response Get User Bracket Pickem Api V1 Picks Bracket Users  User Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/predictions/matches": {
+      "get": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "Get Match Predictions",
+        "operationId": "get_match_predictions_api_v1_predictions_matches_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MatchPredictionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Match Predictions Api V1 Predictions Matches Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "Create Match Prediction",
+        "operationId": "create_match_prediction_api_v1_predictions_matches_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMatchPredictionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchPredictionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/predictions/matches/{match_id}": {
+      "put": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "Update Match Prediction",
+        "operationId": "update_match_prediction_api_v1_predictions_matches__match_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "match_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Match Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMatchPredictionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchPredictionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/audit": {
+      "get": {
+        "tags": [
+          "audit"
+        ],
+        "summary": "Get Audit Logs",
+        "operationId": "get_audit_logs_api_v1_audit_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/AuditEventType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Type"
+            }
+          },
+          {
+            "name": "from_dt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "From Dt"
+            }
+          },
+          {
+            "name": "to_dt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "To Dt"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAuditLogResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tournament/bracket/slots": {
+      "post": {
+        "tags": [
+          "bracket"
+        ],
+        "summary": "Create Bracket Slot",
+        "operationId": "create_bracket_slot_api_v1_tournament_bracket_slots_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBracketSlotRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BracketSlotResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/bracket": {
+      "get": {
+        "tags": [
+          "bracket"
+        ],
+        "summary": "List Bracket",
+        "operationId": "list_bracket_api_v1_tournament_bracket_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BracketSlotResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Bracket Api V1 Tournament Bracket Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tournament/bracket/slots/{slot_id}/match": {
+      "patch": {
+        "tags": [
+          "bracket"
+        ],
+        "summary": "Assign Match To Slot",
+        "operationId": "assign_match_to_slot_api_v1_tournament_bracket_slots__slot_id__match_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "slot_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Slot Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignMatchToBracketSlotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BracketSlotResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/crystal-ball/questions": {
+      "get": {
+        "tags": [
+          "crystal-ball"
+        ],
+        "summary": "List Questions",
+        "operationId": "list_questions_api_v1_crystal_ball_questions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrystalBallQuestionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List Questions Api V1 Crystal Ball Questions Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "crystal-ball"
+        ],
+        "summary": "Create Question",
+        "operationId": "create_question_api_v1_crystal_ball_questions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCrystalBallQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrystalBallQuestionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/crystal-ball/questions/auto-derive": {
+      "post": {
+        "tags": [
+          "crystal-ball"
+        ],
+        "summary": "Auto Derive Resolutions",
+        "operationId": "auto_derive_resolutions_api_v1_crystal_ball_questions_auto_derive_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutoDeriveResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/crystal-ball/answers": {
+      "get": {
+        "tags": [
+          "crystal-ball"
+        ],
+        "summary": "Get Answers",
+        "operationId": "get_answers_api_v1_crystal_ball_answers_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrystalBallPredictionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Answers Api V1 Crystal Ball Answers Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "crystal-ball"
+        ],
+        "summary": "Submit Answers",
+        "operationId": "submit_answers_api_v1_crystal_ball_answers_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitCrystalBallBatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CrystalBallPredictionResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Submit Answers Api V1 Crystal Ball Answers Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/crystal-ball/answers/users/{user_id}": {
+      "get": {
+        "tags": [
+          "crystal-ball"
+        ],
+        "summary": "Get User Answers",
+        "operationId": "get_user_answers_api_v1_crystal_ball_answers_users__user_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrystalBallPredictionPublicResponse"
+                  },
+                  "title": "Response Get User Answers Api V1 Crystal Ball Answers Users  User Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/crystal-ball/questions/{question_id}/resolution": {
+      "post": {
+        "tags": [
+          "crystal-ball"
+        ],
+        "summary": "Set Resolution",
+        "operationId": "set_resolution_api_v1_crystal_ball_questions__question_id__resolution_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCrystalBallResolutionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrystalBallResolutionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "crystal-ball"
+        ],
+        "summary": "Override Resolution",
+        "operationId": "override_resolution_api_v1_crystal_ball_questions__question_id__resolution_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCrystalBallResolutionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrystalBallResolutionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "crystal-ball"
+        ],
+        "summary": "Get Resolution",
+        "operationId": "get_resolution_api_v1_crystal_ball_questions__question_id__resolution_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrystalBallResolutionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/leaderboards/match-prediction": {
+      "get": {
+        "tags": [
+          "leaderboards"
+        ],
+        "summary": "Match Prediction Leaderboard",
+        "operationId": "match_prediction_leaderboard_api_v1_leaderboards_match_prediction_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaderboardResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/leaderboards/pickem": {
+      "get": {
+        "tags": [
+          "leaderboards"
+        ],
+        "summary": "Pickem Leaderboard",
+        "operationId": "pickem_leaderboard_api_v1_leaderboards_pickem_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaderboardResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/leaderboards/crystal-ball": {
+      "get": {
+        "tags": [
+          "leaderboards"
+        ],
+        "summary": "Crystal Ball Leaderboard",
+        "operationId": "crystal_ball_leaderboard_api_v1_leaderboards_crystal_ball_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaderboardResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/config/scoring": {
+      "get": {
+        "tags": [
+          "config"
+        ],
+        "summary": "Get Scoring Config",
+        "operationId": "get_scoring_config_api_v1_config_scoring_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoringConfigResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "config"
+        ],
+        "summary": "Update Scoring Config",
+        "operationId": "update_scoring_config_api_v1_config_scoring_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateScoringConfigRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoringConfigResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/config/scoring/recalculate": {
+      "post": {
+        "tags": [
+          "config"
+        ],
+        "summary": "Recalculate Match Predictions",
+        "operationId": "recalculate_match_predictions_api_v1_config_scoring_recalculate_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecalculateResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/config/deadlines": {
+      "get": {
+        "tags": [
+          "config"
+        ],
+        "summary": "Get Deadlines",
+        "operationId": "get_deadlines_api_v1_config_deadlines_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeadlineConfigResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Deadlines Api V1 Config Deadlines Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/config/deadlines/{deadline_type}": {
+      "put": {
+        "tags": [
+          "config"
+        ],
+        "summary": "Update Deadline",
+        "operationId": "update_deadline_api_v1_config_deadlines__deadline_type__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "deadline_type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/DeadlineType"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDeadlineRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeadlineConfigResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssignMatchToBracketSlotRequest": {
+        "properties": {
+          "match_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Match Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "match_id"
+        ],
+        "title": "AssignMatchToBracketSlotRequest"
+      },
+      "AssignTeamToGroupRequest": {
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Team Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id"
+        ],
+        "title": "AssignTeamToGroupRequest"
+      },
+      "AuditEventType": {
+        "type": "string",
+        "enum": [
+          "LOGIN_SUCCESS",
+          "LOGIN_FAILED",
+          "ACCOUNT_APPROVED",
+          "ACCOUNT_DEACTIVATED",
+          "PASSWORD_CHANGED",
+          "ROLE_PROMOTED",
+          "ROLE_DEMOTED",
+          "MATCH_RESULT_ENTERED"
+        ],
+        "title": "AuditEventType"
+      },
+      "AuditLogResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "event_type": {
+            "$ref": "#/components/schemas/AuditEventType"
+          },
+          "actor_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor Id"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          },
+          "ip_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ip Address"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "event_type",
+          "actor_id",
+          "target_id",
+          "detail",
+          "ip_address",
+          "created_at"
+        ],
+        "title": "AuditLogResponse"
+      },
+      "AutoDeriveResponse": {
+        "properties": {
+          "resolved_question_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Resolved Question Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resolved_question_ids"
+        ],
+        "title": "AutoDeriveResponse"
+      },
+      "BracketPickRequest": {
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Slot Id"
+          },
+          "predicted_winner_team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Predicted Winner Team Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slot_id",
+          "predicted_winner_team_id"
+        ],
+        "title": "BracketPickRequest"
+      },
+      "BracketPredictionPublicResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "slot_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Slot Id"
+          },
+          "predicted_winner_team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Predicted Winner Team Id"
+          },
+          "points_awarded": {
+            "type": "integer",
+            "title": "Points Awarded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "slot_id",
+          "predicted_winner_team_id",
+          "points_awarded"
+        ],
+        "title": "BracketPredictionPublicResponse"
+      },
+      "BracketPredictionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "slot_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Slot Id"
+          },
+          "predicted_winner_team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Predicted Winner Team Id"
+          },
+          "points_awarded": {
+            "type": "integer",
+            "title": "Points Awarded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slot_id",
+          "predicted_winner_team_id",
+          "points_awarded"
+        ],
+        "title": "BracketPredictionResponse"
+      },
+      "BracketSlotResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "round_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Round Id"
+          },
+          "slot_index": {
+            "type": "integer",
+            "title": "Slot Index"
+          },
+          "home_feeds_from_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Feeds From Id"
+          },
+          "away_feeds_from_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Away Feeds From Id"
+          },
+          "match_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Match Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "round_id",
+          "slot_index",
+          "home_feeds_from_id",
+          "away_feeds_from_id",
+          "match_id"
+        ],
+        "title": "BracketSlotResponse"
+      },
+      "BulkCreatePlayersRequest": {
+        "properties": {
+          "players": {
+            "items": {
+              "$ref": "#/components/schemas/CreatePlayerRequest"
+            },
+            "type": "array",
+            "title": "Players"
+          }
+        },
+        "type": "object",
+        "required": [
+          "players"
+        ],
+        "title": "BulkCreatePlayersRequest"
+      },
+      "BulkCreatePlayersResult": {
+        "properties": {
+          "created": {
+            "items": {
+              "$ref": "#/components/schemas/PlayerResponse"
+            },
+            "type": "array",
+            "title": "Created"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created",
+          "errors"
+        ],
+        "title": "BulkCreatePlayersResult"
+      },
+      "BulkCreateStadiumsRequest": {
+        "properties": {
+          "stadiums": {
+            "items": {
+              "$ref": "#/components/schemas/CreateStadiumRequest"
+            },
+            "type": "array",
+            "title": "Stadiums"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stadiums"
+        ],
+        "title": "BulkCreateStadiumsRequest"
+      },
+      "BulkCreateStadiumsResult": {
+        "properties": {
+          "created": {
+            "items": {
+              "$ref": "#/components/schemas/StadiumResponse"
+            },
+            "type": "array",
+            "title": "Created"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created",
+          "errors"
+        ],
+        "title": "BulkCreateStadiumsResult"
+      },
+      "BulkCreateTeamsRequest": {
+        "properties": {
+          "names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Names"
+          }
+        },
+        "type": "object",
+        "required": [
+          "names"
+        ],
+        "title": "BulkCreateTeamsRequest"
+      },
+      "BulkCreateTeamsResult": {
+        "properties": {
+          "created": {
+            "items": {
+              "$ref": "#/components/schemas/TeamResponse"
+            },
+            "type": "array",
+            "title": "Created"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created",
+          "errors"
+        ],
+        "title": "BulkCreateTeamsResult"
+      },
+      "BulkScheduleMatchesRequest": {
+        "properties": {
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/ScheduleMatchRequest"
+            },
+            "type": "array",
+            "title": "Matches"
+          }
+        },
+        "type": "object",
+        "required": [
+          "matches"
+        ],
+        "title": "BulkScheduleMatchesRequest"
+      },
+      "BulkScheduleMatchesResult": {
+        "properties": {
+          "created": {
+            "items": {
+              "$ref": "#/components/schemas/MatchResponse"
+            },
+            "type": "array",
+            "title": "Created"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "created",
+          "errors"
+        ],
+        "title": "BulkScheduleMatchesResult"
+      },
+      "ChangePasswordRequest": {
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "title": "Current Password"
+          },
+          "new_password": {
+            "type": "string",
+            "title": "New Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_password",
+          "new_password"
+        ],
+        "title": "ChangePasswordRequest"
+      },
+      "CreateBracketSlotRequest": {
+        "properties": {
+          "round_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Round Id"
+          },
+          "slot_index": {
+            "type": "integer",
+            "title": "Slot Index"
+          },
+          "home_feeds_from_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Feeds From Id"
+          },
+          "away_feeds_from_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Away Feeds From Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "round_id",
+          "slot_index"
+        ],
+        "title": "CreateBracketSlotRequest"
+      },
+      "CreateCrystalBallQuestionRequest": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/CrystalBallQuestionType"
+          },
+          "answer_type": {
+            "$ref": "#/components/schemas/CrystalBallAnswerType"
+          },
+          "max_selections": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Max Selections"
+          },
+          "points_value": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Points Value"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "answer_type",
+          "max_selections",
+          "points_value"
+        ],
+        "title": "CreateCrystalBallQuestionRequest"
+      },
+      "CreateGroupRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CreateGroupRequest"
+      },
+      "CreateMatchPredictionRequest": {
+        "properties": {
+          "match_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Match Id"
+          },
+          "home_goals": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Home Goals"
+          },
+          "away_goals": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Away Goals"
+          },
+          "mvp_player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mvp Player Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "match_id",
+          "home_goals",
+          "away_goals"
+        ],
+        "title": "CreateMatchPredictionRequest"
+      },
+      "CreatePlayerRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Birth Date"
+          },
+          "dorsal_number": {
+            "type": "integer",
+            "title": "Dorsal Number"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "position",
+          "birth_date",
+          "dorsal_number"
+        ],
+        "title": "CreatePlayerRequest"
+      },
+      "CreateRoundRequest": {
+        "properties": {
+          "phase": {
+            "$ref": "#/components/schemas/Phase"
+          },
+          "round_number": {
+            "type": "integer",
+            "title": "Round Number"
+          }
+        },
+        "type": "object",
+        "required": [
+          "phase",
+          "round_number"
+        ],
+        "title": "CreateRoundRequest"
+      },
+      "CreateStadiumRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "city"
+        ],
+        "title": "CreateStadiumRequest"
+      },
+      "CreateTeamRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CreateTeamRequest"
+      },
+      "CrystalBallAnswerRequest": {
+        "properties": {
+          "selection_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Selection Index"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Id"
+          },
+          "numeric_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numeric Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "selection_index"
+        ],
+        "title": "CrystalBallAnswerRequest"
+      },
+      "CrystalBallAnswerResponse": {
+        "properties": {
+          "selection_index": {
+            "type": "integer",
+            "title": "Selection Index"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Id"
+          },
+          "numeric_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numeric Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "selection_index",
+          "player_id",
+          "team_id",
+          "numeric_value"
+        ],
+        "title": "CrystalBallAnswerResponse"
+      },
+      "CrystalBallAnswerType": {
+        "type": "string",
+        "enum": [
+          "PLAYER",
+          "TEAM",
+          "NUMBER"
+        ],
+        "title": "CrystalBallAnswerType"
+      },
+      "CrystalBallPredictionPublicResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "points_awarded": {
+            "type": "integer",
+            "title": "Points Awarded"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/CrystalBallAnswerResponse"
+            },
+            "type": "array",
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "question_id",
+          "points_awarded",
+          "answers"
+        ],
+        "title": "CrystalBallPredictionPublicResponse"
+      },
+      "CrystalBallPredictionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "points_awarded": {
+            "type": "integer",
+            "title": "Points Awarded"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/CrystalBallAnswerResponse"
+            },
+            "type": "array",
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "question_id",
+          "points_awarded",
+          "answers"
+        ],
+        "title": "CrystalBallPredictionResponse"
+      },
+      "CrystalBallQuestionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CrystalBallQuestionType"
+          },
+          "answer_type": {
+            "$ref": "#/components/schemas/CrystalBallAnswerType"
+          },
+          "max_selections": {
+            "type": "integer",
+            "title": "Max Selections"
+          },
+          "points_value": {
+            "type": "integer",
+            "title": "Points Value"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "answer_type",
+          "max_selections",
+          "points_value",
+          "scope"
+        ],
+        "title": "CrystalBallQuestionResponse"
+      },
+      "CrystalBallQuestionType": {
+        "type": "string",
+        "enum": [
+          "TOP_SCORER",
+          "TOP_ASSISTS",
+          "IDEAL_XI",
+          "FURTHEST_TEAM_PER_CONTINENT",
+          "MOST_CLEAN_SHEETS",
+          "TOURNAMENT_MVP",
+          "YOUNG_MVP",
+          "TOP_4",
+          "WINNER",
+          "MOST_YELLOW_CARDS",
+          "MOST_RED_CARDS",
+          "BIGGEST_WIN",
+          "YELLOW_CARDS_GAVI",
+          "NEYMAR_MATCHES",
+          "BEST_PENALTY_STOPPER",
+          "TOTAL_OVERHEAD_KICKS",
+          "TOTAL_PITCH_INVADERS",
+          "TOTAL_SUSPENDED_MATCHES",
+          "REVELATION_TEAM",
+          "STANDOUT_PLAYER",
+          "BEST_FANS",
+          "CHIRINGUITO_MEMES",
+          "TOTAL_INJURIES"
+        ],
+        "title": "CrystalBallQuestionType"
+      },
+      "CrystalBallResolutionAnswerResponse": {
+        "properties": {
+          "selection_index": {
+            "type": "integer",
+            "title": "Selection Index"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Id"
+          },
+          "numeric_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numeric Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "selection_index",
+          "player_id",
+          "team_id",
+          "numeric_value"
+        ],
+        "title": "CrystalBallResolutionAnswerResponse"
+      },
+      "CrystalBallResolutionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/CrystalBallResolutionAnswerResponse"
+            },
+            "type": "array",
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "question_id",
+          "answers"
+        ],
+        "title": "CrystalBallResolutionResponse"
+      },
+      "DeadlineConfigResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "deadline_type": {
+            "$ref": "#/components/schemas/DeadlineType"
+          },
+          "deadline_dt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Deadline Dt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "deadline_type",
+          "deadline_dt"
+        ],
+        "title": "DeadlineConfigResponse"
+      },
+      "DeadlineType": {
+        "type": "string",
+        "enum": [
+          "GROUP_STAGE",
+          "CRYSTAL_BALL",
+          "BRACKET"
+        ],
+        "title": "DeadlineType"
+      },
+      "EditProfileRequest": {
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "first_name",
+          "last_name"
+        ],
+        "title": "EditProfileRequest"
+      },
+      "FinalStandingItem": {
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Team Id"
+          },
+          "final_position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Final Position"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id",
+          "final_position"
+        ],
+        "title": "FinalStandingItem"
+      },
+      "GroupPickEntry": {
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Team Id"
+          },
+          "predicted_position": {
+            "type": "integer",
+            "title": "Predicted Position"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id",
+          "predicted_position"
+        ],
+        "title": "GroupPickEntry"
+      },
+      "GroupPickEntryResponse": {
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Team Id"
+          },
+          "predicted_position": {
+            "type": "integer",
+            "title": "Predicted Position"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id",
+          "predicted_position"
+        ],
+        "title": "GroupPickEntryResponse"
+      },
+      "GroupPickRequest": {
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Group Id"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/GroupPickEntry"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_id",
+          "entries"
+        ],
+        "title": "GroupPickRequest"
+      },
+      "GroupResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "standings": {
+            "items": {
+              "$ref": "#/components/schemas/GroupStandingResponse"
+            },
+            "type": "array",
+            "title": "Standings",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "GroupResponse"
+      },
+      "GroupStagePredictionPublicResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "group_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Group Id"
+          },
+          "points_awarded": {
+            "type": "integer",
+            "title": "Points Awarded"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/GroupPickEntryResponse"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "group_id",
+          "points_awarded",
+          "entries"
+        ],
+        "title": "GroupStagePredictionPublicResponse"
+      },
+      "GroupStagePredictionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "group_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Group Id"
+          },
+          "points_awarded": {
+            "type": "integer",
+            "title": "Points Awarded"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/GroupPickEntryResponse"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "group_id",
+          "points_awarded",
+          "entries"
+        ],
+        "title": "GroupStagePredictionResponse"
+      },
+      "GroupStandingResponse": {
+        "properties": {
+          "team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Team Id"
+          },
+          "final_position": {
+            "type": "integer",
+            "title": "Final Position"
+          },
+          "points": {
+            "type": "integer",
+            "title": "Points"
+          },
+          "goals_for": {
+            "type": "integer",
+            "title": "Goals For"
+          },
+          "goals_against": {
+            "type": "integer",
+            "title": "Goals Against"
+          }
+        },
+        "type": "object",
+        "required": [
+          "team_id",
+          "final_position",
+          "points",
+          "goals_for",
+          "goals_against"
+        ],
+        "title": "GroupStandingResponse"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LeaderboardEntryResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "points": {
+            "type": "integer",
+            "title": "Points"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "first_name",
+          "last_name",
+          "points"
+        ],
+        "title": "LeaderboardEntryResponse"
+      },
+      "LeaderboardResponse": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/LeaderboardEntryResponse"
+            },
+            "type": "array",
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "title": "LeaderboardResponse"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
+      "MatchOutcome": {
+        "type": "string",
+        "enum": [
+          "LOCAL_W",
+          "AWAY_W",
+          "DRAW",
+          "LOCAL_PEN_W",
+          "AWAY_PEN_W"
+        ],
+        "title": "MatchOutcome"
+      },
+      "MatchPredictionPublicResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "User Id"
+          },
+          "match_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Match Id"
+          },
+          "home_goals": {
+            "type": "integer",
+            "title": "Home Goals"
+          },
+          "away_goals": {
+            "type": "integer",
+            "title": "Away Goals"
+          },
+          "mvp_player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mvp Player Id"
+          },
+          "points_awarded": {
+            "type": "integer",
+            "title": "Points Awarded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "match_id",
+          "home_goals",
+          "away_goals",
+          "mvp_player_id",
+          "points_awarded"
+        ],
+        "title": "MatchPredictionPublicResponse"
+      },
+      "MatchPredictionResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "match_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Match Id"
+          },
+          "home_goals": {
+            "type": "integer",
+            "title": "Home Goals"
+          },
+          "away_goals": {
+            "type": "integer",
+            "title": "Away Goals"
+          },
+          "mvp_player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mvp Player Id"
+          },
+          "points_awarded": {
+            "type": "integer",
+            "title": "Points Awarded"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "match_id",
+          "home_goals",
+          "away_goals",
+          "mvp_player_id",
+          "points_awarded"
+        ],
+        "title": "MatchPredictionResponse"
+      },
+      "MatchResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "home_team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Home Team Id"
+          },
+          "away_team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Away Team Id"
+          },
+          "stadium_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Stadium Id"
+          },
+          "round_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Round Id"
+          },
+          "scheduled_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Scheduled At"
+          },
+          "status": {
+            "$ref": "#/components/schemas/MatchStatus"
+          },
+          "home_goals": {
+            "type": "integer",
+            "title": "Home Goals"
+          },
+          "away_goals": {
+            "type": "integer",
+            "title": "Away Goals"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MatchOutcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mvp_player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mvp Player Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "home_team_id",
+          "away_team_id",
+          "stadium_id",
+          "round_id",
+          "scheduled_at",
+          "status",
+          "home_goals",
+          "away_goals",
+          "outcome",
+          "mvp_player_id"
+        ],
+        "title": "MatchResponse"
+      },
+      "MatchStatus": {
+        "type": "string",
+        "enum": [
+          "DEFINED",
+          "STARTED",
+          "HALF_TIME",
+          "FINISHED"
+        ],
+        "title": "MatchStatus"
+      },
+      "PaginatedAuditLogResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AuditLogResponse"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "limit"
+        ],
+        "title": "PaginatedAuditLogResponse"
+      },
+      "Phase": {
+        "type": "string",
+        "enum": [
+          "GROUP_STAGE",
+          "ROUND_OF_32",
+          "ROUND_OF_16",
+          "QUARTER_FINAL",
+          "SEMI_FINAL",
+          "THIRD_FOURTH_POSITION",
+          "FINAL"
+        ],
+        "title": "Phase"
+      },
+      "PlayerResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Team Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "birth_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Birth Date"
+          },
+          "dorsal_number": {
+            "type": "integer",
+            "title": "Dorsal Number"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "team_id",
+          "name",
+          "position",
+          "birth_date",
+          "dorsal_number"
+        ],
+        "title": "PlayerResponse"
+      },
+      "Position": {
+        "type": "string",
+        "enum": [
+          "GK",
+          "DEF",
+          "MID",
+          "FWD"
+        ],
+        "title": "Position"
+      },
+      "RecalculateResponse": {
+        "properties": {
+          "recalculated_predictions": {
+            "type": "integer",
+            "title": "Recalculated Predictions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recalculated_predictions"
+        ],
+        "title": "RecalculateResponse"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "first_name",
+          "last_name",
+          "password"
+        ],
+        "title": "RegisterRequest"
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "PLAYER",
+          "ADMIN",
+          "SUPERADMIN"
+        ],
+        "title": "Role"
+      },
+      "RoundResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "phase": {
+            "$ref": "#/components/schemas/Phase"
+          },
+          "round_number": {
+            "type": "integer",
+            "title": "Round Number"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "phase",
+          "round_number"
+        ],
+        "title": "RoundResponse"
+      },
+      "ScheduleMatchRequest": {
+        "properties": {
+          "home_team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Home Team Id"
+          },
+          "away_team_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Away Team Id"
+          },
+          "stadium_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Stadium Id"
+          },
+          "round_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Round Id"
+          },
+          "scheduled_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Scheduled At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "home_team_id",
+          "away_team_id",
+          "stadium_id",
+          "round_id",
+          "scheduled_at"
+        ],
+        "title": "ScheduleMatchRequest"
+      },
+      "ScoringConfigResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "match_direction_pts": {
+            "type": "integer",
+            "title": "Match Direction Pts"
+          },
+          "match_exact_bonus": {
+            "type": "integer",
+            "title": "Match Exact Bonus"
+          },
+          "match_mvp_pts": {
+            "type": "integer",
+            "title": "Match Mvp Pts"
+          },
+          "bracket_round_of_32_pts": {
+            "type": "integer",
+            "title": "Bracket Round Of 32 Pts"
+          },
+          "bracket_round_of_16_pts": {
+            "type": "integer",
+            "title": "Bracket Round Of 16 Pts"
+          },
+          "bracket_quarter_final_pts": {
+            "type": "integer",
+            "title": "Bracket Quarter Final Pts"
+          },
+          "bracket_semi_final_pts": {
+            "type": "integer",
+            "title": "Bracket Semi Final Pts"
+          },
+          "bracket_third_fourth_pts": {
+            "type": "integer",
+            "title": "Bracket Third Fourth Pts"
+          },
+          "bracket_final_pts": {
+            "type": "integer",
+            "title": "Bracket Final Pts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "match_direction_pts",
+          "match_exact_bonus",
+          "match_mvp_pts",
+          "bracket_round_of_32_pts",
+          "bracket_round_of_16_pts",
+          "bracket_quarter_final_pts",
+          "bracket_semi_final_pts",
+          "bracket_third_fourth_pts",
+          "bracket_final_pts"
+        ],
+        "title": "ScoringConfigResponse"
+      },
+      "SetCrystalBallResolutionRequest": {
+        "properties": {
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/CrystalBallAnswerRequest"
+            },
+            "type": "array",
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answers"
+        ],
+        "title": "SetCrystalBallResolutionRequest"
+      },
+      "SetGroupFinalStandingsRequest": {
+        "properties": {
+          "standings": {
+            "items": {
+              "$ref": "#/components/schemas/FinalStandingItem"
+            },
+            "type": "array",
+            "title": "Standings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "standings"
+        ],
+        "title": "SetGroupFinalStandingsRequest"
+      },
+      "SetMatchResultRequest": {
+        "properties": {
+          "home_goals": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Home Goals"
+          },
+          "away_goals": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Away Goals"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/MatchOutcome"
+          },
+          "mvp_player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mvp Player Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "home_goals",
+          "away_goals",
+          "outcome"
+        ],
+        "title": "SetMatchResultRequest"
+      },
+      "StadiumResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "city": {
+            "type": "string",
+            "title": "City"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "city"
+        ],
+        "title": "StadiumResponse"
+      },
+      "SubmitBracketPickemRequest": {
+        "properties": {
+          "picks": {
+            "items": {
+              "$ref": "#/components/schemas/BracketPickRequest"
+            },
+            "type": "array",
+            "title": "Picks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "picks"
+        ],
+        "title": "SubmitBracketPickemRequest"
+      },
+      "SubmitCrystalBallAnswersRequest": {
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/CrystalBallAnswerRequest"
+            },
+            "type": "array",
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_id",
+          "answers"
+        ],
+        "title": "SubmitCrystalBallAnswersRequest"
+      },
+      "SubmitCrystalBallBatchRequest": {
+        "properties": {
+          "predictions": {
+            "items": {
+              "$ref": "#/components/schemas/SubmitCrystalBallAnswersRequest"
+            },
+            "type": "array",
+            "title": "Predictions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "predictions"
+        ],
+        "title": "SubmitCrystalBallBatchRequest"
+      },
+      "SubmitGroupStagePickemRequest": {
+        "properties": {
+          "picks": {
+            "items": {
+              "$ref": "#/components/schemas/GroupPickRequest"
+            },
+            "type": "array",
+            "title": "Picks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "picks"
+        ],
+        "title": "SubmitGroupStagePickemRequest"
+      },
+      "TeamResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "TeamResponse"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token"
+        ],
+        "title": "TokenResponse"
+      },
+      "UpdateDeadlineRequest": {
+        "properties": {
+          "deadline_dt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Deadline Dt"
+          }
+        },
+        "type": "object",
+        "required": [
+          "deadline_dt"
+        ],
+        "title": "UpdateDeadlineRequest"
+      },
+      "UpdateMatchPredictionRequest": {
+        "properties": {
+          "home_goals": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Home Goals"
+          },
+          "away_goals": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Away Goals"
+          },
+          "mvp_player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mvp Player Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "home_goals",
+          "away_goals"
+        ],
+        "title": "UpdateMatchPredictionRequest"
+      },
+      "UpdateMatchStatusRequest": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/MatchStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "UpdateMatchStatusRequest"
+      },
+      "UpdateScoringConfigRequest": {
+        "properties": {
+          "match_direction_pts": {
+            "type": "integer",
+            "title": "Match Direction Pts"
+          },
+          "match_exact_bonus": {
+            "type": "integer",
+            "title": "Match Exact Bonus"
+          },
+          "match_mvp_pts": {
+            "type": "integer",
+            "title": "Match Mvp Pts"
+          },
+          "bracket_round_of_32_pts": {
+            "type": "integer",
+            "title": "Bracket Round Of 32 Pts"
+          },
+          "bracket_round_of_16_pts": {
+            "type": "integer",
+            "title": "Bracket Round Of 16 Pts"
+          },
+          "bracket_quarter_final_pts": {
+            "type": "integer",
+            "title": "Bracket Quarter Final Pts"
+          },
+          "bracket_semi_final_pts": {
+            "type": "integer",
+            "title": "Bracket Semi Final Pts"
+          },
+          "bracket_third_fourth_pts": {
+            "type": "integer",
+            "title": "Bracket Third Fourth Pts"
+          },
+          "bracket_final_pts": {
+            "type": "integer",
+            "title": "Bracket Final Pts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "match_direction_pts",
+          "match_exact_bonus",
+          "match_mvp_pts",
+          "bracket_round_of_32_pts",
+          "bracket_round_of_16_pts",
+          "bracket_quarter_final_pts",
+          "bracket_semi_final_pts",
+          "bracket_third_fourth_pts",
+          "bracket_final_pts"
+        ],
+        "title": "UpdateScoringConfigRequest"
+      },
+      "UserAdminView": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "approved": {
+            "type": "boolean",
+            "title": "Approved"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          },
+          "match_prediction_score": {
+            "type": "integer",
+            "title": "Match Prediction Score"
+          },
+          "pickem_score": {
+            "type": "integer",
+            "title": "Pickem Score"
+          },
+          "crystal_ball_score": {
+            "type": "integer",
+            "title": "Crystal Ball Score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "first_name",
+          "last_name",
+          "role",
+          "approved",
+          "active",
+          "match_prediction_score",
+          "pickem_score",
+          "crystal_ball_score"
+        ],
+        "title": "UserAdminView"
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "approved": {
+            "type": "boolean",
+            "title": "Approved"
+          },
+          "active": {
+            "type": "boolean",
+            "title": "Active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "first_name",
+          "last_name",
+          "role",
+          "approved",
+          "active"
+        ],
+        "title": "UserResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
