@@ -487,6 +487,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/picks/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Pickem Overview */
+        get: operations["get_pickem_overview_api_v1_picks_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/picks/groups": {
         parameters: {
             query?: never;
@@ -934,6 +951,17 @@ export interface components {
              */
             predicted_winner_team_id: string;
         };
+        /** BracketPickemStatus */
+        BracketPickemStatus: {
+            /** Is Available */
+            is_available: boolean;
+            /** Editable */
+            editable: boolean;
+            /** Has Submitted */
+            has_submitted: boolean;
+            /** Slots */
+            slots: components["schemas"]["BracketSlotPickemOverview"][];
+        };
         /** BracketPredictionPublicResponse */
         BracketPredictionPublicResponse: {
             /**
@@ -978,6 +1006,20 @@ export interface components {
             predicted_winner_team_id: string;
             /** Points Awarded */
             points_awarded: number;
+        };
+        /** BracketSlotPickemOverview */
+        BracketSlotPickemOverview: {
+            /**
+             * Slot Id
+             * Format: uuid
+             */
+            slot_id: string;
+            /** Slot Index */
+            slot_index: number;
+            /** Phase */
+            phase: string;
+            /** Predicted Winner Team Id */
+            predicted_winner_team_id: string | null;
         };
         /** BracketSlotResponse */
         BracketSlotResponse: {
@@ -1309,6 +1351,18 @@ export interface components {
             /** Entries */
             entries: components["schemas"]["GroupPickEntry"][];
         };
+        /** GroupPickemOverview */
+        GroupPickemOverview: {
+            /**
+             * Group Id
+             * Format: uuid
+             */
+            group_id: string;
+            /** Name */
+            name: string;
+            /** Teams */
+            teams: components["schemas"]["TeamPickemEntry"][];
+        };
         /** GroupResponse */
         GroupResponse: {
             /**
@@ -1323,6 +1377,17 @@ export interface components {
              * @default []
              */
             standings: components["schemas"]["GroupStandingResponse"][];
+        };
+        /** GroupStagePickemStatus */
+        GroupStagePickemStatus: {
+            /** Is Available */
+            is_available: boolean;
+            /** Editable */
+            editable: boolean;
+            /** Has Submitted */
+            has_submitted: boolean;
+            /** Groups */
+            groups: components["schemas"]["GroupPickemOverview"][];
         };
         /** GroupStagePredictionPublicResponse */
         GroupStagePredictionPublicResponse: {
@@ -1527,6 +1592,11 @@ export interface components {
          * @enum {string}
          */
         Phase: "GROUP_STAGE" | "ROUND_OF_32" | "ROUND_OF_16" | "QUARTER_FINAL" | "SEMI_FINAL" | "THIRD_FOURTH_POSITION" | "FINAL";
+        /** PickemOverviewResponse */
+        PickemOverviewResponse: {
+            group_stage: components["schemas"]["GroupStagePickemStatus"];
+            bracket: components["schemas"]["BracketPickemStatus"];
+        };
         /** PlayerResponse */
         PlayerResponse: {
             /**
@@ -1700,6 +1770,18 @@ export interface components {
         SubmitGroupStagePickemRequest: {
             /** Picks */
             picks: components["schemas"]["GroupPickRequest"][];
+        };
+        /** TeamPickemEntry */
+        TeamPickemEntry: {
+            /**
+             * Team Id
+             * Format: uuid
+             */
+            team_id: string;
+            /** Name */
+            name: string;
+            /** Predicted Position */
+            predicted_position: number;
         };
         /** TeamResponse */
         TeamResponse: {
@@ -2849,6 +2931,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_pickem_overview_api_v1_picks_overview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PickemOverviewResponse"];
                 };
             };
         };

@@ -7,6 +7,7 @@ import RegisterPage from '@/pages/register/RegisterPage';
 import PendingApprovalPage from '@/pages/pending-approval/PendingApprovalPage';
 import LeaderboardPage from '@/pages/leaderboard/LeaderboardPage';
 import MatchesPage from '@/pages/matches/MatchesPage';
+import PickemPage from '@/pages/pickem/PickemPage';
 
 function ComingSoon({ title }: { title: string }) {
   return (
@@ -37,7 +38,7 @@ const router = createBrowserRouter([
               { index: true, element: <Navigate to="/leaderboard" replace /> },
               { path: '/leaderboard', element: <LeaderboardPage /> },
               { path: '/matches', element: <MatchesPage /> },
-              { path: '/pickem', element: <ComingSoon title="Pick'em" /> },
+              { path: '/pickem', element: <PickemPage /> },
               { path: '/crystal-ball', element: <ComingSoon title="Crystal Ball" /> },
               { path: '/profile', element: <ComingSoon title="Profile" /> },
             ],
