@@ -9,7 +9,7 @@ interface TeamFlagProps {
 const SIZE: Record<NonNullable<TeamFlagProps['size']>, { w: number; h: number }> = {
   sm: { w: 24, h: 16 },
   md: { w: 30, h: 20 },
-  lg: { w: 40, h: 27 },
+  lg: { w: 36, h: 22 },
   xl: { w: 56, h: 37 },
 };
 
@@ -33,8 +33,8 @@ export function TeamFlag({ teamName, size = 'md', className }: TeamFlagProps) {
       alt={teamName}
       width={w}
       height={h}
-      style={{ borderRadius: '0 6px 0 6px', objectFit: 'cover' }}
-      className={`inline-block shrink-0 ${className ?? ''}`}
+      style={{ width: w, height: h, borderRadius: '0 6px 0 6px', objectFit: 'cover', flexShrink: 0 }}
+      className={`inline-block ${className ?? ''}`}
       loading="lazy"
     />
   );
