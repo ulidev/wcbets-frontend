@@ -3067,6 +3067,74 @@
             "type": "string",
             "title": "Phase"
           },
+          "home_feeds_from_slot_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Feeds From Slot Id"
+          },
+          "away_feeds_from_slot_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Away Feeds From Slot Id"
+          },
+          "home_loser_feeds_from_slot_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Loser Feeds From Slot Id"
+          },
+          "away_loser_feeds_from_slot_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Away Loser Feeds From Slot Id"
+          },
+          "home_team": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TeamInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "away_team": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TeamInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "predicted_winner_team_id": {
             "anyOf": [
               {
@@ -3085,6 +3153,10 @@
           "slot_id",
           "slot_index",
           "phase",
+          "home_feeds_from_slot_id",
+          "away_feeds_from_slot_id",
+          "home_team",
+          "away_team",
           "predicted_winner_team_id"
         ],
         "title": "BracketSlotPickemOverview"
@@ -4919,6 +4991,25 @@
           "picks"
         ],
         "title": "SubmitGroupStagePickemRequest"
+      },
+      "TeamInfo": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "TeamInfo"
       },
       "TeamPickemEntry": {
         "properties": {

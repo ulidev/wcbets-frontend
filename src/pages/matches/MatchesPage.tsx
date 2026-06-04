@@ -1,21 +1,22 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle } from 'lucide-react';
-import { fetchMatches, fetchTeams, fetchRounds } from '@/api/matches';
+import {
+  fetchMatches,
+  fetchTeams,
+  fetchRounds,
+  fetchMyPredictions,
+  createMatchPrediction,
+  updateMatchPrediction,
+} from '@/api/matches';
 import type { components } from '@/types/api';
 import { cn } from '@/lib/utils';
+import { getFlagEmoji } from '@/lib/flags';
 
 type Match = components['schemas']['MatchResponse'];
 type Phase = components['schemas']['Phase'];
-
-const PHASE_ORDER: Phase[] = [
-  'GROUP_STAGE',
-  'ROUND_OF_32',
-  'ROUND_OF_16',
-  'QUARTER_FINAL',
-  'SEMI_FINAL',
-  'THIRD_FOURTH_POSITION',
-  'FINAL',
-];
+type RoundResponse = components['schemas']['RoundResponse'];
+type MatchPrediction = components['schemas']['MatchPredictionResponse'];
 
 const PHASE_LABELS: Record<Phase, string> = {
   GROUP_STAGE: 'Group Stage',
@@ -27,14 +28,31 @@ const PHASE_LABELS: Record<Phase, string> = {
   FINAL: 'Final',
 };
 
-function formatMatchDate(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+function getSpanishDateKey(iso: string): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Madrid' }).format(new Date(iso));
 }
 
-function formatMatchTime(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+function formatDayHeader(dateKey: string): string {
+  const [y, m, d] = dateKey.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+function formatMatchTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString('en-GB', {
+    timeZone: 'Europe/Madrid',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function getRoundLabel(round: RoundResponse): string {
+  if (round.phase === 'GROUP_STAGE') return `Matchday ${round.round_number}`;
+  return PHASE_LABELS[round.phase];
 }
 
 function StatusBadge({ status }: { status: Match['status'] }) {
@@ -63,94 +81,210 @@ function StatusBadge({ status }: { status: Match['status'] }) {
   return null;
 }
 
-interface MatchCardProps {
+function ScoreInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <input
+      type="number"
+      min={0}
+      max={20}
+      value={value}
+      onChange={(e) => {
+        const raw = e.target.value;
+        if (raw === '' || /^\d{1,2}$/.test(raw)) onChange(raw);
+      }}
+      className="h-11 w-11 rounded-lg border border-border bg-background text-center text-xl font-bold tabular-nums focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+      inputMode="numeric"
+      placeholder="–"
+    />
+  );
+}
+
+interface PredictionCardProps {
   match: Match;
   homeTeam: string;
   awayTeam: string;
+  roundLabel: string;
+  prediction: MatchPrediction | undefined;
 }
 
-function MatchCard({ match, homeTeam, awayTeam }: MatchCardProps) {
+function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: PredictionCardProps) {
+  const queryClient = useQueryClient();
   const isLive = match.status === 'STARTED' || match.status === 'HALF_TIME';
-  const hasScore = isLive || match.status === 'FINISHED';
-  const isUpcoming = match.status === 'DEFINED';
+  const isFinished = match.status === 'FINISHED';
+  const isEditable =
+    match.status === 'DEFINED' && new Date(match.scheduled_at) > new Date();
+
+  const [homeInput, setHomeInput] = useState(() =>
+    prediction ? String(prediction.home_goals) : '',
+  );
+  const [awayInput, setAwayInput] = useState(() =>
+    prediction ? String(prediction.away_goals) : '',
+  );
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      const home = parseInt(homeInput, 10);
+      const away = parseInt(awayInput, 10);
+      if (prediction) {
+        return updateMatchPrediction(match.id, { home_goals: home, away_goals: away });
+      }
+      return createMatchPrediction({ match_id: match.id, home_goals: home, away_goals: away });
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['my-predictions'] }),
+  });
+
+  const canSave =
+    isEditable &&
+    homeInput !== '' &&
+    awayInput !== '' &&
+    !isNaN(parseInt(homeInput, 10)) &&
+    !isNaN(parseInt(awayInput, 10));
+
+  const homeWins = (isLive || isFinished) && match.home_goals > match.away_goals;
+  const awayWins = (isLive || isFinished) && match.away_goals > match.home_goals;
 
   return (
     <div
       className={cn(
-        'flex items-center gap-3 border-b border-border px-4 py-3',
-        isLive && 'bg-green-500/5',
+        'overflow-hidden rounded-xl border border-border bg-card',
+        isLive && 'border-green-500/30',
       )}
     >
-      {/* Date / time column */}
-      <div className="w-14 shrink-0 text-center">
-        <p className="text-[10px] leading-tight text-muted-foreground">
-          {formatMatchDate(match.scheduled_at)}
-        </p>
-        <p className={cn('text-xs font-semibold', isLive ? 'text-green-500' : 'text-foreground')}>
-          {isUpcoming ? formatMatchTime(match.scheduled_at) : ''}
-        </p>
+      {/* Header: time + round label + status */}
+      <div className="flex items-center justify-between border-b border-border bg-muted/30 px-3 py-2">
+        <span className="text-xs text-muted-foreground">
+          {formatMatchTime(match.scheduled_at)} · {roundLabel}
+        </span>
+        <StatusBadge status={match.status} />
       </div>
 
-      {/* Teams + score */}
-      <div className="flex flex-1 items-center gap-2">
+      {/* Teams + score area */}
+      <div className="flex items-center gap-2 px-4 py-4">
         {/* Home team */}
-        <span
-          className={cn(
-            'flex-1 truncate text-right text-sm font-medium',
-            hasScore && match.home_goals > match.away_goals && 'font-bold',
-          )}
-        >
-          {homeTeam}
-        </span>
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
+          <span className="text-2xl leading-none" aria-hidden>
+            {getFlagEmoji(homeTeam)}
+          </span>
+          <span
+            className={cn(
+              'w-full truncate text-center text-xs font-medium',
+              homeWins && 'font-bold',
+            )}
+          >
+            {homeTeam}
+          </span>
+        </div>
 
-        {/* Score or vs */}
-        <div className="shrink-0 text-center">
-          {hasScore ? (
-            <span className="font-mono text-base font-bold tabular-nums">
+        {/* Score / inputs */}
+        <div className="flex shrink-0 items-center gap-1.5">
+          {isEditable ? (
+            <>
+              <ScoreInput value={homeInput} onChange={setHomeInput} />
+              <span className="text-sm font-bold text-muted-foreground">–</span>
+              <ScoreInput value={awayInput} onChange={setAwayInput} />
+            </>
+          ) : (
+            <span
+              className={cn(
+                'font-mono text-2xl font-bold tabular-nums',
+                isLive && 'text-green-500',
+              )}
+            >
               {match.home_goals}&nbsp;–&nbsp;{match.away_goals}
             </span>
-          ) : (
-            <span className="text-xs font-semibold text-muted-foreground">vs</span>
           )}
         </div>
 
         {/* Away team */}
-        <span
-          className={cn(
-            'flex-1 truncate text-sm font-medium',
-            hasScore && match.away_goals > match.home_goals && 'font-bold',
-          )}
-        >
-          {awayTeam}
-        </span>
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
+          <span className="text-2xl leading-none" aria-hidden>
+            {getFlagEmoji(awayTeam)}
+          </span>
+          <span
+            className={cn(
+              'w-full truncate text-center text-xs font-medium',
+              awayWins && 'font-bold',
+            )}
+          >
+            {awayTeam}
+          </span>
+        </div>
       </div>
 
-      {/* Status */}
-      <div className="w-14 shrink-0 text-right">
-        <StatusBadge status={match.status} />
-      </div>
+      {/* Save / update button for editable matches */}
+      {isEditable && (
+        <div className="border-t border-border px-4 pb-3 pt-2.5">
+          <button
+            onClick={() => mutation.mutate()}
+            disabled={!canSave || mutation.isPending}
+            className={cn(
+              'w-full rounded-lg py-2 text-sm font-semibold transition-opacity',
+              prediction
+                ? 'bg-muted text-foreground hover:opacity-80'
+                : 'bg-primary text-primary-foreground hover:opacity-90',
+              (!canSave || mutation.isPending) && 'cursor-not-allowed opacity-50',
+            )}
+          >
+            {mutation.isPending ? 'Saving…' : prediction ? 'Update Prediction' : 'Save Prediction'}
+          </button>
+          {mutation.isError && (
+            <p className="mt-1 text-center text-xs text-destructive">Failed to save. Try again.</p>
+          )}
+          {mutation.isSuccess && (
+            <p className="mt-1 text-center text-xs text-green-500">Saved!</p>
+          )}
+        </div>
+      )}
+
+      {/* User's prediction footer for live / finished matches */}
+      {(isLive || isFinished) && (
+        <div className="border-t border-border px-4 py-2">
+          {prediction ? (
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                Your pick:&nbsp;
+                <span className="font-semibold tabular-nums text-foreground">
+                  {prediction.home_goals}&nbsp;–&nbsp;{prediction.away_goals}
+                </span>
+              </p>
+              {isFinished && prediction.points_awarded > 0 && (
+                <span className="text-xs font-semibold text-primary">
+                  +{prediction.points_awarded} pts
+                </span>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground/50">No prediction made</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-function SkeletonCards({ count = 6 }: { count?: number }) {
+function SkeletonCard() {
   return (
-    <>
-      {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="flex items-center gap-3 border-b border-border px-4 py-3">
-          <div className="w-14 space-y-1">
-            <div className="h-2.5 animate-pulse rounded bg-muted" />
-            <div className="h-3 animate-pulse rounded bg-muted" />
-          </div>
-          <div className="flex flex-1 items-center gap-2">
-            <div className="h-3 flex-1 animate-pulse rounded bg-muted" />
-            <div className="h-5 w-10 animate-pulse rounded bg-muted" />
-            <div className="h-3 flex-1 animate-pulse rounded bg-muted" />
-          </div>
-          <div className="h-6 w-10 animate-pulse rounded-full bg-muted" />
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="h-9 animate-pulse bg-muted/50" />
+      <div className="flex items-center gap-2 px-4 py-4">
+        <div className="flex flex-1 flex-col items-center gap-2">
+          <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+          <div className="h-3 w-16 animate-pulse rounded bg-muted" />
         </div>
-      ))}
-    </>
+        <div className="flex items-center gap-1.5">
+          <div className="h-11 w-11 animate-pulse rounded-lg bg-muted" />
+          <div className="h-4 w-3 animate-pulse rounded bg-muted" />
+          <div className="h-11 w-11 animate-pulse rounded-lg bg-muted" />
+        </div>
+        <div className="flex flex-1 flex-col items-center gap-2">
+          <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
+          <div className="h-3 w-16 animate-pulse rounded bg-muted" />
+        </div>
+      </div>
+      <div className="border-t border-border px-4 pb-3 pt-2.5">
+        <div className="h-9 animate-pulse rounded-lg bg-muted" />
+      </div>
+    </div>
   );
 }
 
@@ -158,45 +292,36 @@ export default function MatchesPage() {
   const matchesQuery = useQuery({ queryKey: ['matches'], queryFn: fetchMatches });
   const teamsQuery = useQuery({ queryKey: ['teams'], queryFn: fetchTeams });
   const roundsQuery = useQuery({ queryKey: ['rounds'], queryFn: fetchRounds });
+  const predictionsQuery = useQuery({ queryKey: ['my-predictions'], queryFn: fetchMyPredictions });
 
-  const isLoading = matchesQuery.isLoading || teamsQuery.isLoading || roundsQuery.isLoading;
+  const isLoading =
+    matchesQuery.isLoading ||
+    teamsQuery.isLoading ||
+    roundsQuery.isLoading ||
+    predictionsQuery.isLoading;
+
   const isError = matchesQuery.isError || teamsQuery.isError || roundsQuery.isError;
 
   const teamMap = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.name]));
   const roundMap = new Map((roundsQuery.data ?? []).map((r) => [r.id, r]));
+  const predictionMap = new Map((predictionsQuery.data ?? []).map((p) => [p.match_id, p]));
 
-  // Group matches by phase then by round_number
-  type RoundGroup = { roundNumber: number; matches: Match[] };
-  type PhaseGroup = { phase: Phase; rounds: RoundGroup[] };
-
-  const grouped: PhaseGroup[] = [];
+  // Group matches by day in Europe/Madrid timezone, sorted chronologically
+  type DayGroup = { dateKey: string; matches: Match[] };
+  const dayGroups: DayGroup[] = [];
 
   if (!isLoading && !isError && matchesQuery.data) {
-    const byPhase = new Map<Phase, Map<number, Match[]>>();
-
+    const byDay = new Map<string, Match[]>();
     for (const match of matchesQuery.data) {
-      const round = roundMap.get(match.round_id);
-      if (!round) continue;
-      const phase = round.phase;
-      const rn = round.round_number;
-      if (!byPhase.has(phase)) byPhase.set(phase, new Map());
-      const rounds = byPhase.get(phase)!;
-      if (!rounds.has(rn)) rounds.set(rn, []);
-      rounds.get(rn)!.push(match);
+      const key = getSpanishDateKey(match.scheduled_at);
+      if (!byDay.has(key)) byDay.set(key, []);
+      byDay.get(key)!.push(match);
     }
-
-    for (const phase of PHASE_ORDER) {
-      const rounds = byPhase.get(phase);
-      if (!rounds) continue;
-      const sortedRounds = [...rounds.entries()]
-        .sort(([a], [b]) => a - b)
-        .map(([roundNumber, matches]) => ({
-          roundNumber,
-          matches: matches.sort(
-            (a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime(),
-          ),
-        }));
-      grouped.push({ phase, rounds: sortedRounds });
+    for (const dateKey of [...byDay.keys()].sort()) {
+      const matches = byDay
+        .get(dateKey)!
+        .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime());
+      dayGroups.push({ dateKey, matches });
     }
   }
 
@@ -206,11 +331,17 @@ export default function MatchesPage() {
       <div className="hidden border-b border-border px-6 py-5 md:block">
         <h1 className="text-xl font-bold">Matches</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          All World Cup 2026 matches and results
+          Predict match scores for World Cup 2026
         </p>
       </div>
 
-      {isLoading && <SkeletonCards count={10} />}
+      {isLoading && (
+        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+          {Array.from({ length: 6 }, (_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      )}
 
       {isError && (
         <div className="flex flex-col items-center gap-2 px-4 py-20 text-center text-muted-foreground">
@@ -220,7 +351,7 @@ export default function MatchesPage() {
         </div>
       )}
 
-      {!isLoading && !isError && grouped.length === 0 && (
+      {!isLoading && !isError && dayGroups.length === 0 && (
         <div className="px-4 py-20 text-center text-sm text-muted-foreground">
           No matches scheduled yet.
         </div>
@@ -228,36 +359,28 @@ export default function MatchesPage() {
 
       {!isLoading &&
         !isError &&
-        grouped.map(({ phase, rounds }) => (
-          <section key={phase}>
-            {/* Phase header */}
+        dayGroups.map(({ dateKey, matches }) => (
+          <section key={dateKey}>
             <div className="sticky top-0 z-10 border-b border-border bg-muted/80 px-4 py-2 backdrop-blur">
               <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                {PHASE_LABELS[phase]}
+                {formatDayHeader(dateKey)}
               </h2>
             </div>
-
-            {rounds.map(({ roundNumber, matches }) => (
-              <div key={roundNumber}>
-                {/* Round sub-header (only for Group Stage with multiple matchdays) */}
-                {phase === 'GROUP_STAGE' && rounds.length > 1 && (
-                  <div className="border-b border-border/60 bg-background px-4 py-1.5">
-                    <p className="text-[11px] font-semibold text-muted-foreground">
-                      Matchday {roundNumber}
-                    </p>
-                  </div>
-                )}
-
-                {matches.map((match) => (
-                  <MatchCard
+            <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+              {matches.map((match) => {
+                const round = roundMap.get(match.round_id);
+                return (
+                  <PredictionCard
                     key={match.id}
                     match={match}
                     homeTeam={teamMap.get(match.home_team_id) ?? '—'}
                     awayTeam={teamMap.get(match.away_team_id) ?? '—'}
+                    roundLabel={round ? getRoundLabel(round) : ''}
+                    prediction={predictionMap.get(match.id)}
                   />
-                ))}
-              </div>
-            ))}
+                );
+              })}
+            </div>
           </section>
         ))}
     </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   DndContext,
@@ -19,14 +19,13 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { AlertCircle, CheckCircle2, GripVertical, Lock } from 'lucide-react';
 import { fetchPickemOverview, submitGroupStagePicks, submitBracketPicks } from '@/api/pickem';
-import { fetchTeams } from '@/api/matches';
 import { cn } from '@/lib/utils';
 import { getFlagEmoji } from '@/lib/flags';
 import type { components } from '@/types/api';
 
 type TeamPickemEntry = components['schemas']['TeamPickemEntry'];
 type BracketSlotPickemOverview = components['schemas']['BracketSlotPickemOverview'];
-type TeamResponse = components['schemas']['TeamResponse'];
+type TeamInfo = components['schemas']['TeamInfo'];
 
 const BRACKET_PHASE_ORDER = [
   'ROUND_OF_32',
@@ -162,51 +161,145 @@ function GroupCard({
 
 // ── Bracket ───────────────────────────────────────────────────────────────────
 
-function BracketSlotRow({
+function resolveTeam(
+  directTeam: TeamInfo | null,
+  feedsFromSlotId: string | null,
+  bracketPicks: Record<string, string | null>,
+  teamById: Map<string, TeamInfo>,
+): TeamInfo | null {
+  if (directTeam) return directTeam;
+  if (!feedsFromSlotId) return null;
+  const winnerId = bracketPicks[feedsFromSlotId];
+  if (!winnerId) return null;
+  return teamById.get(winnerId) ?? null;
+}
+
+// For THIRD_FOURTH_POSITION: teams are the losers of the semi-finals.
+// Follow loserFeedsFromSlotId → find which team the user did NOT pick as winner.
+function resolveLoserTeam(
+  loserFeedsFromSlotId: string | null,
+  bracketPicks: Record<string, string | null>,
+  allSlots: BracketSlotPickemOverview[],
+  teamById: Map<string, TeamInfo>,
+): TeamInfo | null {
+  if (!loserFeedsFromSlotId) return null;
+  const feedSlot = allSlots.find((s) => s.slot_id === loserFeedsFromSlotId);
+  if (!feedSlot) return null;
+  const winnerId = bracketPicks[loserFeedsFromSlotId];
+  if (!winnerId) return null;
+  const home = resolveTeam(feedSlot.home_team, feedSlot.home_feeds_from_slot_id, bracketPicks, teamById);
+  const away = resolveTeam(feedSlot.away_team, feedSlot.away_feeds_from_slot_id, bracketPicks, teamById);
+  if (home?.id === winnerId) return away;
+  if (away?.id === winnerId) return home;
+  return null;
+}
+
+function BracketMatchCard({
   slot,
-  teams,
+  allSlots,
+  teamById,
+  bracketPicks,
   editable,
-  selectedTeamId,
   onChange,
 }: {
   slot: BracketSlotPickemOverview;
-  teams: TeamResponse[];
+  allSlots: BracketSlotPickemOverview[];
+  teamById: Map<string, TeamInfo>;
+  bracketPicks: Record<string, string | null>;
   editable: boolean;
-  selectedTeamId: string | null;
   onChange: (teamId: string | null) => void;
 }) {
-  const selected = teams.find((t) => t.id === selectedTeamId);
+  const isThirdPlace = slot.phase === 'THIRD_FOURTH_POSITION';
+
+  const homeTeam = isThirdPlace
+    ? resolveLoserTeam(slot.home_loser_feeds_from_slot_id ?? null, bracketPicks, allSlots, teamById)
+    : resolveTeam(slot.home_team, slot.home_feeds_from_slot_id, bracketPicks, teamById);
+
+  const awayTeam = isThirdPlace
+    ? resolveLoserTeam(slot.away_loser_feeds_from_slot_id ?? null, bracketPicks, allSlots, teamById)
+    : resolveTeam(slot.away_team, slot.away_feeds_from_slot_id, bracketPicks, teamById);
+
+  const selectedId = bracketPicks[slot.slot_id] ?? null;
+
+  const winnerName = selectedId
+    ? (homeTeam?.id === selectedId ? homeTeam?.name : awayTeam?.id === selectedId ? awayTeam?.name : null)
+    : null;
+
+  function slotLabel(slotId: string | null, isLoser: boolean): string | null {
+    if (!slotId) return null;
+    const src = allSlots.find((s) => s.slot_id === slotId);
+    if (!src) return null;
+    return isLoser ? `L. M${src.slot_index + 1}` : `W. M${src.slot_index + 1}`;
+  }
+
+  function TeamButton({
+    team,
+    feedsFrom,
+    loserFeedsFrom,
+  }: {
+    team: TeamInfo | null;
+    feedsFrom: string | null;
+    loserFeedsFrom: string | null;
+  }) {
+    const tbd = !team;
+    const isSelected = !tbd && selectedId === team.id;
+    const canPick = editable && !tbd;
+
+    const placeholder =
+      slotLabel(loserFeedsFrom, true) ?? slotLabel(feedsFrom, false) ?? 'TBD';
+    const label = tbd ? placeholder : team.name;
+
+    return (
+      <button
+        onClick={() => {
+          if (!canPick) return;
+          onChange(isSelected ? null : team.id);
+        }}
+        disabled={!canPick}
+        className={cn(
+          'flex flex-1 flex-col items-center gap-1.5 rounded-xl border px-2 py-3 transition-all',
+          tbd && 'cursor-default border-border opacity-40',
+          !tbd && !isSelected && editable && 'border-border bg-card hover:border-primary/60 hover:bg-primary/5 cursor-pointer',
+          !tbd && !isSelected && !editable && 'border-border bg-card cursor-default',
+          isSelected && 'border-primary bg-primary/10 ring-1 ring-primary/30',
+        )}
+      >
+        <span className="text-2xl leading-none" aria-hidden>
+          {tbd ? '❓' : getFlagEmoji(team.name)}
+        </span>
+        <span
+          className={cn(
+            'text-center text-xs font-medium leading-tight',
+            isSelected ? 'text-primary' : tbd ? 'text-muted-foreground/60' : 'text-foreground',
+          )}
+        >
+          {label}
+        </span>
+      </button>
+    );
+  }
 
   return (
-    <div className="flex items-center gap-3 border-b border-border px-4 py-2.5">
-      <span className="w-6 shrink-0 text-center text-xs font-bold text-muted-foreground">
-        {slot.slot_index + 1}
-      </span>
-
-      {selected && (
-        <span className="text-lg leading-none" aria-hidden>
-          {getFlagEmoji(selected.name)}
-        </span>
-      )}
-
-      {editable ? (
-        <select
-          value={selectedTeamId ?? ''}
-          onChange={(e) => onChange(e.target.value || null)}
-          className="flex-1 rounded-md border border-input bg-background px-2 py-1.5 text-sm text-foreground"
-        >
-          <option value="">Select team…</option>
-          {teams.map((t) => (
-            <option key={t.id} value={t.id}>
-              {getFlagEmoji(t.name)} {t.name}
-            </option>
-          ))}
-        </select>
-      ) : (
-        <span className={cn('flex-1 text-sm', !selected && 'text-muted-foreground')}>
-          {selected?.name ?? '—'}
-        </span>
-      )}
+    <div className="border-b border-border px-4 py-3">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">Match {slot.slot_index + 1}</span>
+        {winnerName && (
+          <span className="text-xs font-medium text-primary">✓ {winnerName} advances</span>
+        )}
+      </div>
+      <div className="flex items-center gap-2">
+        <TeamButton
+          team={homeTeam}
+          feedsFrom={slot.home_feeds_from_slot_id}
+          loserFeedsFrom={slot.home_loser_feeds_from_slot_id ?? null}
+        />
+        <span className="shrink-0 text-xs font-bold text-muted-foreground">VS</span>
+        <TeamButton
+          team={awayTeam}
+          feedsFrom={slot.away_feeds_from_slot_id}
+          loserFeedsFrom={slot.away_loser_feeds_from_slot_id ?? null}
+        />
+      </div>
     </div>
   );
 }
@@ -241,11 +334,6 @@ export default function PickemPage() {
   const overviewQuery = useQuery({
     queryKey: ['pickem-overview'],
     queryFn: fetchPickemOverview,
-  });
-
-  const teamsQuery = useQuery({
-    queryKey: ['teams'],
-    queryFn: fetchTeams,
   });
 
   // Group stage local state — initialized once from overview
@@ -321,9 +409,18 @@ export default function PickemPage() {
     }
   }
 
-  const allTeams = [...(teamsQuery.data ?? [])].sort((a, b) => a.name.localeCompare(b.name));
   const group_stage = overviewQuery.data?.group_stage;
   const bracket = overviewQuery.data?.bracket;
+
+  // Build team lookup from slot data — avoids a separate teams API call for the bracket
+  const teamById = useMemo(() => {
+    const map = new Map<string, TeamInfo>();
+    for (const slot of bracket?.slots ?? []) {
+      if (slot.home_team) map.set(slot.home_team.id, slot.home_team);
+      if (slot.away_team) map.set(slot.away_team.id, slot.away_team);
+    }
+    return map;
+  }, [bracket?.slots]);
 
   return (
     <div className="flex flex-col">
@@ -495,18 +592,21 @@ export default function PickemPage() {
                       {PHASE_LABELS[phase]}
                     </h2>
                   </div>
-                  {(slotsByPhase.get(phase) ?? []).map((slot) => (
-                    <BracketSlotRow
-                      key={slot.slot_id}
-                      slot={slot}
-                      teams={allTeams}
-                      editable={bracket.editable}
-                      selectedTeamId={bracketPicks[slot.slot_id] ?? null}
-                      onChange={(teamId) =>
-                        setBracketPicks((prev) => ({ ...prev, [slot.slot_id]: teamId }))
-                      }
-                    />
-                  ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2">
+                    {(slotsByPhase.get(phase) ?? []).map((slot) => (
+                      <BracketMatchCard
+                        key={slot.slot_id}
+                        slot={slot}
+                        allSlots={bracket.slots}
+                        teamById={teamById}
+                        bracketPicks={bracketPicks}
+                        editable={bracket.editable}
+                        onChange={(teamId) =>
+                          setBracketPicks((prev) => ({ ...prev, [slot.slot_id]: teamId }))
+                        }
+                      />
+                    ))}
+                  </div>
                 </section>
               ))}
 

@@ -1018,6 +1018,16 @@ export interface components {
             slot_index: number;
             /** Phase */
             phase: string;
+            /** Home Feeds From Slot Id */
+            home_feeds_from_slot_id: string | null;
+            /** Away Feeds From Slot Id */
+            away_feeds_from_slot_id: string | null;
+            /** Home Loser Feeds From Slot Id */
+            home_loser_feeds_from_slot_id?: string | null;
+            /** Away Loser Feeds From Slot Id */
+            away_loser_feeds_from_slot_id?: string | null;
+            home_team: components["schemas"]["TeamInfo"] | null;
+            away_team: components["schemas"]["TeamInfo"] | null;
             /** Predicted Winner Team Id */
             predicted_winner_team_id: string | null;
         };
@@ -1770,6 +1780,16 @@ export interface components {
         SubmitGroupStagePickemRequest: {
             /** Picks */
             picks: components["schemas"]["GroupPickRequest"][];
+        };
+        /** TeamInfo */
+        TeamInfo: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
         };
         /** TeamPickemEntry */
         TeamPickemEntry: {
