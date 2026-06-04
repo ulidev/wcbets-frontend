@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Search, X } from 'lucide-react';
 import {
   fetchMatches,
   fetchTeams,
   fetchRounds,
   fetchMyPredictions,
+  fetchMatchPlayers,
   createMatchPrediction,
   updateMatchPrediction,
 } from '@/api/matches';
@@ -17,6 +18,7 @@ type Match = components['schemas']['MatchResponse'];
 type Phase = components['schemas']['Phase'];
 type RoundResponse = components['schemas']['RoundResponse'];
 type MatchPrediction = components['schemas']['MatchPredictionResponse'];
+type PlayerResponse = components['schemas']['PlayerResponse'];
 
 const PHASE_LABELS: Record<Phase, string> = {
   GROUP_STAGE: 'Group Stage',
@@ -99,6 +101,221 @@ function ScoreInput({ value, onChange }: { value: string; onChange: (v: string) 
   );
 }
 
+function PointChip({ label, pts }: { label: string; pts: number }) {
+  const hit = pts > 0;
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold',
+        hit
+          ? 'border-green-500/30 bg-green-500/10 text-green-400'
+          : 'border-border bg-muted/40 text-muted-foreground/50',
+      )}
+    >
+      {label}
+      <span className={cn('font-bold tabular-nums', hit ? 'text-green-300' : '')}>
+        {hit ? `+${pts}` : '0'}
+      </span>
+    </span>
+  );
+}
+
+const POSITION_LABELS: Record<PlayerResponse['position'], string> = {
+  GK: 'GK',
+  DEF: 'DEF',
+  MID: 'MID',
+  FWD: 'FWD',
+};
+
+const POSITION_COLORS: Record<PlayerResponse['position'], string> = {
+  GK: 'text-amber-400 bg-amber-400/10',
+  DEF: 'text-blue-400 bg-blue-400/10',
+  MID: 'text-green-400 bg-green-400/10',
+  FWD: 'text-red-400 bg-red-400/10',
+};
+
+interface MvpPickerSheetProps {
+  matchId: string;
+  homeTeamName: string;
+  awayTeamName: string;
+  selectedPlayerId: string | null;
+  onSelect: (playerId: string | null) => void;
+  onClose: () => void;
+}
+
+function MvpPickerSheet({
+  matchId,
+  homeTeamName,
+  awayTeamName,
+  selectedPlayerId,
+  onSelect,
+  onClose,
+}: MvpPickerSheetProps) {
+  const [search, setSearch] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const playersQuery = useQuery({
+    queryKey: ['match-players', matchId],
+    queryFn: () => fetchMatchPlayers(matchId),
+  });
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
+  const q = search.toLowerCase().trim();
+
+  function filterPlayers(players: PlayerResponse[]) {
+    if (!q) return players;
+    return players.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        POSITION_LABELS[p.position].toLowerCase().includes(q) ||
+        String(p.dorsal_number).includes(q),
+    );
+  }
+
+  const homePlayers = filterPlayers(playersQuery.data?.home_team ?? []);
+  const awayPlayers = filterPlayers(playersQuery.data?.away_team ?? []);
+
+  function PlayerRow({ player }: { player: PlayerResponse }) {
+    const isSelected = player.id === selectedPlayerId;
+    return (
+      <button
+        onClick={() => {
+          onSelect(isSelected ? null : player.id);
+          onClose();
+        }}
+        className={cn(
+          'flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors',
+          isSelected ? 'bg-primary/10' : 'hover:bg-muted/50',
+        )}
+      >
+        <span className="w-7 shrink-0 text-center text-xs tabular-nums text-muted-foreground">
+          #{player.dorsal_number}
+        </span>
+        <span className="flex-1 truncate text-sm font-medium">{player.name}</span>
+        <span
+          className={cn(
+            'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold',
+            POSITION_COLORS[player.position],
+          )}
+        >
+          {POSITION_LABELS[player.position]}
+        </span>
+        {isSelected && (
+          <span className="shrink-0 text-xs font-bold text-primary">✓</span>
+        )}
+      </button>
+    );
+  }
+
+  function TeamSection({ players, teamName }: { players: PlayerResponse[]; teamName: string }) {
+    if (players.length === 0 && q) return null;
+    return (
+      <div>
+        <div className="sticky top-0 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur">
+          <span className="text-lg leading-none">{getFlagEmoji(teamName)}</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            {teamName}
+          </span>
+        </div>
+        {players.length === 0 ? (
+          <p className="px-4 py-3 text-xs text-muted-foreground">No players match.</p>
+        ) : (
+          <div className="divide-y divide-border/50">
+            {players.map((p) => (
+              <PlayerRow key={p.id} player={p} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col justify-end">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+
+      {/* Sheet */}
+      <div className="relative flex max-h-[75vh] flex-col rounded-t-2xl border border-border bg-background shadow-2xl">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <h2 className="text-sm font-bold">Select MVP</h2>
+          <button onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:text-foreground">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="border-b border-border px-3 py-2">
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
+            <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            <input
+              ref={inputRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, position, number…"
+              className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="text-muted-foreground hover:text-foreground">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Clear selection row */}
+        {selectedPlayerId && (
+          <button
+            onClick={() => { onSelect(null); onClose(); }}
+            className="border-b border-border px-4 py-2.5 text-left text-xs font-medium text-destructive hover:bg-destructive/5"
+          >
+            Clear MVP selection
+          </button>
+        )}
+
+        {/* Player list */}
+        <div className="overflow-y-auto">
+          {playersQuery.isLoading && (
+            <div className="flex flex-col gap-1 p-4">
+              {Array.from({ length: 6 }, (_, i) => (
+                <div key={i} className="h-10 animate-pulse rounded-lg bg-muted/60" />
+              ))}
+            </div>
+          )}
+          {playersQuery.isError && (
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+              Failed to load players.
+            </p>
+          )}
+          {playersQuery.data && (
+            <>
+              <TeamSection players={homePlayers} teamName={homeTeamName} />
+              <TeamSection players={awayPlayers} teamName={awayTeamName} />
+              {homePlayers.length === 0 && awayPlayers.length === 0 && q && (
+                <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+                  No players found for "{search}".
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface PredictionCardProps {
   match: Match;
   homeTeam: string;
@@ -120,15 +337,46 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
   const [awayInput, setAwayInput] = useState(() =>
     prediction ? String(prediction.away_goals) : '',
   );
+  const [mvpPlayerId, setMvpPlayerId] = useState<string | null>(() =>
+    prediction?.mvp_player_id ?? null,
+  );
+  const [showMvpPicker, setShowMvpPicker] = useState(false);
+
+  // Fetch players lazily so we can resolve the MVP name for display
+  const playersQuery = useQuery({
+    queryKey: ['match-players', match.id],
+    queryFn: () => fetchMatchPlayers(match.id),
+    enabled: showMvpPicker || mvpPlayerId !== null,
+  });
+
+  const allPlayers = [
+    ...(playersQuery.data?.home_team ?? []),
+    ...(playersQuery.data?.away_team ?? []),
+  ];
+  const selectedPlayer = allPlayers.find((p) => p.id === mvpPlayerId) ?? null;
+  const selectedPlayerTeam = selectedPlayer
+    ? (playersQuery.data?.home_team.some((p) => p.id === selectedPlayer.id)
+        ? homeTeam
+        : awayTeam)
+    : null;
 
   const mutation = useMutation({
     mutationFn: () => {
       const home = parseInt(homeInput, 10);
       const away = parseInt(awayInput, 10);
       if (prediction) {
-        return updateMatchPrediction(match.id, { home_goals: home, away_goals: away });
+        return updateMatchPrediction(match.id, {
+          home_goals: home,
+          away_goals: away,
+          mvp_player_id: mvpPlayerId,
+        });
       }
-      return createMatchPrediction({ match_id: match.id, home_goals: home, away_goals: away });
+      return createMatchPrediction({
+        match_id: match.id,
+        home_goals: home,
+        away_goals: away,
+        mvp_player_id: mvpPlayerId,
+      });
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['my-predictions'] }),
   });
@@ -211,6 +459,33 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
         </div>
       </div>
 
+      {/* MVP selection for editable matches */}
+      {isEditable && (
+        <div className="border-t border-border px-4 py-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">MVP pick</span>
+            <button
+              onClick={() => setShowMvpPicker(true)}
+              className={cn(
+                'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors',
+                selectedPlayer
+                  ? 'border-primary/40 bg-primary/10 text-primary'
+                  : 'border-border bg-muted/40 text-muted-foreground hover:border-primary/40 hover:text-foreground',
+              )}
+            >
+              {selectedPlayer ? (
+                <>
+                  <span className="leading-none">{getFlagEmoji(selectedPlayerTeam!)}</span>
+                  <span>#{selectedPlayer.dorsal_number} {selectedPlayer.name}</span>
+                </>
+              ) : (
+                <span>Pick player…</span>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Save / update button for editable matches */}
       {isEditable && (
         <div className="border-t border-border px-4 pb-3 pt-2.5">
@@ -238,25 +513,74 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
 
       {/* User's prediction footer for live / finished matches */}
       {(isLive || isFinished) && (
-        <div className="border-t border-border px-4 py-2">
+        <div className="border-t border-border px-4 py-2.5">
           {prediction ? (
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                Your pick:&nbsp;
-                <span className="font-semibold tabular-nums text-foreground">
-                  {prediction.home_goals}&nbsp;–&nbsp;{prediction.away_goals}
-                </span>
-              </p>
-              {isFinished && prediction.points_awarded > 0 && (
-                <span className="text-xs font-semibold text-primary">
-                  +{prediction.points_awarded} pts
-                </span>
+            <div className="flex flex-col gap-2">
+              {/* Pick summary row */}
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Your pick:&nbsp;
+                  <span className="font-semibold tabular-nums text-foreground">
+                    {prediction.home_goals}&nbsp;–&nbsp;{prediction.away_goals}
+                  </span>
+                  {prediction.mvp_player_id && playersQuery.data && (() => {
+                    const mvp = allPlayers.find((p) => p.id === prediction.mvp_player_id);
+                    const mvpTeam = mvp
+                      ? (playersQuery.data.home_team.some((p) => p.id === mvp.id) ? homeTeam : awayTeam)
+                      : null;
+                    return mvp ? (
+                      <span className="ml-1">
+                        · MVP: {getFlagEmoji(mvpTeam!)} {mvp.name}
+                      </span>
+                    ) : null;
+                  })()}
+                </p>
+                {isFinished && (
+                  <span className={cn(
+                    'text-xs font-bold tabular-nums',
+                    prediction.points_awarded > 0 ? 'text-primary' : 'text-muted-foreground',
+                  )}>
+                    {prediction.points_awarded > 0 ? `+${prediction.points_awarded}` : '0'} pts
+                  </span>
+                )}
+              </div>
+
+              {/* Points breakdown — only when finished */}
+              {isFinished && (
+                <div className="flex flex-wrap gap-1.5">
+                  <PointChip
+                    label="Outcome"
+                    pts={prediction.direction_pts_awarded}
+                  />
+                  <PointChip
+                    label="Exact score"
+                    pts={prediction.exact_bonus_awarded}
+                  />
+                  {prediction.mvp_player_id != null && (
+                    <PointChip
+                      label="MVP"
+                      pts={prediction.mvp_pts_awarded}
+                    />
+                  )}
+                </div>
               )}
             </div>
           ) : (
             <p className="text-xs text-muted-foreground/50">No prediction made</p>
           )}
         </div>
+      )}
+
+      {/* MVP picker sheet */}
+      {showMvpPicker && (
+        <MvpPickerSheet
+          matchId={match.id}
+          homeTeamName={homeTeam}
+          awayTeamName={awayTeam}
+          selectedPlayerId={mvpPlayerId}
+          onSelect={setMvpPlayerId}
+          onClose={() => setShowMvpPicker(false)}
+        />
       )}
     </div>
   );

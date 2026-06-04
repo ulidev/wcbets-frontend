@@ -5,6 +5,7 @@ type MatchResponse = components['schemas']['MatchResponse'];
 type TeamResponse = components['schemas']['TeamResponse'];
 type RoundResponse = components['schemas']['RoundResponse'];
 type MatchPredictionResponse = components['schemas']['MatchPredictionResponse'];
+type MatchPlayersResponse = components['schemas']['MatchPlayersResponse'];
 type CreateMatchPredictionRequest = components['schemas']['CreateMatchPredictionRequest'];
 type UpdateMatchPredictionRequest = components['schemas']['UpdateMatchPredictionRequest'];
 
@@ -32,3 +33,6 @@ export const updateMatchPrediction = (
   api
     .put(`api/v1/predictions/matches/${matchId}`, { json: body })
     .json<MatchPredictionResponse>();
+
+export const fetchMatchPlayers = (matchId: string): Promise<MatchPlayersResponse> =>
+  api.get(`api/v1/tournament/matches/${matchId}/players`).json<MatchPlayersResponse>();

@@ -17,7 +17,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { AlertCircle, CheckCircle2, GripVertical, Lock } from 'lucide-react';
+import { AlertCircle, CheckCircle2, GripVertical, Lock, Trophy, XCircle } from 'lucide-react';
 import { fetchPickemOverview, submitGroupStagePicks, submitBracketPicks } from '@/api/pickem';
 import { cn } from '@/lib/utils';
 import { getFlagEmoji } from '@/lib/flags';
@@ -67,6 +67,10 @@ function SortableTeamRow({
     zIndex: isDragging ? 1 : undefined,
   };
 
+  const hasResult = team.actual_position != null;
+  const isCorrect = hasResult && team.actual_position === position;
+  const isWrong = hasResult && team.actual_position !== position;
+
   return (
     <div
       ref={setNodeRef}
@@ -74,10 +78,16 @@ function SortableTeamRow({
       className={cn(
         'flex items-center gap-3 bg-card px-3 py-2.5 select-none',
         isDragging && 'opacity-50 shadow-lg rounded-md',
+        hasResult && isCorrect && 'bg-green-500/5',
+        hasResult && isWrong && 'bg-muted/30',
       )}
     >
-      {/* Position number */}
-      <span className="w-5 shrink-0 text-center text-xs font-bold text-muted-foreground">
+      {/* Predicted position */}
+      <span className={cn(
+        'w-5 shrink-0 text-center text-xs font-bold',
+        hasResult && isCorrect ? 'text-green-500' : 'text-muted-foreground',
+        hasResult && isWrong && 'text-muted-foreground/50',
+      )}>
         {position}
       </span>
 
@@ -87,10 +97,20 @@ function SortableTeamRow({
       </span>
 
       {/* Name */}
-      <span className="flex-1 truncate text-sm font-medium">{team.name}</span>
+      <span className={cn(
+        'flex-1 truncate text-sm font-medium',
+        hasResult && isWrong && 'text-muted-foreground',
+      )}>{team.name}</span>
 
-      {/* Drag handle */}
-      {!disabled && (
+      {/* Actual position badge / drag handle */}
+      {hasResult ? (
+        <span className={cn(
+          'shrink-0 text-xs font-bold tabular-nums',
+          isCorrect ? 'text-green-500' : 'text-muted-foreground/60',
+        )}>
+          {isCorrect ? '✓' : `→${team.actual_position}`}
+        </span>
+      ) : !disabled && (
         <button
           {...attributes}
           {...listeners}
@@ -111,10 +131,12 @@ type GroupState = { group_id: string; name: string; teams: TeamPickemEntry[] };
 function GroupCard({
   group,
   editable,
+  pointsAwarded,
   onChange,
 }: {
   group: GroupState;
   editable: boolean;
+  pointsAwarded?: number | null;
   onChange: (teams: TeamPickemEntry[]) => void;
 }) {
   const sensors = useSensors(
@@ -133,10 +155,18 @@ function GroupCard({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border">
-      <div className="border-b border-border bg-muted/50 px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border bg-muted/50 px-3 py-2">
         <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
           {group.name}
         </h3>
+        {pointsAwarded != null && (
+          <span className={cn(
+            'text-xs font-bold tabular-nums',
+            pointsAwarded > 0 ? 'text-primary' : 'text-muted-foreground/60',
+          )}>
+            {pointsAwarded > 0 ? `+${pointsAwarded}` : '0'} pts
+          </span>
+        )}
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext
@@ -221,7 +251,15 @@ function BracketMatchCard({
 
   const selectedId = bracketPicks[slot.slot_id] ?? null;
 
-  const winnerName = selectedId
+  const isFinished = slot.actual_winner_team_id != null;
+  const actualWinnerId = slot.actual_winner_team_id ?? null;
+  const isCorrect = isFinished && selectedId !== null && selectedId === actualWinnerId;
+  const isWrong = isFinished && selectedId !== null && selectedId !== actualWinnerId;
+  const pointsAwarded = slot.points_awarded ?? null;
+  const wentToPens =
+    slot.outcome === 'LOCAL_PEN_W' || slot.outcome === 'AWAY_PEN_W';
+
+  const winnerName = !isFinished && selectedId
     ? (homeTeam?.id === selectedId ? homeTeam?.name : awayTeam?.id === selectedId ? awayTeam?.name : null)
     : null;
 
@@ -243,6 +281,8 @@ function BracketMatchCard({
   }) {
     const tbd = !team;
     const isSelected = !tbd && selectedId === team.id;
+    const isActualWinner = !tbd && isFinished && team.id === actualWinnerId;
+    const isActualLoser = !tbd && isFinished && team.id !== actualWinnerId;
     const canPick = editable && !tbd;
 
     const placeholder =
@@ -257,20 +297,40 @@ function BracketMatchCard({
         }}
         disabled={!canPick}
         className={cn(
-          'flex flex-1 flex-col items-center gap-1.5 rounded-xl border px-2 py-3 transition-all',
+          'relative flex flex-1 flex-col items-center gap-1.5 rounded-xl border px-2 py-3 transition-all',
+          // TBD
           tbd && 'cursor-default border-border opacity-40',
-          !tbd && !isSelected && editable && 'border-border bg-card hover:border-primary/60 hover:bg-primary/5 cursor-pointer',
-          !tbd && !isSelected && !editable && 'border-border bg-card cursor-default',
-          isSelected && 'border-primary bg-primary/10 ring-1 ring-primary/30',
+          // Not finished
+          !isFinished && !tbd && !isSelected && editable && 'cursor-pointer border-border bg-card hover:border-primary/60 hover:bg-primary/5',
+          !isFinished && !tbd && !isSelected && !editable && 'cursor-default border-border bg-card',
+          !isFinished && isSelected && 'border-primary bg-primary/10 ring-1 ring-primary/30',
+          // Finished — correct pick (user picked the winner)
+          isFinished && isSelected && isActualWinner && 'cursor-default border-green-500/60 bg-green-500/10 ring-1 ring-green-500/30',
+          // Finished — wrong pick (user picked the loser)
+          isFinished && isSelected && isActualLoser && 'cursor-default border-destructive/40 bg-destructive/5 opacity-70',
+          // Finished — actual winner, not picked by user
+          isFinished && !isSelected && isActualWinner && 'cursor-default border-green-500/30 bg-green-500/5',
+          // Finished — actual loser, not picked
+          isFinished && !isSelected && isActualLoser && 'cursor-default border-border bg-card opacity-40',
         )}
       >
+        {/* Winner crown badge */}
+        {isActualWinner && (
+          <Trophy className="absolute -top-2 left-1/2 h-3.5 w-3.5 -translate-x-1/2 text-amber-400" />
+        )}
         <span className="text-2xl leading-none" aria-hidden>
           {tbd ? '❓' : getFlagEmoji(team.name)}
         </span>
         <span
           className={cn(
             'text-center text-xs font-medium leading-tight',
-            isSelected ? 'text-primary' : tbd ? 'text-muted-foreground/60' : 'text-foreground',
+            tbd && 'text-muted-foreground/60',
+            !isFinished && isSelected && 'text-primary',
+            !isFinished && !isSelected && !tbd && 'text-foreground',
+            isFinished && isSelected && isActualWinner && 'text-green-400',
+            isFinished && isSelected && isActualLoser && 'text-destructive/70',
+            isFinished && !isSelected && isActualWinner && 'text-green-400',
+            isFinished && !isSelected && isActualLoser && 'text-foreground',
           )}
         >
           {label}
@@ -282,10 +342,33 @@ function BracketMatchCard({
   return (
     <div className="border-b border-border px-4 py-3">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs text-muted-foreground">Match {slot.slot_index + 1}</span>
-        {winnerName && (
-          <span className="text-xs font-medium text-primary">✓ {winnerName} advances</span>
-        )}
+        {/* Left: match number + score */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">M{slot.slot_index + 1}</span>
+          {isFinished && slot.home_goals != null && slot.away_goals != null && (
+            <span className="text-xs font-bold text-foreground tabular-nums">
+              {slot.home_goals}–{slot.away_goals}
+              {wentToPens && <span className="ml-1 font-normal text-muted-foreground">(P)</span>}
+            </span>
+          )}
+        </div>
+        {/* Right: result feedback */}
+        <div>
+          {isCorrect && (
+            <span className="flex items-center gap-1 rounded-full border border-green-500/30 bg-green-500/10 px-2 py-0.5 text-xs font-bold text-green-400">
+              <CheckCircle2 className="h-3 w-3" />
+              {pointsAwarded != null && pointsAwarded > 0 ? `+${pointsAwarded}` : '✓'}
+            </span>
+          )}
+          {isWrong && (
+            <span className="flex items-center gap-1 rounded-full border border-destructive/30 bg-destructive/5 px-2 py-0.5 text-xs font-bold text-destructive/70">
+              <XCircle className="h-3 w-3" />0
+            </span>
+          )}
+          {!isFinished && winnerName && (
+            <span className="text-xs font-medium text-primary">✓ {winnerName}</span>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <TeamButton
@@ -494,18 +577,22 @@ export default function PickemPage() {
 
               {/* Responsive group grid */}
               <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {groupPicks.map((group) => (
-                  <GroupCard
-                    key={group.group_id}
-                    group={group}
-                    editable={group_stage.editable}
-                    onChange={(teams) =>
-                      setGroupPicks((prev) =>
-                        prev.map((g) => (g.group_id === group.group_id ? { ...g, teams } : g)),
-                      )
-                    }
-                  />
-                ))}
+                {groupPicks.map((group) => {
+                  const overview = group_stage.groups.find((g) => g.group_id === group.group_id);
+                  return (
+                    <GroupCard
+                      key={group.group_id}
+                      group={group}
+                      editable={group_stage.editable}
+                      pointsAwarded={overview?.points_awarded}
+                      onChange={(teams) =>
+                        setGroupPicks((prev) =>
+                          prev.map((g) => (g.group_id === group.group_id ? { ...g, teams } : g)),
+                        )
+                      }
+                    />
+                  );
+                })}
               </div>
 
               {/* Submit */}

@@ -470,6 +470,23 @@ export interface paths {
         patch: operations["override_match_result_api_v1_tournament_matches__match_id__result_override_patch"];
         trace?: never;
     };
+    "/api/v1/tournament/matches/{match_id}/players": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Match Players */
+        get: operations["get_match_players_api_v1_tournament_matches__match_id__players_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tournament/matches/{match_id}/predictions": {
         parameters: {
             query?: never;
@@ -852,6 +869,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/config/phase-multipliers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Phase Multipliers */
+        get: operations["get_phase_multipliers_api_v1_config_phase_multipliers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/config/phase-multipliers/{phase}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Upsert Phase Multiplier */
+        put: operations["upsert_phase_multiplier_api_v1_config_phase_multipliers__phase__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/config/deadlines": {
         parameters: {
             query?: never;
@@ -1030,6 +1081,16 @@ export interface components {
             away_team: components["schemas"]["TeamInfo"] | null;
             /** Predicted Winner Team Id */
             predicted_winner_team_id: string | null;
+            /** Home Goals */
+            home_goals?: number | null;
+            /** Away Goals */
+            away_goals?: number | null;
+            /** Outcome */
+            outcome?: string | null;
+            /** Actual Winner Team Id */
+            actual_winner_team_id?: string | null;
+            /** Points Awarded */
+            points_awarded?: number | null;
         };
         /** BracketSlotResponse */
         BracketSlotResponse: {
@@ -1372,6 +1433,8 @@ export interface components {
             name: string;
             /** Teams */
             teams: components["schemas"]["TeamPickemEntry"][];
+            /** Points Awarded */
+            points_awarded?: number | null;
         };
         /** GroupResponse */
         GroupResponse: {
@@ -1493,6 +1556,13 @@ export interface components {
          * @enum {string}
          */
         MatchOutcome: "LOCAL_W" | "AWAY_W" | "DRAW" | "LOCAL_PEN_W" | "AWAY_PEN_W";
+        /** MatchPlayersResponse */
+        MatchPlayersResponse: {
+            /** Home Team */
+            home_team: components["schemas"]["PlayerResponse"][];
+            /** Away Team */
+            away_team: components["schemas"]["PlayerResponse"][];
+        };
         /** MatchPredictionPublicResponse */
         MatchPredictionPublicResponse: {
             /**
@@ -1518,6 +1588,12 @@ export interface components {
             mvp_player_id: string | null;
             /** Points Awarded */
             points_awarded: number;
+            /** Direction Pts Awarded */
+            direction_pts_awarded: number;
+            /** Exact Bonus Awarded */
+            exact_bonus_awarded: number;
+            /** Mvp Pts Awarded */
+            mvp_pts_awarded: number;
         };
         /** MatchPredictionResponse */
         MatchPredictionResponse: {
@@ -1539,6 +1615,12 @@ export interface components {
             mvp_player_id: string | null;
             /** Points Awarded */
             points_awarded: number;
+            /** Direction Pts Awarded */
+            direction_pts_awarded: number;
+            /** Exact Bonus Awarded */
+            exact_bonus_awarded: number;
+            /** Mvp Pts Awarded */
+            mvp_pts_awarded: number;
         };
         /** MatchResponse */
         MatchResponse: {
@@ -1602,6 +1684,17 @@ export interface components {
          * @enum {string}
          */
         Phase: "GROUP_STAGE" | "ROUND_OF_32" | "ROUND_OF_16" | "QUARTER_FINAL" | "SEMI_FINAL" | "THIRD_FOURTH_POSITION" | "FINAL";
+        /** PhaseMultiplierResponse */
+        PhaseMultiplierResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            phase: components["schemas"]["Phase"];
+            /** Multiplier */
+            multiplier: number;
+        };
         /** PickemOverviewResponse */
         PickemOverviewResponse: {
             group_stage: components["schemas"]["GroupStagePickemStatus"];
@@ -1711,18 +1804,12 @@ export interface components {
             match_exact_bonus: number;
             /** Match Mvp Pts */
             match_mvp_pts: number;
-            /** Bracket Round Of 32 Pts */
-            bracket_round_of_32_pts: number;
-            /** Bracket Round Of 16 Pts */
-            bracket_round_of_16_pts: number;
-            /** Bracket Quarter Final Pts */
-            bracket_quarter_final_pts: number;
-            /** Bracket Semi Final Pts */
-            bracket_semi_final_pts: number;
-            /** Bracket Third Fourth Pts */
-            bracket_third_fourth_pts: number;
-            /** Bracket Final Pts */
-            bracket_final_pts: number;
+            /** Group Stage Correct Pts */
+            group_stage_correct_pts: number;
+            /** Group Stage Perfect Bonus */
+            group_stage_perfect_bonus: number;
+            /** Bracket Base Pts */
+            bracket_base_pts: number;
         };
         /** SetCrystalBallResolutionRequest */
         SetCrystalBallResolutionRequest: {
@@ -1802,6 +1889,8 @@ export interface components {
             name: string;
             /** Predicted Position */
             predicted_position: number;
+            /** Actual Position */
+            actual_position?: number | null;
         };
         /** TeamResponse */
         TeamResponse: {
@@ -1852,18 +1941,17 @@ export interface components {
             match_exact_bonus: number;
             /** Match Mvp Pts */
             match_mvp_pts: number;
-            /** Bracket Round Of 32 Pts */
-            bracket_round_of_32_pts: number;
-            /** Bracket Round Of 16 Pts */
-            bracket_round_of_16_pts: number;
-            /** Bracket Quarter Final Pts */
-            bracket_quarter_final_pts: number;
-            /** Bracket Semi Final Pts */
-            bracket_semi_final_pts: number;
-            /** Bracket Third Fourth Pts */
-            bracket_third_fourth_pts: number;
-            /** Bracket Final Pts */
-            bracket_final_pts: number;
+            /** Group Stage Correct Pts */
+            group_stage_correct_pts: number;
+            /** Group Stage Perfect Bonus */
+            group_stage_perfect_bonus: number;
+            /** Bracket Base Pts */
+            bracket_base_pts: number;
+        };
+        /** UpsertPhaseMultiplierRequest */
+        UpsertPhaseMultiplierRequest: {
+            /** Multiplier */
+            multiplier: number;
         };
         /** UserAdminView */
         UserAdminView: {
@@ -2924,6 +3012,37 @@ export interface operations {
             };
         };
     };
+    get_match_players_api_v1_tournament_matches__match_id__players_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchPlayersResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_match_predictions_all_api_v1_tournament_matches__match_id__predictions_get: {
         parameters: {
             query?: never;
@@ -3741,6 +3860,61 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecalculateResponse"];
+                };
+            };
+        };
+    };
+    get_phase_multipliers_api_v1_config_phase_multipliers_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhaseMultiplierResponse"][];
+                };
+            };
+        };
+    };
+    upsert_phase_multiplier_api_v1_config_phase_multipliers__phase__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                phase: components["schemas"]["Phase"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertPhaseMultiplierRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhaseMultiplierResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
