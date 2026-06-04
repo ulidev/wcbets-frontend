@@ -14,7 +14,9 @@ export function Sidebar() {
       <div className="flex items-center gap-2.5 px-5 py-5">
         <WcLogo size={32} className="shrink-0 text-sidebar-primary" />
         <div>
-          <p className="text-sm font-bold leading-none text-sidebar-foreground">WC Bets</p>
+          <p className="font-heading text-base font-bold uppercase leading-none tracking-wide text-sidebar-foreground">
+            WC Bets
+          </p>
           <p className="text-[10px] text-sidebar-foreground/50">World Cup 2026</p>
         </div>
       </div>

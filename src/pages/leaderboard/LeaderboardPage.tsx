@@ -70,7 +70,7 @@ function EntryRow({
 
       {/* Name */}
       <div className="min-w-0 flex-1">
-        <span className="truncate text-sm font-medium">
+        <span className="wc-font-body truncate text-sm uppercase">
           {entry.first_name} {entry.last_name}
         </span>
         {isCurrentUser && (
@@ -125,7 +125,7 @@ export default function LeaderboardPage() {
 
   return (
     <div className="flex flex-col">
-      <PageChrome
+      <PageChrome<Tab>
         title="Leaderboard"
         description="Rankings across all three prediction games"
         tabs={tabs.map(({ key, label }) => ({ id: key, label }))}

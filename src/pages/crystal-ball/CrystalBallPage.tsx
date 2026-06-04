@@ -12,6 +12,7 @@ import {
 import { PageChrome } from '@/components/app/PageChrome';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import { cn } from '@/lib/utils';
+import { wcBtnPrimary, wcFontBody } from '@/lib/wc-ui';
 import type { components } from '@/types/api';
 
 type CrystalBallQuestionResponse = components['schemas']['CrystalBallQuestionResponse'];
@@ -27,6 +28,50 @@ const QUESTION_DESCRIPTIONS: Record<string, string> = {
   TOP_4: "Tria els 4 equips que arriben a les semifinals (l'ordre importa).",
   FURTHEST_TEAM_PER_CONTINENT: 'Tria l\'equip que arriba més lluny de cada confederació.',
 };
+
+function answerTypeHint(answerType: string, maxSelections: number): string {
+  if (answerType === 'PLAYER') {
+    return maxSelections > 1
+      ? `Selecciona ${maxSelections} jugadors`
+      : 'Selecciona un jugador';
+  }
+  if (answerType === 'TEAM') {
+    return maxSelections > 1
+      ? `Selecciona ${maxSelections} equips`
+      : 'Selecciona un equip';
+  }
+  return 'Introdueix un número';
+}
+
+function savedToDrafts(answers: CrystalBallAnswerResponse[]): AnswerDraft[] {
+  return answers.map((a) => ({
+    selection_index: a.selection_index,
+    player_id: a.player_id ?? undefined,
+    team_id: a.team_id ?? undefined,
+    numeric_value: a.numeric_value ?? undefined,
+  }));
+}
+
+function isDraftComplete(
+  question: CrystalBallQuestionResponse,
+  drafts: AnswerDraft[],
+): boolean {
+  if (question.answer_type === 'NUMBER') {
+    return drafts[0]?.numeric_value != null;
+  }
+  return drafts.length === question.max_selections;
+}
+
+function draftsEqual(a: AnswerDraft[], b: AnswerDraft[]): boolean {
+  if (a.length !== b.length) return false;
+  const key = (d: AnswerDraft) =>
+    `${d.selection_index}:${d.team_id ?? ''}:${d.player_id ?? ''}:${d.numeric_value ?? ''}`;
+  const sorted = (list: AnswerDraft[]) =>
+    [...list].sort((x, y) => x.selection_index - y.selection_index).map(key);
+  const ka = sorted(a);
+  const kb = sorted(b);
+  return ka.every((k, i) => k === kb[i]);
+}
 
 // ── Player search ─────────────────────────────────────────────────────────────
 
@@ -67,9 +112,31 @@ function TeamPicker({
   locked: boolean;
 }) {
   const [filter, setFilter] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const canAddMore = !locked && selected.length < maxSelections;
+  const showResults = canAddMore && pickerOpen;
+  const query = filter.trim().toLowerCase();
   const filtered = teams.filter((t) =>
-    t.name.toLowerCase().includes(filter.toLowerCase()),
+    query.length === 0 ? true : t.name.toLowerCase().includes(query),
   );
+
+  const openPicker = () => {
+    if (blurTimer.current) clearTimeout(blurTimer.current);
+    setPickerOpen(true);
+  };
+
+  const scheduleClose = () => {
+    if (blurTimer.current) clearTimeout(blurTimer.current);
+    blurTimer.current = setTimeout(() => setPickerOpen(false), 180);
+  };
+
+  const handleSelect = (teamId: string) => {
+    onToggle(teamId);
+    setFilter('');
+    setPickerOpen(false);
+  };
 
   return (
     <div className="space-y-2">
@@ -81,17 +148,21 @@ function TeamPicker({
             return (
               <span
                 key={id}
-                className="flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary"
+                className={cn(
+                  'flex items-center gap-1.5 rounded-full border border-wc-hermes/20 bg-wc-hermes/10 px-2.5 py-1 text-xs uppercase text-wc-hermes',
+                  wcFontBody,
+                )}
               >
                 {maxSelections > 1 && (
-                  <span className="text-[10px] text-primary/60">{idx + 1}.</span>
+                  <span className="text-[10px] text-wc-hermes/60">{idx + 1}.</span>
                 )}
                 <TeamFlag teamName={team.name} size="sm" />
                 {team.name}
                 {!locked && (
                   <button
+                    type="button"
                     onClick={() => onToggle(id)}
-                    className="ml-0.5 text-primary/60 hover:text-primary"
+                    className="ml-0.5 text-wc-hermes/60 hover:text-wc-red"
                   >
                     <X size={12} />
                   </button>
@@ -102,7 +173,7 @@ function TeamPicker({
         </div>
       )}
 
-      {!locked && selected.length < maxSelections && (
+      {canAddMore && (
         <>
           <div className="relative">
             <Search
@@ -111,33 +182,49 @@ function TeamPicker({
             />
             <input
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              placeholder="Filter teams…"
-              className="w-full rounded-lg border border-border bg-background py-2 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              onChange={(e) => {
+                setFilter(e.target.value);
+                openPicker();
+              }}
+              onFocus={openPicker}
+              onBlur={scheduleClose}
+              placeholder="Buscar equipo…"
+              className="w-full rounded-xl border border-wc-light-gray bg-white py-2 pl-8 pr-3 text-sm text-wc-card-text focus:outline-none focus:ring-2 focus:ring-wc-green/40"
             />
           </div>
-          <div className="max-h-44 overflow-y-auto rounded-lg border border-border">
-            {filtered.map((team) => {
-              const isSelected = selected.includes(team.id);
-              return (
-                <button
-                  key={team.id}
-                  onClick={() => onToggle(team.id)}
-                  disabled={isSelected}
-                  className={cn(
-                    'flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left text-sm transition-colors last:border-b-0',
-                    isSelected
-                      ? 'cursor-default bg-muted/40 text-muted-foreground'
-                      : 'hover:bg-muted/60',
-                  )}
-                >
-                  <TeamFlag teamName={team.name} size="sm" />
-                  {team.name}
-                  {isSelected && <CheckCircle2 size={14} className="ml-auto text-primary" />}
-                </button>
-              );
-            })}
-          </div>
+          {showResults && (
+            <div
+              className="crystal-picker-surface max-h-44 overflow-y-auto"
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              {filtered.length === 0 ? (
+                <div className="px-3 py-2 text-sm text-wc-dark-gray">No teams found</div>
+              ) : (
+                filtered.map((team) => {
+                  const isSelected = selected.includes(team.id);
+                  return (
+                    <button
+                      key={team.id}
+                      type="button"
+                      onClick={() => !isSelected && handleSelect(team.id)}
+                      disabled={isSelected}
+                      className={cn(
+                        'flex w-full items-center gap-2 border-b border-wc-light-gray/80 px-3 py-2 text-left text-sm uppercase transition-colors last:border-b-0',
+                        wcFontBody,
+                        isSelected
+                          ? 'cursor-default bg-wc-light-gray/30 text-wc-dark-gray'
+                          : 'hover:bg-wc-hermes/5',
+                      )}
+                    >
+                      <TeamFlag teamName={team.name} size="sm" />
+                      {team.name}
+                      {isSelected && <CheckCircle2 size={14} className="ml-auto text-wc-green" />}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          )}
         </>
       )}
     </div>
@@ -183,10 +270,13 @@ function PlayerPicker({
             return (
               <span
                 key={id}
-                className="flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-medium text-primary"
+                className={cn(
+                  'flex items-center gap-1.5 rounded-full border border-wc-hermes/20 bg-wc-hermes/10 px-2.5 py-1 text-xs uppercase text-wc-hermes',
+                  wcFontBody,
+                )}
               >
                 {maxSelections > 1 && (
-                  <span className="text-[10px] text-primary/60">{idx + 1}.</span>
+                  <span className="text-[10px] text-wc-hermes/60">{idx + 1}.</span>
                 )}
                 {info && <TeamFlag teamName={getTeamName(info.teamId)} size="sm" />}
                 {info?.name ?? id.slice(0, 8)}
@@ -195,7 +285,7 @@ function PlayerPicker({
                     onClick={() =>
                       info && onToggle(id, info.name, info.teamId)
                     }
-                    className="ml-0.5 text-primary/60 hover:text-primary"
+                    className="ml-0.5 text-wc-hermes/60 hover:text-wc-red"
                   >
                     <X size={12} />
                   </button>
@@ -216,18 +306,21 @@ function PlayerPicker({
             <input
               value={query}
               onChange={(e) => onChange(e.target.value)}
-              placeholder="Search player name (min 2 chars)…"
-              className="w-full rounded-lg border border-border bg-background py-2 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Buscar jugador (mín. 2 letras)…"
+              className="w-full rounded-xl border border-wc-light-gray bg-white py-2 pl-8 pr-3 text-sm text-wc-card-text focus:outline-none focus:ring-2 focus:ring-wc-green/40"
             />
           </div>
 
           {query.length >= 2 && (
-            <div className="max-h-44 overflow-y-auto rounded-lg border border-border">
+            <div
+              className="crystal-picker-surface max-h-44 overflow-y-auto"
+              onMouseDown={(e) => e.preventDefault()}
+            >
               {isFetching && (
-                <div className="px-3 py-2 text-sm text-muted-foreground">Searching…</div>
+                <div className="px-3 py-2 text-sm text-wc-dark-gray">Searching…</div>
               )}
               {!isFetching && players.length === 0 && (
-                <div className="px-3 py-2 text-sm text-muted-foreground">No players found</div>
+                <div className="px-3 py-2 text-sm text-wc-dark-gray">No players found</div>
               )}
               {!isFetching &&
                 players.map((player) => {
@@ -238,16 +331,17 @@ function PlayerPicker({
                       onClick={() => !isSelected && handleToggle(player)}
                       disabled={isSelected}
                       className={cn(
-                        'flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left text-sm transition-colors last:border-b-0',
+                        'flex w-full items-center gap-2 border-b border-wc-light-gray/80 px-3 py-2 text-left text-sm uppercase transition-colors last:border-b-0',
+                        wcFontBody,
                         isSelected
-                          ? 'cursor-default bg-muted/40 text-muted-foreground'
-                          : 'hover:bg-muted/60',
+                          ? 'cursor-default bg-wc-light-gray/30 text-wc-dark-gray'
+                          : 'hover:bg-wc-hermes/5',
                       )}
                     >
                       <TeamFlag teamName={getTeamName(player.team_id)} size="sm" />
-                      <span className="flex-1">{player.name}</span>
-                      <span className="text-xs text-muted-foreground">{player.position}</span>
-                      {isSelected && <CheckCircle2 size={14} className="text-primary" />}
+                      <span className={cn('flex-1', wcFontBody)}>{player.name}</span>
+                      <span className="text-xs text-wc-dark-gray">{player.position}</span>
+                      {isSelected && <CheckCircle2 size={14} className="text-wc-green" />}
                     </button>
                   );
                 })}
@@ -263,46 +357,25 @@ function PlayerPicker({
 
 function QuestionCard({
   question,
+  drafts,
+  onDraftsChange,
   savedAnswers,
   teams,
   locked,
-  onSave,
 }: {
   question: CrystalBallQuestionResponse;
+  drafts: AnswerDraft[];
+  onDraftsChange: (drafts: AnswerDraft[]) => void;
   savedAnswers: CrystalBallAnswerResponse[] | undefined;
   teams: TeamResponse[];
   locked: boolean;
-  onSave: (questionId: string, answers: AnswerDraft[]) => Promise<void>;
 }) {
-  const [drafts, setDrafts] = useState<AnswerDraft[]>(() => {
-    if (!savedAnswers) return [];
-    return savedAnswers.map((a) => ({
-      selection_index: a.selection_index,
-      player_id: a.player_id ?? undefined,
-      team_id: a.team_id ?? undefined,
-      numeric_value: a.numeric_value ?? undefined,
-    }));
-  });
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
-
   const isSaved = savedAnswers !== undefined && savedAnswers.length > 0;
+  const isDirty =
+    isSaved && !draftsEqual(drafts, savedToDrafts(savedAnswers));
+  const isComplete = isDraftComplete(question, drafts);
   const label = question.label || question.type;
   const desc = QUESTION_DESCRIPTIONS[question.type];
-
-  // Sync when savedAnswers arrives
-  useEffect(() => {
-    if (!savedAnswers) return;
-    setDrafts(
-      savedAnswers.map((a) => ({
-        selection_index: a.selection_index,
-        player_id: a.player_id ?? undefined,
-        team_id: a.team_id ?? undefined,
-        numeric_value: a.numeric_value ?? undefined,
-      })),
-    );
-  }, [savedAnswers]);
 
   const selectedIds = drafts
     .sort((a, b) => a.selection_index - b.selection_index)
@@ -312,73 +385,84 @@ function QuestionCard({
     .filter(Boolean);
 
   const handleToggleTeam = (teamId: string) => {
-    setDrafts((prev) => {
-      const exists = prev.find((d) => d.team_id === teamId);
-      if (exists) return prev.filter((d) => d.team_id !== teamId);
-      const nextIndex = prev.length;
-      return [...prev, { selection_index: nextIndex, team_id: teamId }];
-    });
-    setSaved(false);
+    const exists = drafts.find((d) => d.team_id === teamId);
+    if (exists) {
+      onDraftsChange(
+        drafts
+          .filter((d) => d.team_id !== teamId)
+          .map((d, i) => ({ ...d, selection_index: i })),
+      );
+      return;
+    }
+    onDraftsChange([...drafts, { selection_index: drafts.length, team_id: teamId }]);
   };
 
-  const handleTogglePlayer = (playerId: string, _name: string, _teamId: string) => {
-    setDrafts((prev) => {
-      const exists = prev.find((d) => d.player_id === playerId);
-      if (exists) return prev.filter((d) => d.player_id !== playerId);
-      const nextIndex = prev.length;
-      return [...prev, { selection_index: nextIndex, player_id: playerId }];
-    });
-    setSaved(false);
+  const handleTogglePlayer = (playerId: string) => {
+    const exists = drafts.find((d) => d.player_id === playerId);
+    if (exists) {
+      onDraftsChange(
+        drafts
+          .filter((d) => d.player_id !== playerId)
+          .map((d, i) => ({ ...d, selection_index: i })),
+      );
+      return;
+    }
+    onDraftsChange([...drafts, { selection_index: drafts.length, player_id: playerId }]);
   };
 
   const handleNumberChange = (val: string) => {
     const n = val === '' ? undefined : Number(val);
-    setDrafts([{ selection_index: 0, numeric_value: n }]);
-    setSaved(false);
+    onDraftsChange([{ selection_index: 0, numeric_value: n }]);
   };
-
-  const handleSave = async () => {
-    setSaving(true);
-    setSaveError(null);
-    try {
-      await onSave(question.id, drafts);
-      setSaved(true);
-    } catch {
-      setSaveError('Failed to save. Try again.');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const isComplete =
-    question.answer_type === 'NUMBER'
-      ? drafts[0]?.numeric_value != null
-      : drafts.length > 0 && drafts.length <= question.max_selections;
 
   const numberVal =
     question.answer_type === 'NUMBER' ? (drafts[0]?.numeric_value ?? '') : '';
 
+  const scopeLabel = question.scope ? ` · ${question.scope}` : '';
+
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <div className="mb-3 flex items-start justify-between gap-2">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">{label}</span>
-            {isSaved && !locked && (
-              <CheckCircle2 size={14} className="shrink-0 text-green-500" />
+    <article className="crystal-pred-card">
+      <div className="mb-2.5 flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <h2 className="crystal-pred-title">{label}</h2>
+          <p className="crystal-pred-detail">
+            {desc ?? answerTypeHint(question.answer_type, question.max_selections)}
+            {scopeLabel}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="crystal-badge-official">
+              ★ {question.points_value} punts
+            </span>
+            {isSaved && !isDirty && (
+              <span className="crystal-badge-official bg-wc-green">
+                Predicció guardada
+              </span>
             )}
-            {locked && <Lock size={13} className="shrink-0 text-muted-foreground" />}
+            {isDirty && (
+              <span className="crystal-badge-official bg-amber-500">
+                Canvis sense guardar
+              </span>
+            )}
+            {!isSaved && isComplete && (
+              <span className="crystal-badge-official bg-wc-hermes">
+                Llista per guardar
+              </span>
+            )}
+            {locked && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-wc-dark-gray">
+                <Lock size={12} /> Tancat
+              </span>
+            )}
           </div>
-          {desc && <p className="mt-0.5 text-xs text-muted-foreground">{desc}</p>}
         </div>
-        <span className="shrink-0 rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-bold text-primary">
-          {question.points_value} pts
-        </span>
+        {isSaved && !isDirty && !locked && (
+          <CheckCircle2 size={20} className="shrink-0 text-wc-green" aria-label="Saved" />
+        )}
       </div>
 
       {question.max_selections > 1 && question.answer_type !== 'NUMBER' && (
-        <p className="mb-2 text-xs text-muted-foreground">
-          {drafts.length} / {question.max_selections} selected
+        <p className="mb-2 text-xs font-semibold text-wc-dark-gray">
+          {drafts.length} / {question.max_selections} seleccionats
         </p>
       )}
 
@@ -389,8 +473,8 @@ function QuestionCard({
           value={numberVal}
           disabled={locked}
           onChange={(e) => handleNumberChange(e.target.value)}
-          placeholder="Enter a number…"
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
+          placeholder="Introdueix un número…"
+          className="w-full rounded-xl border border-wc-light-gray bg-white px-3 py-2.5 text-sm text-wc-card-text focus:outline-none focus:ring-2 focus:ring-wc-green/40 disabled:cursor-not-allowed disabled:opacity-60"
         />
       )}
 
@@ -414,33 +498,7 @@ function QuestionCard({
         />
       )}
 
-      {!locked && (
-        <div className="mt-3 flex items-center gap-2">
-          <button
-            onClick={handleSave}
-            disabled={saving || !isComplete}
-            className={cn(
-              'rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
-              isComplete && !saving
-                ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                : 'cursor-not-allowed bg-muted text-muted-foreground',
-            )}
-          >
-            {saving ? 'Saving…' : 'Save'}
-          </button>
-          {saved && !saving && (
-            <span className="flex items-center gap-1 text-xs text-green-500">
-              <CheckCircle2 size={12} /> Saved
-            </span>
-          )}
-          {saveError && (
-            <span className="flex items-center gap-1 text-xs text-destructive">
-              <AlertCircle size={12} /> {saveError}
-            </span>
-          )}
-        </div>
-      )}
-    </div>
+    </article>
   );
 }
 
@@ -448,6 +506,9 @@ function QuestionCard({
 
 export default function CrystalBallPage() {
   const queryClient = useQueryClient();
+  const [draftsByQuestion, setDraftsByQuestion] = useState<Record<string, AnswerDraft[]>>({});
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const answersHydrated = useRef(false);
 
   const { data: questions = [], isLoading: loadingQ, isError: errorQ } = useQuery({
     queryKey: ['crystal-ball-questions'],
@@ -480,15 +541,41 @@ export default function CrystalBallPage() {
     myAnswers.map((pred) => [pred.question_id, pred.answers]),
   );
 
-  const { mutateAsync } = useMutation({
+  useEffect(() => {
+    if (loadingA || answersHydrated.current) return;
+    answersHydrated.current = true;
+    setDraftsByQuestion(
+      Object.fromEntries(myAnswers.map((p) => [p.question_id, savedToDrafts(p.answers)])),
+    );
+  }, [loadingA, myAnswers]);
+
+  const { mutateAsync, isPending: saving } = useMutation({
     mutationFn: submitAnswers,
-    onSuccess: () => {
+    onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ['crystal-ball-answers'] });
+      setDraftsByQuestion((prev) => ({
+        ...prev,
+        ...Object.fromEntries(saved.map((p) => [p.question_id, savedToDrafts(p.answers)])),
+      }));
+      setSaveError(null);
     },
+    onError: () => setSaveError('No s’han pogut guardar les prediccions. Torna-ho a provar.'),
   });
 
-  const handleSave = async (questionId: string, answers: AnswerDraft[]) => {
-    await mutateAsync({ predictions: [{ question_id: questionId, answers }] });
+  const predictionsToSave = questions
+    .map((q) => {
+      const drafts = draftsByQuestion[q.id] ?? [];
+      if (!isDraftComplete(q, drafts)) return null;
+      const saved = answersByQuestion[q.id];
+      if (saved && draftsEqual(drafts, savedToDrafts(saved))) return null;
+      return { question_id: q.id, answers: drafts };
+    })
+    .filter((p): p is { question_id: string; answers: AnswerDraft[] } => p !== null);
+
+  const handleSaveAll = async () => {
+    if (predictionsToSave.length === 0 || isLocked) return;
+    setSaveError(null);
+    await mutateAsync({ predictions: predictionsToSave });
   };
 
   const isLoading = loadingQ || loadingA;
@@ -501,9 +588,9 @@ export default function CrystalBallPage() {
       />
 
       {isLocked && (
-        <div className="mx-4 mt-4 flex items-center gap-2 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-          <Lock size={14} />
-          Predictions are locked — the deadline has passed.
+        <div className="mx-4 mt-4 flex items-center gap-2 rounded-[20px] border-l-4 border-l-wc-red bg-gradient-to-r from-white to-[#f0f2f5] px-4 py-3 text-sm font-semibold text-wc-dark-gray shadow-sm">
+          <Lock size={14} className="text-wc-hermes" />
+          Les prediccions estan tancades — ha passat el termini.
         </div>
       )}
 
@@ -512,7 +599,7 @@ export default function CrystalBallPage() {
           Array.from({ length: 5 }, (_, i) => (
             <div
               key={i}
-              className="h-24 animate-pulse rounded-xl border border-border bg-card"
+              className="h-28 animate-pulse rounded-[18px] border-l-[6px] border-l-wc-red/30 bg-gradient-to-br from-white to-[#f0f2f5]"
             />
           ))}
 
@@ -536,13 +623,43 @@ export default function CrystalBallPage() {
             <QuestionCard
               key={q.id}
               question={q}
+              drafts={draftsByQuestion[q.id] ?? []}
+              onDraftsChange={(next) =>
+                setDraftsByQuestion((prev) => ({ ...prev, [q.id]: next }))
+              }
               savedAnswers={answersByQuestion[q.id]}
               teams={teams}
               locked={isLocked}
-              onSave={handleSave}
             />
           ))}
       </div>
+
+      {!isLocked && !isLoading && !errorQ && questions.length > 0 && (
+        <div className="sticky bottom-0 z-10 border-t border-wc-light-gray bg-white/95 px-4 py-3 backdrop-blur-sm">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-wc-dark-gray">
+              {predictionsToSave.length === 0
+                ? 'Completa almenys una pregunta per guardar.'
+                : `${predictionsToSave.length} pregunta${predictionsToSave.length === 1 ? '' : 'es'} per guardar`}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => void handleSaveAll()}
+                disabled={saving || predictionsToSave.length === 0}
+                className={wcBtnPrimary}
+              >
+                {saving ? 'Guardant…' : 'Guardar prediccions'}
+              </button>
+              {saveError && (
+                <span className="flex items-center gap-1 text-xs font-semibold text-wc-red">
+                  <AlertCircle size={12} /> {saveError}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

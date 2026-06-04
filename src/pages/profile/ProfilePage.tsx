@@ -20,7 +20,7 @@ export default function ProfilePage() {
     <div className="flex flex-col">
       {/* Desktop header */}
       <div className="hidden border-b border-border px-6 py-5 md:block">
-        <h1 className="text-xl font-bold">Profile</h1>
+        <h1 className="wc-page-title">Profile</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">Your account details</p>
       </div>
 

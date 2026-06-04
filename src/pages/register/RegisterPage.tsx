@@ -47,7 +47,7 @@ export default function RegisterPage() {
           <div className="mb-3 flex justify-center">
             <AppLogo size={72} />
           </div>
-          <h1 className="text-2xl font-bold">WC Bets</h1>
+          <h1 className="wc-page-title text-2xl">WC Bets</h1>
           <p className="mt-1 text-sm text-muted-foreground">FIFA World Cup 2026 Predictions</p>
         </div>
 
@@ -132,7 +132,7 @@ export default function RegisterPage() {
               type="submit"
               disabled={isSubmitting}
               className={cn(
-                'w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-opacity',
+                'wc-btn-primary w-full',
                 isSubmitting ? 'opacity-60' : 'hover:opacity-90',
               )}
             >

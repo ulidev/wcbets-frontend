@@ -1,0 +1,14 @@
+import {
+  BRACKET_CENTER_W,
+  BRACKET_COL_W,
+  BRACKET_GAP_W,
+  BRACKET_MATCH_BLOCK_H,
+  BRACKET_ROW_UNIT,
+} from '../bracket-utils';
+
+export const TREE_MATCH_H = BRACKET_MATCH_BLOCK_H;
+export const TREE_COL_W = BRACKET_COL_W;
+export const TREE_GAP_W = BRACKET_GAP_W;
+export const TREE_CENTER_W = BRACKET_CENTER_W;
+export const TREE_ROW_UNIT = BRACKET_ROW_UNIT;
+export const TREE_COL_STEP = TREE_COL_W + TREE_GAP_W;

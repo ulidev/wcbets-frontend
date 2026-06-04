@@ -1,13 +1,40 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
+
+/* FWC 2026 official-style fonts (bundled in /public/fonts) */
+@font-face {
+  font-family: 'FWC2026 UltraCondensed';
+  src: url('/fonts/FWC2026-UltraCondensedBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FWC2026 Condensed';
+  src: url('/fonts/FWC2026-CondensedLight.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'FWC2026 Normal';
+  src: url('/fonts/FWC2026-NormalRegular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif;
+    --font-wc-bold: 'FWC2026 UltraCondensed', sans-serif;
+    --font-wc-light: 'FWC2026 Condensed', sans-serif;
+    --font-wc-regular: 'FWC2026 Normal', sans-serif;
+    --font-heading: var(--font-wc-bold);
+    --font-sans: var(--font-wc-light);
     --color-wc-green: #3CAC3B;
     --color-wc-hermes: #2A398D;
     --color-wc-red: #E61D25;
@@ -106,5 +133,376 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* WC 2026 — shared page chrome, buttons, section titles */
+@layer components {
+  .wc-page-title {
+    font-family: var(--font-wc-bold);
+    font-size: 1.65rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-wc-hermes);
+  }
+
+  .wc-page-desc {
+    margin-top: 0.35rem;
+    font-family: var(--font-wc-light);
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: var(--color-wc-dark-gray);
+  }
+
+  .wc-topbar-title {
+    font-family: var(--font-wc-bold);
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-wc-hermes);
+  }
+
+  .wc-tab {
+    flex: 1;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-family: var(--font-wc-light);
+    font-size: 0.875rem;
+    font-weight: 300;
+    color: var(--color-wc-dark-gray);
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .wc-tab:hover {
+    color: var(--color-wc-hermes);
+  }
+
+  .wc-tab-active {
+    border-bottom: 3px solid var(--color-wc-red);
+    color: var(--color-wc-hermes);
+  }
+
+  .wc-btn-primary {
+    border-radius: 9999px;
+    background: var(--color-wc-hermes);
+    padding: 0.55rem 1.25rem;
+    font-family: var(--font-wc-light);
+    font-size: 0.875rem;
+    font-weight: 300;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #fff;
+    box-shadow: 0 4px 14px -4px rgba(42, 57, 141, 0.65);
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  }
+
+  .wc-btn-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-wc-hermes) 88%, white);
+    box-shadow: 0 6px 16px -4px rgba(42, 57, 141, 0.75);
+  }
+
+  .wc-btn-primary:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  .wc-btn-primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    box-shadow: none;
+  }
+
+  .wc-section-heading {
+    font-family: var(--font-wc-bold);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-wc-hermes);
+  }
+
+  .wc-day-heading {
+    font-family: var(--font-wc-bold);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-wc-hermes);
+  }
+
+  .wc-group-card-title {
+    font-family: var(--font-wc-bold);
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  /* Team names, player names, chips, labels */
+  .wc-font-body {
+    font-family: var(--font-wc-light);
+    font-weight: 300;
+  }
+
+  .wc-font-regular {
+    font-family: var(--font-wc-regular);
+    font-weight: 400;
+  }
+
+  .wc-accent-card {
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid var(--color-wc-light-gray);
+    border-left: 5px solid var(--color-wc-red);
+    background: linear-gradient(145deg, #ffffff 0%, #f5f7fa 100%);
+    box-shadow: 0 8px 18px -14px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Crystal Ball — prediction cards (compact) */
+  .crystal-pred-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    padding: 0.95rem 1rem 1rem;
+    padding-top: 1.05rem;
+    color: var(--color-wc-card-text);
+    border-left: 6px solid var(--color-wc-red);
+    background: linear-gradient(145deg, #ffffff 0%, #f0f2f5 100%);
+    box-shadow: 0 8px 16px -14px rgba(0, 0, 0, 0.7);
+    font-family: var(--font-wc-light);
+    font-weight: 300;
+  }
+
+  .crystal-pred-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-wc-green), var(--color-wc-hermes));
+    pointer-events: none;
+  }
+
+  .crystal-pred-title {
+    font-family: var(--font-wc-regular);
+    font-size: 1.125rem;
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--color-wc-hermes);
+    letter-spacing: 0.01em;
+  }
+
+  .crystal-pred-detail {
+    font-family: var(--font-wc-light);
+    font-weight: 300;
+    margin: 4px 0 0;
+    color: var(--color-wc-dark-gray);
+    font-size: 0.8125rem;
+    line-height: 1.35;
+  }
+
+  .crystal-badge-official {
+    background: var(--color-wc-hermes);
+    color: #fff;
+    border-radius: 9999px;
+    padding: 0.15rem 0.65rem;
+    font-family: var(--font-wc-light);
+    font-size: 0.6875rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: inline-block;
+  }
+
+  .crystal-picker-surface {
+    border-radius: 10px;
+    border: 1px solid var(--color-wc-light-gray);
+    background: rgba(255, 255, 255, 0.75);
+  }
+
+  /* Pick'em — full bracket tree */
+  .bracket-tree-scroll {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+    background: #fff;
+    max-height: min(72vh, calc(100dvh - 260px));
+  }
+
+  .pickem-bracket-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bracket-tree-canvas {
+    background: #fff;
+    margin-inline: 0;
+    overflow: visible;
+  }
+
+  .bracket-tree-line {
+    stroke: color-mix(in srgb, var(--color-wc-hermes) 35%, var(--color-wc-light-gray));
+    stroke-width: 2;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+  }
+
+  .bracket-tree-match {
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+    min-height: 84px;
+    overflow: hidden;
+    border-radius: 14px;
+    padding: 0.45rem 0.5rem 0.5rem;
+    padding-top: 0.55rem;
+    border-left: 4px solid var(--color-wc-red);
+    background: linear-gradient(145deg, #ffffff 0%, #f0f2f5 100%);
+    box-shadow: 0 6px 14px -12px rgba(0, 0, 0, 0.55);
+    font-family: var(--font-wc-light);
+  }
+
+  .bracket-tree-match--placeholder {
+    border-left-color: var(--color-wc-light-gray);
+    opacity: 0.72;
+    box-shadow: none;
+  }
+
+  .bracket-tree-match--placeholder::after {
+    background: var(--color-wc-light-gray);
+  }
+
+  .bracket-tree-match::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-wc-green), var(--color-wc-hermes));
+    pointer-events: none;
+  }
+
+  .bracket-tree-team {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.4rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-wc-light-gray);
+    background: #fff;
+    padding: 0.3rem 0.45rem;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    color: var(--color-wc-card-text);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .bracket-tree-team + .bracket-tree-team {
+    margin-top: 0.25rem;
+  }
+
+  .bracket-tree-team:hover:not(:disabled):not(.bracket-tree-team--tbd) {
+    border-color: color-mix(in srgb, var(--color-wc-hermes) 45%, white);
+    background: color-mix(in srgb, var(--color-wc-hermes) 6%, white);
+  }
+
+  .bracket-tree-team--tbd {
+    cursor: default;
+    opacity: 0.55;
+    color: var(--color-wc-dark-gray);
+  }
+
+  .bracket-tree-team--selected {
+    border-color: var(--color-wc-hermes);
+    background: color-mix(in srgb, var(--color-wc-hermes) 12%, white);
+    color: var(--color-wc-hermes);
+  }
+
+  .bracket-tree-team--winner {
+    border-color: color-mix(in srgb, var(--color-wc-green) 55%, white);
+    background: color-mix(in srgb, var(--color-wc-green) 10%, white);
+  }
+
+  .bracket-tree-team--wrong {
+    border-color: color-mix(in srgb, var(--color-wc-red) 40%, white);
+    opacity: 0.75;
+  }
+
+  .bracket-tree-focus-shell {
+    margin: 0 auto;
+    width: fit-content;
+    max-width: 100%;
+    padding: 1.25rem 1rem 1.5rem;
+    background: #fff;
+  }
+
+  .bracket-view-toggle {
+    display: inline-flex;
+    border-radius: 9999px;
+    border: 1px solid var(--color-wc-light-gray);
+    background: #fff;
+    padding: 2px;
+  }
+
+  .bracket-view-toggle-btn {
+    border-radius: 9999px;
+    padding: 0.35rem 0.85rem;
+    font-family: var(--font-wc-light);
+    font-size: 0.75rem;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    color: var(--color-wc-dark-gray);
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .bracket-view-toggle-btn--active {
+    background: var(--color-wc-hermes);
+    color: #fff;
+  }
+
+  .bracket-tree-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bracket-mobile-jump {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--color-wc-light-gray);
+    background: #fff;
+    padding: 0.5rem 1rem;
+  }
+
+  .bracket-mobile-jump-btn {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-wc-light-gray);
+    background: #fff;
+    padding: 0.45rem 0.5rem;
+    font-family: var(--font-wc-light);
+    font-size: 0.6875rem;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--color-wc-hermes);
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .bracket-mobile-jump-btn:active {
+    background: color-mix(in srgb, var(--color-wc-hermes) 10%, white);
+    border-color: var(--color-wc-hermes);
   }
 }

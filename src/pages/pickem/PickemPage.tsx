@@ -17,34 +17,32 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { AlertCircle, CheckCircle2, GripVertical, Info, Lock, Trophy, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, GripVertical, Info, LayoutGrid, List, Lock, Trophy, XCircle } from 'lucide-react';
 import { fetchPickemOverview, submitGroupStagePicks, submitBracketPicks } from '@/api/pickem';
 import { cn } from '@/lib/utils';
+import { wcBtnPrimaryFull, wcFontBody } from '@/lib/wc-ui';
+import { PageChrome } from '@/components/app/PageChrome';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import type { components } from '@/types/api';
+import { BracketTreeView } from '@/pages/pickem/BracketTreeView';
+import {
+  BRACKET_PHASE_ORDER,
+  PHASE_LABELS,
+  type BracketPhase,
+  type BracketSlotPickemOverview,
+  type TeamInfo,
+  resolveLoserTeam,
+  resolveTeam,
+  formatMatchLabel,
+  slotFeedLabel,
+  slotsByPhaseOrdered,
+} from '@/pages/pickem/bracket-utils';
 
 type TeamPickemEntry = components['schemas']['TeamPickemEntry'];
-type BracketSlotPickemOverview = components['schemas']['BracketSlotPickemOverview'];
-type TeamInfo = components['schemas']['TeamInfo'];
 type GroupPickemOverview = components['schemas']['GroupPickemOverview'];
 
-const BRACKET_PHASE_ORDER = [
-  'ROUND_OF_32',
-  'ROUND_OF_16',
-  'QUARTER_FINAL',
-  'SEMI_FINAL',
-  'THIRD_FOURTH_POSITION',
-  'FINAL',
-] as const;
-
-const PHASE_LABELS: Record<string, string> = {
-  ROUND_OF_32: 'Round of 32',
-  ROUND_OF_16: 'Round of 16',
-  QUARTER_FINAL: 'Quarter-Finals',
-  SEMI_FINAL: 'Semi-Finals',
-  THIRD_FOURTH_POSITION: 'Third Place Play-off',
-  FINAL: 'Final',
-};
+type PickemTab = 'groups' | 'bracket';
+type BracketViewMode = 'list' | 'tree';
 
 // ── Group Stage — score summary ───────────────────────────────────────────────
 
@@ -67,13 +65,13 @@ function GroupStageScoreSummary({ groups }: { groups: GroupPickemOverview[] }) {
   );
 
   return (
-    <div className="mx-4 mt-4 overflow-hidden rounded-xl border border-border bg-card">
+    <div className="wc-accent-card mx-4 mt-4">
       <div className="flex divide-x divide-border/60">
         <div className="flex flex-1 flex-col gap-0.5 px-4 py-3">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-wc-dark-gray">
             Points
           </span>
-          <span className="text-2xl font-black tabular-nums text-primary">{totalPoints}</span>
+          <span className="text-2xl font-black tabular-nums text-wc-red">{totalPoints}</span>
         </div>
         <div className="flex flex-1 flex-col gap-0.5 px-4 py-3">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -96,7 +94,7 @@ function GroupStageScoreSummary({ groups }: { groups: GroupPickemOverview[] }) {
       </div>
       <div className="h-1 bg-muted/50">
         <div
-          className="h-full bg-primary transition-all duration-700"
+          className="h-full bg-gradient-to-r from-wc-green to-wc-hermes transition-all duration-700"
           style={{ width: `${(scoredGroups.length / groups.length) * 100}%` }}
         />
       </div>
@@ -158,7 +156,7 @@ function SortableTeamRow({
       {/* Name */}
       <span
         className={cn(
-          'flex-1 truncate text-sm font-medium',
+          cn('flex-1 truncate text-sm', wcFontBody),
           isWrong && 'text-muted-foreground/70',
         )}
       >
@@ -232,14 +230,12 @@ function GroupCard({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border">
+    <div className="overflow-hidden rounded-2xl border border-wc-light-gray shadow-sm">
       <div
-        className="flex items-center justify-between px-3 py-2.5"
+        className="flex items-center justify-between px-3 py-2"
         style={{ backgroundColor: color }}
       >
-        <h3 className="text-sm font-black uppercase tracking-widest text-white">
-          {group.name}
-        </h3>
+        <h3 className="wc-group-card-title">{group.name}</h3>
         <div className="flex items-center gap-2">
           {scoredCount > 0 && (
             <span className="text-xs text-white/70">
@@ -275,39 +271,6 @@ function GroupCard({
 }
 
 // ── Bracket ───────────────────────────────────────────────────────────────────
-
-function resolveTeam(
-  directTeam: TeamInfo | null,
-  feedsFromSlotId: string | null,
-  bracketPicks: Record<string, string | null>,
-  teamById: Map<string, TeamInfo>,
-): TeamInfo | null {
-  if (directTeam) return directTeam;
-  if (!feedsFromSlotId) return null;
-  const winnerId = bracketPicks[feedsFromSlotId];
-  if (!winnerId) return null;
-  return teamById.get(winnerId) ?? null;
-}
-
-// For THIRD_FOURTH_POSITION: teams are the losers of the semi-finals.
-// Follow loserFeedsFromSlotId → find which team the user did NOT pick as winner.
-function resolveLoserTeam(
-  loserFeedsFromSlotId: string | null,
-  bracketPicks: Record<string, string | null>,
-  allSlots: BracketSlotPickemOverview[],
-  teamById: Map<string, TeamInfo>,
-): TeamInfo | null {
-  if (!loserFeedsFromSlotId) return null;
-  const feedSlot = allSlots.find((s) => s.slot_id === loserFeedsFromSlotId);
-  if (!feedSlot) return null;
-  const winnerId = bracketPicks[loserFeedsFromSlotId];
-  if (!winnerId) return null;
-  const home = resolveTeam(feedSlot.home_team, feedSlot.home_feeds_from_slot_id, bracketPicks, teamById);
-  const away = resolveTeam(feedSlot.away_team, feedSlot.away_feeds_from_slot_id, bracketPicks, teamById);
-  if (home?.id === winnerId) return away;
-  if (away?.id === winnerId) return home;
-  return null;
-}
 
 function BracketMatchCard({
   slot,
@@ -348,13 +311,6 @@ function BracketMatchCard({
     ? (homeTeam?.id === selectedId ? homeTeam?.name : awayTeam?.id === selectedId ? awayTeam?.name : null)
     : null;
 
-  function slotLabel(slotId: string | null, isLoser: boolean): string | null {
-    if (!slotId) return null;
-    const src = allSlots.find((s) => s.slot_id === slotId);
-    if (!src) return null;
-    return isLoser ? `L. M${src.slot_index + 1}` : `W. M${src.slot_index + 1}`;
-  }
-
   function TeamButton({
     team,
     feedsFrom,
@@ -371,7 +327,9 @@ function BracketMatchCard({
     const canPick = editable && !tbd;
 
     const placeholder =
-      slotLabel(loserFeedsFrom, true) ?? slotLabel(feedsFrom, false) ?? 'TBD';
+      slotFeedLabel(loserFeedsFrom, true, allSlots) ??
+      slotFeedLabel(feedsFrom, false, allSlots) ??
+      'TBD';
     const label = tbd ? placeholder : team.name;
 
     return (
@@ -409,7 +367,8 @@ function BracketMatchCard({
         }
         <span
           className={cn(
-            'text-center text-xs font-medium leading-tight',
+            'text-center text-sm uppercase leading-tight',
+            wcFontBody,
             tbd && 'text-muted-foreground/60',
             !isFinished && isSelected && 'text-primary',
             !isFinished && !isSelected && !tbd && 'text-foreground',
@@ -426,11 +385,11 @@ function BracketMatchCard({
   }
 
   return (
-    <div className="border-b border-border px-4 py-3">
-      <div className="mb-2 flex items-center justify-between">
+    <article className="crystal-pred-card">
+      <div className="mb-2.5 flex items-center justify-between">
         {/* Left: match number + score */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">M{slot.slot_index + 1}</span>
+          <span className="text-xs text-muted-foreground">{formatMatchLabel(slot.slot_index)}</span>
           {isFinished && slot.home_goals != null && slot.away_goals != null && (
             <span className="text-xs font-bold text-foreground tabular-nums">
               {slot.home_goals}–{slot.away_goals}
@@ -469,7 +428,7 @@ function BracketMatchCard({
           loserFeedsFrom={slot.away_loser_feeds_from_slot_id ?? null}
         />
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -498,7 +457,8 @@ function GroupSkeleton() {
 
 export default function PickemPage() {
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<'groups' | 'bracket'>('groups');
+  const [tab, setTab] = useState<PickemTab>('groups');
+  const [bracketView, setBracketView] = useState<BracketViewMode>('list');
 
   const overviewQuery = useQuery({
     queryKey: ['pickem-overview'],
@@ -566,17 +526,18 @@ export default function PickemPage() {
   const isLoading = overviewQuery.isLoading;
   const isError = overviewQuery.isError;
 
-  // Slots grouped by phase
-  const slotsByPhase = new Map<string, BracketSlotPickemOverview[]>();
-  if (overviewQuery.data) {
-    for (const slot of overviewQuery.data.bracket.slots) {
-      if (!slotsByPhase.has(slot.phase)) slotsByPhase.set(slot.phase, []);
-      slotsByPhase.get(slot.phase)!.push(slot);
-    }
-    for (const slots of slotsByPhase.values()) {
-      slots.sort((a, b) => a.slot_index - b.slot_index);
-    }
-  }
+  const slotsByPhase = useMemo(
+    () =>
+      overviewQuery.data
+        ? slotsByPhaseOrdered(overviewQuery.data.bracket.slots)
+        : new Map<BracketPhase, BracketSlotPickemOverview[]>(),
+    [overviewQuery.data],
+  );
+
+  const visiblePhases = useMemo(
+    (): BracketPhase[] => BRACKET_PHASE_ORDER.filter((phase) => slotsByPhase.has(phase)),
+    [slotsByPhase],
+  );
 
   const group_stage = overviewQuery.data?.group_stage;
   const bracket = overviewQuery.data?.bracket;
@@ -593,31 +554,16 @@ export default function PickemPage() {
 
   return (
     <div className="flex flex-col">
-      {/* Desktop header */}
-      <div className="hidden border-b border-border px-6 py-5 md:block">
-        <h1 className="text-xl font-bold">Pick'em</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Predict group standings and the knockout bracket
-        </p>
-      </div>
-
-      {/* Tab bar */}
-      <div className="flex border-b border-border">
-        {(['groups', 'bracket'] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={cn(
-              'flex-1 py-3 text-sm font-medium transition-colors',
-              tab === t
-                ? 'border-b-2 border-primary text-primary'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {t === 'groups' ? 'Group Stage' : 'Bracket'}
-          </button>
-        ))}
-      </div>
+      <PageChrome<PickemTab>
+        title="Pick'em"
+        description="Predict group standings and the knockout bracket"
+        tabs={[
+          { id: 'groups', label: 'Group Stage' },
+          { id: 'bracket', label: 'Bracket' },
+        ]}
+        active={tab}
+        onChange={setTab}
+      />
 
       {/* ── Group Stage Tab ── */}
       {tab === 'groups' && (
@@ -697,12 +643,7 @@ export default function PickemPage() {
                   <button
                     onClick={handleGroupSubmit}
                     disabled={groupMutation.isPending || groupPicks.length === 0}
-                    className={cn(
-                      'w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-opacity',
-                      groupMutation.isPending || groupPicks.length === 0
-                        ? 'opacity-60'
-                        : 'hover:opacity-90',
-                    )}
+                    className={wcBtnPrimaryFull}
                   >
                     {groupMutation.isPending
                       ? 'Saving…'
@@ -774,31 +715,74 @@ export default function PickemPage() {
                 )}
               </div>
 
-              {/* Slots by phase */}
-              {BRACKET_PHASE_ORDER.filter((phase) => slotsByPhase.has(phase)).map((phase) => (
-                <section key={phase}>
-                  <div className="sticky top-0 z-10 border-b border-border bg-muted/80 px-4 py-2 backdrop-blur">
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {PHASE_LABELS[phase]}
-                    </h2>
+              {bracket.slots.length > 0 && (
+                <div className="flex border-b border-wc-light-gray bg-white px-4 py-3">
+                  <div className="bracket-view-toggle">
+                    <button
+                      type="button"
+                      onClick={() => setBracketView('list')}
+                      className={cn(
+                        'bracket-view-toggle-btn inline-flex items-center gap-1.5',
+                        bracketView === 'list' && 'bracket-view-toggle-btn--active',
+                      )}
+                    >
+                      <List className="h-3.5 w-3.5" />
+                      Lista
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBracketView('tree')}
+                      className={cn(
+                        'bracket-view-toggle-btn inline-flex items-center gap-1.5',
+                        bracketView === 'tree' && 'bracket-view-toggle-btn--active',
+                      )}
+                    >
+                      <LayoutGrid className="h-3.5 w-3.5" />
+                      Bracket completo
+                    </button>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2">
-                    {(slotsByPhase.get(phase) ?? []).map((slot) => (
-                      <BracketMatchCard
-                        key={slot.slot_id}
-                        slot={slot}
-                        allSlots={bracket.slots}
-                        teamById={teamById}
-                        bracketPicks={bracketPicks}
-                        editable={bracket.editable}
-                        onChange={(teamId) =>
-                          setBracketPicks((prev) => ({ ...prev, [slot.slot_id]: teamId }))
-                        }
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))}
+                </div>
+              )}
+
+              {bracketView === 'tree' && bracket.slots.length > 0 && (
+                <BracketTreeView
+                  slots={bracket.slots}
+                  bracketPicks={bracketPicks}
+                  teamById={teamById}
+                  editable={bracket.editable}
+                  onChange={(slotId, teamId) =>
+                    setBracketPicks((prev) => ({ ...prev, [slotId]: teamId }))
+                  }
+                />
+              )}
+
+              {/* Slots by phase (list view) */}
+              {bracketView === 'list' && (
+                <div className="pickem-bracket-list mx-auto w-full max-w-5xl">
+                  {visiblePhases.map((phase) => (
+                    <section key={phase} className="w-full">
+                      <div className="sticky top-0 z-10 border-b border-wc-light-gray bg-white/90 px-4 py-2 backdrop-blur">
+                        <h2 className="wc-section-heading text-center">{PHASE_LABELS[phase]}</h2>
+                      </div>
+                      <div className="mx-auto grid w-full max-w-4xl grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+                        {(slotsByPhase.get(phase) ?? []).map((slot) => (
+                          <BracketMatchCard
+                            key={slot.slot_id}
+                            slot={slot}
+                            allSlots={bracket.slots}
+                            teamById={teamById}
+                            bracketPicks={bracketPicks}
+                            editable={bracket.editable}
+                            onChange={(teamId) =>
+                              setBracketPicks((prev) => ({ ...prev, [slot.slot_id]: teamId }))
+                            }
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              )}
 
               {bracket.slots.length === 0 && (
                 <p className="px-4 py-12 text-center text-sm text-muted-foreground">
@@ -812,10 +796,7 @@ export default function PickemPage() {
                   <button
                     onClick={handleBracketSubmit}
                     disabled={bracketMutation.isPending}
-                    className={cn(
-                      'w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-opacity',
-                      bracketMutation.isPending ? 'opacity-60' : 'hover:opacity-90',
-                    )}
+                    className={wcBtnPrimaryFull}
                   >
                     {bracketMutation.isPending
                       ? 'Saving…'

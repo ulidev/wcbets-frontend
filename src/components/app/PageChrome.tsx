@@ -22,25 +22,18 @@ export function PageChrome<T extends string>({
 }: PageChromeProps<T>) {
   return (
     <>
-      <div className="hidden border-b border-border px-6 py-5 md:block">
-        <h1 className="text-xl font-bold">{title}</h1>
-        {description && (
-          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
-        )}
+      <div className="hidden border-b border-wc-light-gray bg-gradient-to-r from-white to-[#f8f9fc] px-6 py-4 md:block">
+        <h1 className="wc-page-title">{title}</h1>
+        {description && <p className="wc-page-desc">{description}</p>}
       </div>
 
       {tabs && tabs.length > 0 && (
-        <div className="flex border-b border-border">
+        <div className="flex border-b border-wc-light-gray bg-white/80">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => onChange?.(tab.id)}
-              className={cn(
-                'flex-1 py-3 text-sm font-medium transition-colors',
-                active === tab.id
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
+              className={cn('wc-tab', active === tab.id && 'wc-tab-active')}
             >
               {tab.label}
             </button>

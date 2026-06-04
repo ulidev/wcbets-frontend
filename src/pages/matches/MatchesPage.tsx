@@ -12,6 +12,8 @@ import {
 } from '@/api/matches';
 import type { components } from '@/types/api';
 import { cn } from '@/lib/utils';
+import { wcBtnPrimaryFull, wcFontBody } from '@/lib/wc-ui';
+import { PageChrome } from '@/components/app/PageChrome';
 import { TeamFlag } from '@/components/app/TeamFlag';
 
 type Match = components['schemas']['MatchResponse'];
@@ -239,7 +241,7 @@ function MvpPickerSheet({
         <span className="w-7 shrink-0 text-center text-xs tabular-nums text-muted-foreground">
           #{player.dorsal_number}
         </span>
-        <span className="flex-1 truncate text-sm font-medium">{player.name}</span>
+        <span className={cn('flex-1 truncate text-sm uppercase', wcFontBody)}>{player.name}</span>
         <span
           className={cn(
             'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold',
@@ -287,7 +289,7 @@ function MvpPickerSheet({
       <div className="relative flex max-h-[75vh] flex-col rounded-t-2xl border border-border bg-background shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="text-sm font-bold">Select MVP</h2>
+          <h2 className="wc-section-heading text-base">Select MVP</h2>
           <button onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:text-foreground">
             <X className="h-4 w-4" />
           </button>
@@ -454,8 +456,9 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
           <TeamFlag teamName={homeTeam} size="lg" />
           <span
             className={cn(
-              'w-full truncate text-center text-xs font-medium',
-              homeWins && 'font-bold',
+              'w-full truncate text-center text-sm uppercase',
+              wcFontBody,
+              homeWins && 'text-wc-hermes',
             )}
           >
             {homeTeam}
@@ -487,8 +490,9 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
           <TeamFlag teamName={awayTeam} size="lg" />
           <span
             className={cn(
-              'w-full truncate text-center text-xs font-medium',
-              awayWins && 'font-bold',
+              'w-full truncate text-center text-sm uppercase',
+              wcFontBody,
+              awayWins && 'text-wc-hermes',
             )}
           >
             {awayTeam}
@@ -530,11 +534,8 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
             onClick={() => mutation.mutate()}
             disabled={!canSave || mutation.isPending}
             className={cn(
-              'w-full rounded-lg py-2 text-sm font-semibold transition-opacity',
-              prediction
-                ? 'bg-muted text-foreground hover:opacity-80'
-                : 'bg-primary text-primary-foreground hover:opacity-90',
-              (!canSave || mutation.isPending) && 'cursor-not-allowed opacity-50',
+              wcBtnPrimaryFull,
+              prediction && 'bg-wc-dark-gray shadow-none hover:bg-wc-dark-gray/90',
             )}
           >
             {mutation.isPending ? 'Saving…' : prediction ? 'Update Prediction' : 'Save Prediction'}
@@ -699,10 +700,8 @@ export default function MatchesPage() {
   function DaySection({ dateKey, matches }: DayGroup) {
     return (
       <section key={dateKey}>
-        <div className="sticky top-0 z-10 border-b border-border bg-muted/80 px-4 py-2 backdrop-blur">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            {formatDayHeader(dateKey)}
-          </h2>
+        <div className="sticky top-0 z-10 border-b border-wc-light-gray bg-white/90 px-4 py-2 backdrop-blur">
+          <h2 className="wc-day-heading">{formatDayHeader(dateKey)}</h2>
         </div>
         <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
           {matches.map((match) => {
@@ -725,13 +724,10 @@ export default function MatchesPage() {
 
   return (
     <div className="flex flex-col">
-      {/* Desktop header */}
-      <div className="hidden border-b border-border px-6 py-5 md:block">
-        <h1 className="text-xl font-bold">Matches</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Predict match scores for World Cup 2026
-        </p>
-      </div>
+      <PageChrome
+        title="Matches"
+        description="Predict match scores for World Cup 2026"
+      />
 
       {isLoading && (
         <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
