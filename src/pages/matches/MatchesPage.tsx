@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, Search, X } from 'lucide-react';
+import { AlertCircle, ChevronDown, Clock, Search, X } from 'lucide-react';
 import {
   fetchMatches,
   fetchTeams,
@@ -12,7 +12,7 @@ import {
 } from '@/api/matches';
 import type { components } from '@/types/api';
 import { cn } from '@/lib/utils';
-import { getFlagEmoji } from '@/lib/flags';
+import { TeamFlag } from '@/components/app/TeamFlag';
 
 type Match = components['schemas']['MatchResponse'];
 type Phase = components['schemas']['Phase'];
@@ -81,6 +81,43 @@ function StatusBadge({ status }: { status: Match['status'] }) {
     );
   }
   return null;
+}
+
+function getTimeRemaining(iso: string): { label: string; urgency: 'low' | 'medium' | 'high' } | null {
+  const diff = new Date(iso).getTime() - Date.now();
+  if (diff <= 0) return null;
+  const totalSeconds = Math.floor(diff / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  if (days > 0) return { label: `${days}d ${hours}h`, urgency: 'low' };
+  if (hours > 0) return { label: `${hours}h ${minutes}m`, urgency: 'medium' };
+  return { label: `${minutes}m`, urgency: 'high' };
+}
+
+function TimeRemaining({ scheduledAt }: { scheduledAt: string }) {
+  const [state, setState] = useState(() => getTimeRemaining(scheduledAt));
+
+  useEffect(() => {
+    const id = setInterval(() => setState(getTimeRemaining(scheduledAt)), 30_000);
+    return () => clearInterval(id);
+  }, [scheduledAt]);
+
+  if (!state) return null;
+
+  const colorClass =
+    state.urgency === 'high'
+      ? 'text-red-400'
+      : state.urgency === 'medium'
+        ? 'text-amber-400'
+        : 'text-muted-foreground';
+
+  return (
+    <span className={cn('flex items-center gap-1 text-xs font-medium', colorClass)}>
+      <Clock className="h-3 w-3" />
+      {state.label}
+    </span>
+  );
 }
 
 function ScoreInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -223,7 +260,7 @@ function MvpPickerSheet({
     return (
       <div>
         <div className="sticky top-0 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur">
-          <span className="text-lg leading-none">{getFlagEmoji(teamName)}</span>
+          <TeamFlag teamName={teamName} size="sm" />
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             {teamName}
           </span>
@@ -398,21 +435,23 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
         isLive && 'border-green-500/30',
       )}
     >
-      {/* Header: time + round label + status */}
+      {/* Header: time + round label + status / countdown */}
       <div className="flex items-center justify-between border-b border-border bg-muted/30 px-3 py-2">
         <span className="text-xs text-muted-foreground">
           {formatMatchTime(match.scheduled_at)} · {roundLabel}
         </span>
-        <StatusBadge status={match.status} />
+        {isEditable ? (
+          <TimeRemaining scheduledAt={match.scheduled_at} />
+        ) : (
+          <StatusBadge status={match.status} />
+        )}
       </div>
 
       {/* Teams + score area */}
       <div className="flex items-center gap-2 px-4 py-4">
         {/* Home team */}
         <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
-          <span className="text-2xl leading-none" aria-hidden>
-            {getFlagEmoji(homeTeam)}
-          </span>
+          <TeamFlag teamName={homeTeam} size="lg" />
           <span
             className={cn(
               'w-full truncate text-center text-xs font-medium',
@@ -445,9 +484,7 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
 
         {/* Away team */}
         <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
-          <span className="text-2xl leading-none" aria-hidden>
-            {getFlagEmoji(awayTeam)}
-          </span>
+          <TeamFlag teamName={awayTeam} size="lg" />
           <span
             className={cn(
               'w-full truncate text-center text-xs font-medium',
@@ -475,7 +512,7 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
             >
               {selectedPlayer ? (
                 <>
-                  <span className="leading-none">{getFlagEmoji(selectedPlayerTeam!)}</span>
+                  <TeamFlag teamName={selectedPlayerTeam!} size="sm" />
                   <span>#{selectedPlayer.dorsal_number} {selectedPlayer.name}</span>
                 </>
               ) : (
@@ -530,7 +567,7 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
                       : null;
                     return mvp ? (
                       <span className="ml-1">
-                        · MVP: {getFlagEmoji(mvpTeam!)} {mvp.name}
+                        · MVP: <TeamFlag teamName={mvpTeam!} size="sm" className="align-middle" /> {mvp.name}
                       </span>
                     ) : null;
                   })()}
@@ -617,6 +654,7 @@ export default function MatchesPage() {
   const teamsQuery = useQuery({ queryKey: ['teams'], queryFn: fetchTeams });
   const roundsQuery = useQuery({ queryKey: ['rounds'], queryFn: fetchRounds });
   const predictionsQuery = useQuery({ queryKey: ['my-predictions'], queryFn: fetchMyPredictions });
+  const [pastExpanded, setPastExpanded] = useState(false);
 
   const isLoading =
     matchesQuery.isLoading ||
@@ -632,7 +670,8 @@ export default function MatchesPage() {
 
   // Group matches by day in Europe/Madrid timezone, sorted chronologically
   type DayGroup = { dateKey: string; matches: Match[] };
-  const dayGroups: DayGroup[] = [];
+  const activeDayGroups: DayGroup[] = [];
+  const finishedDayGroups: DayGroup[] = [];
 
   if (!isLoading && !isError && matchesQuery.data) {
     const byDay = new Map<string, Match[]>();
@@ -645,8 +684,43 @@ export default function MatchesPage() {
       const matches = byDay
         .get(dateKey)!
         .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime());
-      dayGroups.push({ dateKey, matches });
+      const allFinished = matches.every((m) => m.status === 'FINISHED');
+      if (allFinished) {
+        finishedDayGroups.push({ dateKey, matches });
+      } else {
+        activeDayGroups.push({ dateKey, matches });
+      }
     }
+  }
+
+  const totalDayGroups = activeDayGroups.length + finishedDayGroups.length;
+  const finishedMatchCount = finishedDayGroups.reduce((n, g) => n + g.matches.length, 0);
+
+  function DaySection({ dateKey, matches }: DayGroup) {
+    return (
+      <section key={dateKey}>
+        <div className="sticky top-0 z-10 border-b border-border bg-muted/80 px-4 py-2 backdrop-blur">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            {formatDayHeader(dateKey)}
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+          {matches.map((match) => {
+            const round = roundMap.get(match.round_id);
+            return (
+              <PredictionCard
+                key={match.id}
+                match={match}
+                homeTeam={teamMap.get(match.home_team_id) ?? '—'}
+                awayTeam={teamMap.get(match.away_team_id) ?? '—'}
+                roundLabel={round ? getRoundLabel(round) : ''}
+                prediction={predictionMap.get(match.id)}
+              />
+            );
+          })}
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -675,38 +749,38 @@ export default function MatchesPage() {
         </div>
       )}
 
-      {!isLoading && !isError && dayGroups.length === 0 && (
+      {!isLoading && !isError && totalDayGroups === 0 && (
         <div className="px-4 py-20 text-center text-sm text-muted-foreground">
           No matches scheduled yet.
         </div>
       )}
 
-      {!isLoading &&
-        !isError &&
-        dayGroups.map(({ dateKey, matches }) => (
-          <section key={dateKey}>
-            <div className="sticky top-0 z-10 border-b border-border bg-muted/80 px-4 py-2 backdrop-blur">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                {formatDayHeader(dateKey)}
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
-              {matches.map((match) => {
-                const round = roundMap.get(match.round_id);
-                return (
-                  <PredictionCard
-                    key={match.id}
-                    match={match}
-                    homeTeam={teamMap.get(match.home_team_id) ?? '—'}
-                    awayTeam={teamMap.get(match.away_team_id) ?? '—'}
-                    roundLabel={round ? getRoundLabel(round) : ''}
-                    prediction={predictionMap.get(match.id)}
-                  />
-                );
-              })}
-            </div>
-          </section>
-        ))}
+      {!isLoading && !isError && finishedDayGroups.length > 0 && (
+        <div className="border-b border-border">
+          <button
+            onClick={() => setPastExpanded((v) => !v)}
+            className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-muted/30"
+          >
+            <span className="text-sm font-semibold text-muted-foreground">
+              Past results
+              <span className="ml-1.5 text-xs font-normal">({finishedMatchCount} matches)</span>
+            </span>
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 text-muted-foreground transition-transform duration-200',
+                pastExpanded && 'rotate-180',
+              )}
+            />
+          </button>
+          {pastExpanded && finishedDayGroups.map((group) => (
+            <DaySection key={group.dateKey} {...group} />
+          ))}
+        </div>
+      )}
+
+      {!isLoading && !isError && activeDayGroups.map((group) => (
+        <DaySection key={group.dateKey} {...group} />
+      ))}
     </div>
   );
 }

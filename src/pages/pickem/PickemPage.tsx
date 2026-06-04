@@ -17,15 +17,16 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { AlertCircle, CheckCircle2, GripVertical, Lock, Trophy, XCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, GripVertical, Info, Lock, Trophy, XCircle } from 'lucide-react';
 import { fetchPickemOverview, submitGroupStagePicks, submitBracketPicks } from '@/api/pickem';
 import { cn } from '@/lib/utils';
-import { getFlagEmoji } from '@/lib/flags';
+import { TeamFlag } from '@/components/app/TeamFlag';
 import type { components } from '@/types/api';
 
 type TeamPickemEntry = components['schemas']['TeamPickemEntry'];
 type BracketSlotPickemOverview = components['schemas']['BracketSlotPickemOverview'];
 type TeamInfo = components['schemas']['TeamInfo'];
+type GroupPickemOverview = components['schemas']['GroupPickemOverview'];
 
 const BRACKET_PHASE_ORDER = [
   'ROUND_OF_32',
@@ -44,6 +45,64 @@ const PHASE_LABELS: Record<string, string> = {
   THIRD_FOURTH_POSITION: 'Third Place Play-off',
   FINAL: 'Final',
 };
+
+// ── Group Stage — score summary ───────────────────────────────────────────────
+
+function GroupStageScoreSummary({ groups }: { groups: GroupPickemOverview[] }) {
+  const scoredGroups = groups.filter((g) => g.points_awarded != null);
+  if (scoredGroups.length === 0) return null;
+
+  const totalPoints = scoredGroups.reduce((sum, g) => sum + (g.points_awarded ?? 0), 0);
+  const { correct, scored } = groups.reduce(
+    (acc, g) => {
+      for (const t of g.teams) {
+        if (t.actual_position != null) {
+          acc.scored++;
+          if (t.actual_position === t.predicted_position) acc.correct++;
+        }
+      }
+      return acc;
+    },
+    { correct: 0, scored: 0 },
+  );
+
+  return (
+    <div className="mx-4 mt-4 overflow-hidden rounded-xl border border-border bg-card">
+      <div className="flex divide-x divide-border/60">
+        <div className="flex flex-1 flex-col gap-0.5 px-4 py-3">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Points
+          </span>
+          <span className="text-2xl font-black tabular-nums text-primary">{totalPoints}</span>
+        </div>
+        <div className="flex flex-1 flex-col gap-0.5 px-4 py-3">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Correct
+          </span>
+          <span className="text-2xl font-black tabular-nums text-foreground">
+            {correct}
+            <span className="text-sm font-medium text-muted-foreground">/{scored}</span>
+          </span>
+        </div>
+        <div className="flex flex-1 flex-col gap-0.5 px-4 py-3">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Groups
+          </span>
+          <span className="text-2xl font-black tabular-nums text-foreground">
+            {scoredGroups.length}
+            <span className="text-sm font-medium text-muted-foreground">/{groups.length}</span>
+          </span>
+        </div>
+      </div>
+      <div className="h-1 bg-muted/50">
+        <div
+          className="h-full bg-primary transition-all duration-700"
+          style={{ width: `${(scoredGroups.length / groups.length) * 100}%` }}
+        />
+      </div>
+    </div>
+  );
+}
 
 // ── Group Stage — sortable row ────────────────────────────────────────────────
 
@@ -76,41 +135,47 @@ function SortableTeamRow({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'flex items-center gap-3 bg-card px-3 py-2.5 select-none',
+        'flex items-center gap-2.5 bg-card px-3 py-2.5 select-none',
         isDragging && 'opacity-50 shadow-lg rounded-md',
-        hasResult && isCorrect && 'bg-green-500/5',
-        hasResult && isWrong && 'bg-muted/30',
+        isCorrect && 'bg-green-500/10',
       )}
     >
-      {/* Predicted position */}
-      <span className={cn(
-        'w-5 shrink-0 text-center text-xs font-bold',
-        hasResult && isCorrect ? 'text-green-500' : 'text-muted-foreground',
-        hasResult && isWrong && 'text-muted-foreground/50',
-      )}>
+      {/* Position */}
+      <span
+        className={cn(
+          'w-5 shrink-0 text-center text-xs font-bold tabular-nums',
+          !hasResult && 'text-muted-foreground',
+          isCorrect && 'text-green-500',
+          isWrong && 'text-muted-foreground/30',
+        )}
+      >
         {position}
       </span>
 
       {/* Flag */}
-      <span className="text-xl leading-none" aria-hidden>
-        {getFlagEmoji(team.name)}
-      </span>
+      <TeamFlag teamName={team.name} size="md" />
 
       {/* Name */}
-      <span className={cn(
-        'flex-1 truncate text-sm font-medium',
-        hasResult && isWrong && 'text-muted-foreground',
-      )}>{team.name}</span>
+      <span
+        className={cn(
+          'flex-1 truncate text-sm font-medium',
+          isWrong && 'text-muted-foreground/70',
+        )}
+      >
+        {team.name}
+      </span>
 
-      {/* Actual position badge / drag handle */}
+      {/* Right: result feedback or drag handle */}
       {hasResult ? (
-        <span className={cn(
-          'shrink-0 text-xs font-bold tabular-nums',
-          isCorrect ? 'text-green-500' : 'text-muted-foreground/60',
-        )}>
-          {isCorrect ? '✓' : `→${team.actual_position}`}
-        </span>
-      ) : !disabled && (
+        isCorrect ? (
+          <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+        ) : (
+          <span className="flex shrink-0 items-center gap-1 text-xs tabular-nums">
+            <span className="text-muted-foreground/40 line-through">#{position}</span>
+            <span className="font-bold text-muted-foreground">→ #{team.actual_position}</span>
+          </span>
+        )
+      ) : !disabled ? (
         <button
           {...attributes}
           {...listeners}
@@ -119,23 +184,31 @@ function SortableTeamRow({
         >
           <GripVertical className="h-4 w-4" />
         </button>
-      )}
+      ) : null}
     </div>
   );
 }
 
 // ── Group Stage — card ────────────────────────────────────────────────────────
 
+const GROUP_HEADER_COLORS = [
+  '#3CAC3B', '#E61D25', '#F58220', '#2A398D',
+  '#7B2D8E', '#9ACD32', '#E91E8C', '#00ACC1',
+  '#AB47BC', '#00897B', '#FF5722', '#29B6F6',
+] as const;
+
 type GroupState = { group_id: string; name: string; teams: TeamPickemEntry[] };
 
 function GroupCard({
   group,
   editable,
+  color,
   pointsAwarded,
   onChange,
 }: {
   group: GroupState;
   editable: boolean;
+  color: string;
   pointsAwarded?: number | null;
   onChange: (teams: TeamPickemEntry[]) => void;
 }) {
@@ -143,6 +216,11 @@ function GroupCard({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
+
+  const scoredCount = group.teams.filter((t) => t.actual_position != null).length;
+  const correctCount = group.teams.filter(
+    (t) => t.actual_position != null && t.actual_position === t.predicted_position,
+  ).length;
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -155,18 +233,25 @@ function GroupCard({
 
   return (
     <div className="overflow-hidden rounded-lg border border-border">
-      <div className="flex items-center justify-between border-b border-border bg-muted/50 px-3 py-2">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+      <div
+        className="flex items-center justify-between px-3 py-2.5"
+        style={{ backgroundColor: color }}
+      >
+        <h3 className="text-sm font-black uppercase tracking-widest text-white">
           {group.name}
         </h3>
-        {pointsAwarded != null && (
-          <span className={cn(
-            'text-xs font-bold tabular-nums',
-            pointsAwarded > 0 ? 'text-primary' : 'text-muted-foreground/60',
-          )}>
-            {pointsAwarded > 0 ? `+${pointsAwarded}` : '0'} pts
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {scoredCount > 0 && (
+            <span className="text-xs text-white/70">
+              {correctCount}/{scoredCount}✓
+            </span>
+          )}
+          {pointsAwarded != null && (
+            <span className="rounded-full bg-black/25 px-2 py-0.5 text-xs font-bold tabular-nums text-white">
+              +{pointsAwarded} pts
+            </span>
+          )}
+        </div>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext
@@ -318,9 +403,10 @@ function BracketMatchCard({
         {isActualWinner && (
           <Trophy className="absolute -top-2 left-1/2 h-3.5 w-3.5 -translate-x-1/2 text-amber-400" />
         )}
-        <span className="text-2xl leading-none" aria-hidden>
-          {tbd ? '❓' : getFlagEmoji(team.name)}
-        </span>
+        {tbd
+          ? <span className="text-2xl leading-none" aria-hidden>❓</span>
+          : <TeamFlag teamName={team.name} size="lg" />
+        }
         <span
           className={cn(
             'text-center text-xs font-medium leading-tight',
@@ -556,34 +642,44 @@ export default function PickemPage() {
                     Group Stage Pick'em is not available yet.
                   </div>
                 )}
-                {group_stage.is_available && group_stage.has_submitted && !group_stage.editable && (
-                  <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-500">
+                {group_stage.is_available && !group_stage.editable && group_stage.has_submitted && (
+                  <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-600">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
                     Your Group Stage picks are locked in.
                   </div>
                 )}
-                {group_stage.is_available && group_stage.has_submitted && group_stage.editable && (
-                  <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
+                {group_stage.is_available && !group_stage.editable && !group_stage.has_submitted && (
+                  <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                    <XCircle className="h-4 w-4 shrink-0" />
+                    Deadline passed — you didn't submit any picks for this round.
+                  </div>
+                )}
+                {group_stage.is_available && group_stage.editable && group_stage.has_submitted && (
+                  <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-600">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
                     Picks submitted — you can still update them before the deadline.
                   </div>
                 )}
-                {group_stage.is_available && !group_stage.has_submitted && group_stage.editable && (
-                  <p className="text-xs text-muted-foreground">
-                    Drag teams into your predicted finishing order for each group.
-                  </p>
+                {group_stage.is_available && group_stage.editable && !group_stage.has_submitted && (
+                  <div className="flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent">
+                    <Info className="h-4 w-4 shrink-0" />
+                    No picks yet — drag teams into your predicted finishing order for each group.
+                  </div>
                 )}
               </div>
 
+              <GroupStageScoreSummary groups={group_stage.groups} />
+
               {/* Responsive group grid */}
               <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {groupPicks.map((group) => {
+                {groupPicks.map((group, idx) => {
                   const overview = group_stage.groups.find((g) => g.group_id === group.group_id);
                   return (
                     <GroupCard
                       key={group.group_id}
                       group={group}
                       editable={group_stage.editable}
+                      color={GROUP_HEADER_COLORS[idx % GROUP_HEADER_COLORS.length]}
                       pointsAwarded={overview?.points_awarded}
                       onChange={(teams) =>
                         setGroupPicks((prev) =>
@@ -645,29 +741,36 @@ export default function PickemPage() {
           {!isLoading && !isError && bracket && (
             <>
               {/* Status banners */}
-              <div className="px-4 pt-4 pb-0">
+              <div className="px-4 pt-4 pb-4">
                 {!bracket.is_available && (
                   <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
                     <Lock className="h-4 w-4 shrink-0" />
                     Bracket Pick'em is not available yet.
                   </div>
                 )}
-                {bracket.is_available && bracket.has_submitted && !bracket.editable && (
-                  <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-500">
+                {bracket.is_available && !bracket.editable && bracket.has_submitted && (
+                  <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-600">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
                     Your Bracket picks are locked in.
                   </div>
                 )}
-                {bracket.is_available && bracket.has_submitted && bracket.editable && (
-                  <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
+                {bracket.is_available && !bracket.editable && !bracket.has_submitted && (
+                  <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                    <XCircle className="h-4 w-4 shrink-0" />
+                    Deadline passed — you didn't submit a bracket for this round.
+                  </div>
+                )}
+                {bracket.is_available && bracket.editable && bracket.has_submitted && (
+                  <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-600">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
                     Picks submitted — you can still update them before the deadline.
                   </div>
                 )}
-                {bracket.is_available && !bracket.has_submitted && bracket.editable && (
-                  <p className="text-xs text-muted-foreground">
-                    Pick the winner of each knockout match across every round.
-                  </p>
+                {bracket.is_available && bracket.editable && !bracket.has_submitted && (
+                  <div className="flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent">
+                    <Info className="h-4 w-4 shrink-0" />
+                    No picks yet — pick the winner of each knockout match across every round.
+                  </div>
                 )}
               </div>
 

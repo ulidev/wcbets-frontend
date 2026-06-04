@@ -33,7 +33,7 @@ export default function PendingApprovalPage() {
       {user && (
         <p className="mt-4 text-sm font-medium">
           Signed in as{' '}
-          <span className="text-primary">
+          <span className="font-semibold text-wc-hermes">
             {user.first_name} {user.last_name}
           </span>
         </p>

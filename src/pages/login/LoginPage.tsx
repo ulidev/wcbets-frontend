@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import { WcLogo } from '@/components/app/WcLogo';
+import { AppLogo } from '@/components/app/AppLogo';
 
 export default function LoginPage() {
   const { user, isLoading: authLoading, login } = useAuth();
@@ -39,7 +39,7 @@ export default function LoginPage() {
         {/* Brand */}
         <div className="mb-8 text-center">
           <div className="mb-3 flex justify-center">
-            <WcLogo size={64} className="text-primary" />
+            <AppLogo size={72} />
           </div>
           <h1 className="text-2xl font-bold">WC Bets</h1>
           <p className="mt-1 text-sm text-muted-foreground">FIFA World Cup 2026 Predictions</p>
@@ -102,7 +102,7 @@ export default function LoginPage() {
 
           <p className="mt-5 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{' '}
-            <Link to="/register" className="font-medium text-primary">
+            <Link to="/register" className="font-medium text-wc-red hover:underline">
               Register
             </Link>
           </p>

@@ -315,6 +315,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/tournament/players": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List All Players */
+        get: operations["list_all_players_api_v1_tournament_players_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/tournament/groups": {
         parameters: {
             query?: never;
@@ -365,23 +382,6 @@ export interface paths {
         head?: never;
         /** Set Final Standings */
         patch: operations["set_final_standings_api_v1_tournament_groups__group_id__standings_patch"];
-        trace?: never;
-    };
-    "/api/v1/tournament/groups/{group_id}/score": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Score Group Stage Pickem */
-        post: operations["score_group_stage_pickem_api_v1_tournament_groups__group_id__score_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/api/v1/tournament/matches": {
@@ -1190,6 +1190,11 @@ export interface components {
             max_selections: number;
             /** Points Value */
             points_value: number;
+            /**
+             * Label
+             * @default
+             */
+            label: string;
             /** Scope */
             scope?: string | null;
         };
@@ -1242,6 +1247,8 @@ export interface components {
         CreateTeamRequest: {
             /** Name */
             name: string;
+            /** Confederation */
+            confederation?: string | null;
         };
         /** CrystalBallAnswerRequest */
         CrystalBallAnswerRequest: {
@@ -1322,6 +1329,8 @@ export interface components {
             max_selections: number;
             /** Points Value */
             points_value: number;
+            /** Label */
+            label: string;
             /** Scope */
             scope: string | null;
         };
@@ -1455,6 +1464,8 @@ export interface components {
         GroupStagePickemStatus: {
             /** Is Available */
             is_available: boolean;
+            /** Is Finished */
+            is_finished: boolean;
             /** Editable */
             editable: boolean;
             /** Has Submitted */
@@ -1479,8 +1490,6 @@ export interface components {
              * Format: uuid
              */
             group_id: string;
-            /** Points Awarded */
-            points_awarded: number;
             /** Entries */
             entries: components["schemas"]["GroupPickEntryResponse"][];
         };
@@ -1496,8 +1505,6 @@ export interface components {
              * Format: uuid
              */
             group_id: string;
-            /** Points Awarded */
-            points_awarded: number;
             /** Entries */
             entries: components["schemas"]["GroupPickEntryResponse"][];
         };
@@ -1804,10 +1811,14 @@ export interface components {
             match_exact_bonus: number;
             /** Match Mvp Pts */
             match_mvp_pts: number;
-            /** Group Stage Correct Pts */
-            group_stage_correct_pts: number;
-            /** Group Stage Perfect Bonus */
-            group_stage_perfect_bonus: number;
+            /** Group Stage Pts 1 Correct */
+            group_stage_pts_1_correct: number;
+            /** Group Stage Pts 2 Correct */
+            group_stage_pts_2_correct: number;
+            /** Group Stage Pts 3 Correct */
+            group_stage_pts_3_correct: number;
+            /** Group Stage Pts 4 Correct */
+            group_stage_pts_4_correct: number;
             /** Bracket Base Pts */
             bracket_base_pts: number;
         };
@@ -1901,6 +1912,8 @@ export interface components {
             id: string;
             /** Name */
             name: string;
+            /** Confederation */
+            confederation: string | null;
         };
         /** TokenResponse */
         TokenResponse: {
@@ -1941,10 +1954,14 @@ export interface components {
             match_exact_bonus: number;
             /** Match Mvp Pts */
             match_mvp_pts: number;
-            /** Group Stage Correct Pts */
-            group_stage_correct_pts: number;
-            /** Group Stage Perfect Bonus */
-            group_stage_perfect_bonus: number;
+            /** Group Stage Pts 1 Correct */
+            group_stage_pts_1_correct: number;
+            /** Group Stage Pts 2 Correct */
+            group_stage_pts_2_correct: number;
+            /** Group Stage Pts 3 Correct */
+            group_stage_pts_3_correct: number;
+            /** Group Stage Pts 4 Correct */
+            group_stage_pts_4_correct: number;
             /** Bracket Base Pts */
             bracket_base_pts: number;
         };
@@ -2345,7 +2362,9 @@ export interface operations {
     };
     list_teams_api_v1_tournament_teams_get: {
         parameters: {
-            query?: never;
+            query?: {
+                confederation?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -2359,6 +2378,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TeamResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -2669,6 +2697,38 @@ export interface operations {
             };
         };
     };
+    list_all_players_api_v1_tournament_players_get: {
+        parameters: {
+            query?: {
+                team_id?: string | null;
+                search?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlayerResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_groups_api_v1_tournament_groups_get: {
         parameters: {
             query?: never;
@@ -2776,39 +2836,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    score_group_stage_pickem_api_v1_tournament_groups__group_id__score_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                group_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
             };
             /** @description Validation Error */
             422: {

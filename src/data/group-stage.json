@@ -1,0 +1,124 @@
+{
+  "groups": [
+    {
+      "letter": "A",
+      "color": "#3CAC3B",
+      "teams": [
+        { "id": "mexico", "name": "Mexico" },
+        { "id": "south-africa", "name": "South Africa" },
+        { "id": "korea-republic", "name": "Korea Republic" },
+        { "id": "czechia", "name": "Czechia" }
+      ]
+    },
+    {
+      "letter": "B",
+      "color": "#E61D25",
+      "teams": [
+        { "id": "canada", "name": "Canada" },
+        { "id": "bosnia", "name": "Bosnia and Herzegovina" },
+        { "id": "qatar", "name": "Qatar" },
+        { "id": "switzerland", "name": "Switzerland" }
+      ]
+    },
+    {
+      "letter": "C",
+      "color": "#F58220",
+      "teams": [
+        { "id": "brazil", "name": "Brazil" },
+        { "id": "morocco", "name": "Morocco" },
+        { "id": "haiti", "name": "Haiti" },
+        { "id": "scotland", "name": "Scotland" }
+      ]
+    },
+    {
+      "letter": "D",
+      "color": "#2A398D",
+      "teams": [
+        { "id": "usa", "name": "USA" },
+        { "id": "paraguay", "name": "Paraguay" },
+        { "id": "australia", "name": "Australia" },
+        { "id": "turkiye", "name": "Türkiye" }
+      ]
+    },
+    {
+      "letter": "E",
+      "color": "#7B2D8E",
+      "teams": [
+        { "id": "germany", "name": "Germany" },
+        { "id": "curacao", "name": "Curaçao" },
+        { "id": "ivory-coast", "name": "Côte d'Ivoire" },
+        { "id": "ecuador", "name": "Ecuador" }
+      ]
+    },
+    {
+      "letter": "F",
+      "color": "#9ACD32",
+      "teams": [
+        { "id": "netherlands", "name": "Netherlands" },
+        { "id": "japan", "name": "Japan" },
+        { "id": "sweden", "name": "Sweden" },
+        { "id": "tunisia", "name": "Tunisia" }
+      ]
+    },
+    {
+      "letter": "G",
+      "color": "#E91E8C",
+      "teams": [
+        { "id": "belgium", "name": "Belgium" },
+        { "id": "egypt", "name": "Egypt" },
+        { "id": "iran", "name": "IR Iran" },
+        { "id": "new-zealand", "name": "New Zealand" }
+      ]
+    },
+    {
+      "letter": "H",
+      "color": "#00ACC1",
+      "teams": [
+        { "id": "spain", "name": "Spain" },
+        { "id": "cabo-verde", "name": "Cabo Verde" },
+        { "id": "saudi-arabia", "name": "Saudi Arabia" },
+        { "id": "uruguay", "name": "Uruguay" }
+      ]
+    },
+    {
+      "letter": "I",
+      "color": "#AB47BC",
+      "teams": [
+        { "id": "france", "name": "France" },
+        { "id": "senegal", "name": "Senegal" },
+        { "id": "iraq", "name": "Iraq" },
+        { "id": "norway", "name": "Norway" }
+      ]
+    },
+    {
+      "letter": "J",
+      "color": "#00897B",
+      "teams": [
+        { "id": "argentina", "name": "Argentina" },
+        { "id": "algeria", "name": "Algeria" },
+        { "id": "austria", "name": "Austria" },
+        { "id": "jordan", "name": "Jordan" }
+      ]
+    },
+    {
+      "letter": "K",
+      "color": "#FF5722",
+      "teams": [
+        { "id": "portugal", "name": "Portugal" },
+        { "id": "congo-dr", "name": "Congo DR" },
+        { "id": "uzbekistan", "name": "Uzbekistan" },
+        { "id": "colombia", "name": "Colombia" }
+      ]
+    },
+    {
+      "letter": "L",
+      "color": "#29B6F6",
+      "teams": [
+        { "id": "england", "name": "England" },
+        { "id": "croatia", "name": "Croatia" },
+        { "id": "ghana", "name": "Ghana" },
+        { "id": "panama", "name": "Panama" }
+      ]
+    }
+  ]
+}

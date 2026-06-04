@@ -9,14 +9,7 @@ import LeaderboardPage from '@/pages/leaderboard/LeaderboardPage';
 import MatchesPage from '@/pages/matches/MatchesPage';
 import PickemPage from '@/pages/pickem/PickemPage';
 import ProfilePage from '@/pages/profile/ProfilePage';
-
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div className="flex h-full items-center justify-center py-24 text-muted-foreground">
-      <p className="text-sm">{title} — coming soon</p>
-    </div>
-  );
-}
+import CrystalBallPage from '@/pages/crystal-ball/CrystalBallPage';
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -40,7 +33,7 @@ const router = createBrowserRouter([
               { path: '/leaderboard', element: <LeaderboardPage /> },
               { path: '/matches', element: <MatchesPage /> },
               { path: '/pickem', element: <PickemPage /> },
-              { path: '/crystal-ball', element: <ComingSoon title="Crystal Ball" /> },
+              { path: '/crystal-ball', element: <CrystalBallPage /> },
               { path: '/profile', element: <ProfilePage /> },
             ],
           },

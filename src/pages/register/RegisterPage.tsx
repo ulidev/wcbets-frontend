@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { register } from '@/api/auth';
 import { cn } from '@/lib/utils';
-import { WcLogo } from '@/components/app/WcLogo';
+import { AppLogo } from '@/components/app/AppLogo';
 
 export default function RegisterPage() {
   const { user, isLoading: authLoading, login } = useAuth();
@@ -45,7 +45,7 @@ export default function RegisterPage() {
         {/* Brand */}
         <div className="mb-8 text-center">
           <div className="mb-3 flex justify-center">
-            <WcLogo size={64} className="text-primary" />
+            <AppLogo size={72} />
           </div>
           <h1 className="text-2xl font-bold">WC Bets</h1>
           <p className="mt-1 text-sm text-muted-foreground">FIFA World Cup 2026 Predictions</p>

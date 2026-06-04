@@ -56,26 +56,24 @@ const COUNTRY_CODES: Record<string, string> = {
   'New Zealand': 'NZ', Fiji: 'FJ', 'Papua New Guinea': 'PG',
   Samoa: 'WS', Tonga: 'TO', Vanuatu: 'VU',
 
-  // Other
-  Israel: 'IL', Kosovo: 'XK',
+  Curaçao: 'CW',
+  'Cabo Verde': 'CV',
+  'Congo DR': 'CD',
+  'IR Iran': 'IR',
 };
 
-// Nations that need tag-sequence emoji (Celtic nations)
-const SPECIAL_FLAGS: Record<string, string> = {
-  England: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-  Scotland: '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-  Wales: '🏴󠁧󠁢󠁷󠁬󠁳󠁿',
+// Celtic nations use subdivision codes on flagcdn.com
+const SPECIAL_CODES: Record<string, string> = {
+  England: 'gb-eng',
+  Scotland: 'gb-sct',
+  Wales: 'gb-wls',
 };
 
-function codeToEmoji(code: string): string {
-  return [...code.toUpperCase()]
-    .map((c) => String.fromCodePoint(c.codePointAt(0)! + 127397))
-    .join('');
-}
-
-export function getFlagEmoji(teamName: string): string {
-  if (teamName in SPECIAL_FLAGS) return SPECIAL_FLAGS[teamName];
+export function getFlagUrl(teamName: string): string | null {
+  if (teamName in SPECIAL_CODES) {
+    return `https://flagcdn.com/w40/${SPECIAL_CODES[teamName]}.png`;
+  }
   const code = COUNTRY_CODES[teamName];
-  if (!code) return '🏳️';
-  return codeToEmoji(code);
+  if (!code) return null;
+  return `https://flagcdn.com/w40/${code.toLowerCase()}.png`;
 }

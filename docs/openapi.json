@@ -440,49 +440,26 @@
       }
     },
     "/api/v1/tournament/teams": {
-      "get": {
-        "tags": [
-          "tournament"
-        ],
-        "summary": "List Teams",
-        "operationId": "list_teams_api_v1_tournament_teams_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/TeamResponse"
-                  },
-                  "type": "array",
-                  "title": "Response List Teams Api V1 Tournament Teams Get"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ]
-      },
       "post": {
         "tags": [
           "tournament"
         ],
         "summary": "Create Team",
         "operationId": "create_team_api_v1_tournament_teams_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateTeamRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "201": {
@@ -505,12 +482,63 @@
               }
             }
           }
-        },
+        }
+      },
+      "get": {
+        "tags": [
+          "tournament"
+        ],
+        "summary": "List Teams",
+        "operationId": "list_teams_api_v1_tournament_teams_get",
         "security": [
           {
             "HTTPBearer": []
           }
-        ]
+        ],
+        "parameters": [
+          {
+            "name": "confederation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Confederation"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamResponse"
+                  },
+                  "title": "Response List Teams Api V1 Tournament Teams Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/tournament/stadiums": {
@@ -919,6 +947,82 @@
         }
       }
     },
+    "/api/v1/tournament/players": {
+      "get": {
+        "tags": [
+          "players"
+        ],
+        "summary": "List All Players",
+        "operationId": "list_all_players_api_v1_tournament_players_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Team Id"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 2
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerResponse"
+                  },
+                  "title": "Response List All Players Api V1 Tournament Players Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/tournament/groups": {
       "get": {
         "tags": [
@@ -1081,56 +1185,6 @@
         "responses": {
           "204": {
             "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/tournament/groups/{group_id}/score": {
-      "post": {
-        "tags": [
-          "groups"
-        ],
-        "summary": "Score Group Stage Pickem",
-        "operationId": "score_group_stage_pickem_api_v1_tournament_groups__group_id__score_post",
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "group_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Group Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Score Group Stage Pickem Api V1 Tournament Groups  Group Id  Score Post"
-                }
-              }
-            }
           },
           "422": {
             "description": "Validation Error",
@@ -3654,6 +3708,11 @@
             "minimum": 0.0,
             "title": "Points Value"
           },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "default": ""
+          },
           "scope": {
             "anyOf": [
               {
@@ -3794,6 +3853,17 @@
           "name": {
             "type": "string",
             "title": "Name"
+          },
+          "confederation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confederation"
           }
         },
         "type": "object",
@@ -4004,6 +4074,10 @@
             "type": "integer",
             "title": "Points Value"
           },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
           "scope": {
             "anyOf": [
               {
@@ -4023,6 +4097,7 @@
           "answer_type",
           "max_selections",
           "points_value",
+          "label",
           "scope"
         ],
         "title": "CrystalBallQuestionResponse"
@@ -4337,6 +4412,10 @@
             "type": "boolean",
             "title": "Is Available"
           },
+          "is_finished": {
+            "type": "boolean",
+            "title": "Is Finished"
+          },
           "editable": {
             "type": "boolean",
             "title": "Editable"
@@ -4356,6 +4435,7 @@
         "type": "object",
         "required": [
           "is_available",
+          "is_finished",
           "editable",
           "has_submitted",
           "groups"
@@ -4379,10 +4459,6 @@
             "format": "uuid",
             "title": "Group Id"
           },
-          "points_awarded": {
-            "type": "integer",
-            "title": "Points Awarded"
-          },
           "entries": {
             "items": {
               "$ref": "#/components/schemas/GroupPickEntryResponse"
@@ -4396,7 +4472,6 @@
           "id",
           "user_id",
           "group_id",
-          "points_awarded",
           "entries"
         ],
         "title": "GroupStagePredictionPublicResponse"
@@ -4413,10 +4488,6 @@
             "format": "uuid",
             "title": "Group Id"
           },
-          "points_awarded": {
-            "type": "integer",
-            "title": "Points Awarded"
-          },
           "entries": {
             "items": {
               "$ref": "#/components/schemas/GroupPickEntryResponse"
@@ -4429,7 +4500,6 @@
         "required": [
           "id",
           "group_id",
-          "points_awarded",
           "entries"
         ],
         "title": "GroupStagePredictionResponse"
@@ -5068,13 +5138,21 @@
             "type": "integer",
             "title": "Match Mvp Pts"
           },
-          "group_stage_correct_pts": {
+          "group_stage_pts_1_correct": {
             "type": "integer",
-            "title": "Group Stage Correct Pts"
+            "title": "Group Stage Pts 1 Correct"
           },
-          "group_stage_perfect_bonus": {
+          "group_stage_pts_2_correct": {
             "type": "integer",
-            "title": "Group Stage Perfect Bonus"
+            "title": "Group Stage Pts 2 Correct"
+          },
+          "group_stage_pts_3_correct": {
+            "type": "integer",
+            "title": "Group Stage Pts 3 Correct"
+          },
+          "group_stage_pts_4_correct": {
+            "type": "integer",
+            "title": "Group Stage Pts 4 Correct"
           },
           "bracket_base_pts": {
             "type": "integer",
@@ -5087,8 +5165,10 @@
           "match_direction_pts",
           "match_exact_bonus",
           "match_mvp_pts",
-          "group_stage_correct_pts",
-          "group_stage_perfect_bonus",
+          "group_stage_pts_1_correct",
+          "group_stage_pts_2_correct",
+          "group_stage_pts_3_correct",
+          "group_stage_pts_4_correct",
           "bracket_base_pts"
         ],
         "title": "ScoringConfigResponse"
@@ -5319,12 +5399,24 @@
           "name": {
             "type": "string",
             "title": "Name"
+          },
+          "confederation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confederation"
           }
         },
         "type": "object",
         "required": [
           "id",
-          "name"
+          "name",
+          "confederation"
         ],
         "title": "TeamResponse"
       },
@@ -5418,13 +5510,21 @@
             "type": "integer",
             "title": "Match Mvp Pts"
           },
-          "group_stage_correct_pts": {
+          "group_stage_pts_1_correct": {
             "type": "integer",
-            "title": "Group Stage Correct Pts"
+            "title": "Group Stage Pts 1 Correct"
           },
-          "group_stage_perfect_bonus": {
+          "group_stage_pts_2_correct": {
             "type": "integer",
-            "title": "Group Stage Perfect Bonus"
+            "title": "Group Stage Pts 2 Correct"
+          },
+          "group_stage_pts_3_correct": {
+            "type": "integer",
+            "title": "Group Stage Pts 3 Correct"
+          },
+          "group_stage_pts_4_correct": {
+            "type": "integer",
+            "title": "Group Stage Pts 4 Correct"
           },
           "bracket_base_pts": {
             "type": "integer",
@@ -5436,8 +5536,10 @@
           "match_direction_pts",
           "match_exact_bonus",
           "match_mvp_pts",
-          "group_stage_correct_pts",
-          "group_stage_perfect_bonus",
+          "group_stage_pts_1_correct",
+          "group_stage_pts_2_correct",
+          "group_stage_pts_3_correct",
+          "group_stage_pts_4_correct",
           "bracket_base_pts"
         ],
         "title": "UpdateScoringConfigRequest"

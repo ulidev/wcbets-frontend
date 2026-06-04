@@ -9,6 +9,7 @@ import {
 import type { components } from '@/types/api';
 import { useAuth } from '@/hooks/useAuth';
 import { cn, getInitials, getAvatarColor } from '@/lib/utils';
+import { PageChrome } from '@/components/app/PageChrome';
 
 type LeaderboardEntry = components['schemas']['LeaderboardEntryResponse'];
 
@@ -29,9 +30,9 @@ function addRanks(entries: LeaderboardEntry[]) {
 }
 
 const MEDAL_STYLES: Record<number, string> = {
-  1: 'text-yellow-400 font-bold',
-  2: 'text-slate-300 font-bold',
-  3: 'text-amber-500 font-bold',
+  1: 'text-amber-400 font-bold',
+  2: 'text-slate-400 font-bold',
+  3: 'text-orange-500 font-bold',
 };
 
 function EntryRow({
@@ -46,8 +47,8 @@ function EntryRow({
   return (
     <div
       className={cn(
-        'flex items-center gap-4 border-b border-border px-4 py-3 transition-colors',
-        isCurrentUser ? 'bg-primary/5' : 'hover:bg-muted/30',
+        'flex items-center gap-4 border-b border-border px-4 py-3 transition-colors last:border-b-0',
+        isCurrentUser ? 'bg-primary/5' : 'hover:bg-muted/40',
       )}
     >
       {/* Rank */}
@@ -92,13 +93,13 @@ function SkeletonRows() {
   return (
     <>
       {Array.from({ length: 8 }, (_, i) => (
-        <div key={i} className="flex items-center gap-4 border-b border-border px-4 py-3">
-          <div className="h-4 w-7 animate-pulse rounded bg-muted" />
-          <div className="h-9 w-9 animate-pulse rounded-full bg-muted" />
+        <div key={i} className="flex items-center gap-4 border-b border-border px-4 py-3 last:border-b-0">
+          <div className="h-4 w-7 animate-pulse rounded bg-muted/60" />
+          <div className="h-9 w-9 animate-pulse rounded-full bg-muted/60" />
           <div className="flex-1 space-y-2">
-            <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-32 animate-pulse rounded bg-muted/60" />
           </div>
-          <div className="h-4 w-12 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-12 animate-pulse rounded bg-muted/60" />
         </div>
       ))}
     </>
@@ -124,38 +125,24 @@ export default function LeaderboardPage() {
 
   return (
     <div className="flex flex-col">
-      {/* Desktop page header */}
-      <div className="hidden border-b border-border px-6 py-5 md:block">
-        <h1 className="text-xl font-bold">Leaderboard</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          Rankings across all three prediction games
-        </p>
-      </div>
-
-      {/* Tab bar */}
-      <div className="flex gap-1 border-b border-border bg-background px-4 py-2">
-        {tabs.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setActiveTab(key)}
-            className={cn(
-              'rounded-full px-3 py-1.5 text-xs font-semibold transition-colors',
-              activeTab === key
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <PageChrome
+        title="Leaderboard"
+        description="Rankings across all three prediction games"
+        tabs={tabs.map(({ key, label }) => ({ id: key, label }))}
+        active={activeTab}
+        onChange={setActiveTab}
+      />
 
       {/* Content */}
-      <div className="flex flex-col">
-        {isLoading && <SkeletonRows />}
+      <div className="p-4">
+        {isLoading && (
+          <div className="overflow-hidden rounded-xl border border-border bg-card overflow-hidden">
+            <SkeletonRows />
+          </div>
+        )}
 
         {isError && (
-          <div className="flex flex-col items-center gap-2 px-4 py-16 text-center text-muted-foreground">
+          <div className="overflow-hidden rounded-xl border border-border bg-card flex flex-col items-center gap-2 px-4 py-16 text-center text-muted-foreground">
             <AlertCircle className="h-8 w-8" />
             <p className="text-sm font-medium">Failed to load leaderboard</p>
             <p className="text-xs">Check your connection and try again.</p>
@@ -163,21 +150,23 @@ export default function LeaderboardPage() {
         )}
 
         {!isLoading && !isError && ranked.length === 0 && (
-          <div className="px-4 py-16 text-center text-sm text-muted-foreground">
+          <div className="overflow-hidden rounded-xl border border-border bg-card px-4 py-16 text-center text-sm text-muted-foreground">
             No scores yet — be the first to predict!
           </div>
         )}
 
-        {!isLoading &&
-          !isError &&
-          ranked.map((entry) => (
-            <EntryRow
-              key={entry.user_id}
-              entry={entry}
-              rank={entry.rank}
-              isCurrentUser={user?.id === entry.user_id}
-            />
-          ))}
+        {!isLoading && !isError && ranked.length > 0 && (
+          <div className="overflow-hidden rounded-xl border border-border bg-card overflow-hidden">
+            {ranked.map((entry) => (
+              <EntryRow
+                key={entry.user_id}
+                entry={entry}
+                rank={entry.rank}
+                isCurrentUser={user?.id === entry.user_id}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
