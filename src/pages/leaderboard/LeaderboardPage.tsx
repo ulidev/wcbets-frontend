@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ChevronRight } from 'lucide-react';
 import {
   fetchMatchPredictionLeaderboard,
   fetchPickemLeaderboard,
   fetchCrystalBallLeaderboard,
 } from '@/api/leaderboards';
+import { fetchDeadlines } from '@/api/crystal-ball';
+import { deadlineHasPassed } from '@/lib/deadlines';
 import type { components } from '@/types/api';
 import { useAuth } from '@/hooks/useAuth';
 import { cn, getInitials, getAvatarColor } from '@/lib/utils';
@@ -20,6 +22,11 @@ const tabs: { key: Tab; label: string }[] = [
   { key: 'pickem', label: "Pick'em" },
   { key: 'crystal-ball', label: 'Crystal Ball' },
 ];
+
+function parseTab(value: string | null): Tab {
+  if (value === 'match' || value === 'pickem' || value === 'crystal-ball') return value;
+  return 'match';
+}
 
 function addRanks(entries: LeaderboardEntry[]) {
   let rank = 1;
@@ -39,26 +46,23 @@ function EntryRow({
   entry,
   rank,
   isCurrentUser,
+  clickable,
+  game,
 }: {
   entry: LeaderboardEntry;
   rank: number;
   isCurrentUser: boolean;
+  clickable: boolean;
+  game: Tab;
 }) {
-  return (
-    <div
-      className={cn(
-        'flex items-center gap-4 border-b border-border px-4 py-3 transition-colors last:border-b-0',
-        isCurrentUser ? 'bg-primary/5' : 'hover:bg-muted/40',
-      )}
-    >
-      {/* Rank */}
+  const content = (
+    <>
       <div className="w-7 shrink-0 text-center">
         <span className={cn('text-sm', MEDAL_STYLES[rank] ?? 'text-muted-foreground')}>
           {rank}
         </span>
       </div>
 
-      {/* Avatar */}
       <div
         className={cn(
           'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white',
@@ -68,24 +72,49 @@ function EntryRow({
         {getInitials(entry.first_name, entry.last_name)}
       </div>
 
-      {/* Name */}
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 flex items-center gap-2">
         <span className="wc-font-body truncate text-sm uppercase">
           {entry.first_name} {entry.last_name}
         </span>
         {isCurrentUser && (
-          <span className="ml-2 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+          <span className="shrink-0 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
             You
           </span>
         )}
       </div>
 
-      {/* Points */}
-      <div className="shrink-0 text-right">
+      <div className="flex shrink-0 items-center gap-2 text-right">
         <span className="text-sm font-bold tabular-nums">{entry.points}</span>
-        <span className="ml-1 text-xs text-muted-foreground">pts</span>
+        <span className="text-xs text-muted-foreground">pts</span>
+        {clickable && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
       </div>
-    </div>
+    </>
+  );
+
+  const className = cn(
+    'flex items-center gap-4 border-b border-border px-4 py-3 transition-colors last:border-b-0',
+    isCurrentUser ? 'bg-primary/5' : 'hover:bg-muted/40',
+    clickable && 'cursor-pointer',
+  );
+
+  if (!clickable || game === 'match') {
+    return <div className={className}>{content}</div>;
+  }
+
+  const gameParam = game === 'crystal-ball' ? 'crystal-ball' : 'pickem';
+
+  return (
+    <Link
+      to={`/leaderboard/user/${entry.user_id}?game=${gameParam}`}
+      state={{
+        firstName: entry.first_name,
+        lastName: entry.last_name,
+        points: entry.points,
+      }}
+      className={cn(className, 'w-full text-inherit no-underline')}
+    >
+      {content}
+    </Link>
   );
 }
 
@@ -107,8 +136,13 @@ function SkeletonRows() {
 }
 
 export default function LeaderboardPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('match');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = parseTab(searchParams.get('tab'));
   const { user } = useAuth();
+
+  function handleTabChange(tab: Tab) {
+    setSearchParams({ tab }, { replace: true });
+  }
 
   const queryFn = {
     match: fetchMatchPredictionLeaderboard,
@@ -121,7 +155,22 @@ export default function LeaderboardPage() {
     queryFn,
   });
 
+  const { data: deadlines = [] } = useQuery({
+    queryKey: ['deadlines'],
+    queryFn: fetchDeadlines,
+  });
+
   const ranked = data ? addRanks(data.entries) : [];
+  const canViewPredictions = data?.can_view_predictions ?? false;
+
+  const deadlineUnlocked =
+    activeTab === 'pickem'
+      ? deadlineHasPassed(deadlines, 'GROUP_STAGE') || deadlineHasPassed(deadlines, 'BRACKET')
+      : activeTab === 'crystal-ball'
+        ? deadlineHasPassed(deadlines, 'CRYSTAL_BALL')
+        : false;
+
+  const rowsClickable = canViewPredictions || deadlineUnlocked;
 
   return (
     <div className="flex flex-col">
@@ -130,11 +179,16 @@ export default function LeaderboardPage() {
         description="Rankings across all three prediction games"
         tabs={tabs.map(({ key, label }) => ({ id: key, label }))}
         active={activeTab}
-        onChange={setActiveTab}
+        onChange={handleTabChange}
       />
 
-      {/* Content */}
       <div className="p-4">
+        {rowsClickable && activeTab !== 'match' && (
+          <p className="mb-3 text-xs text-muted-foreground">
+            Tap a player to view their predictions.
+          </p>
+        )}
+
         {isLoading && (
           <div className="overflow-hidden rounded-xl border border-border bg-card overflow-hidden">
             <SkeletonRows />
@@ -163,6 +217,8 @@ export default function LeaderboardPage() {
                 entry={entry}
                 rank={entry.rank}
                 isCurrentUser={user?.id === entry.user_id}
+                clickable={rowsClickable}
+                game={activeTab}
               />
             ))}
           </div>

@@ -34,3 +34,8 @@ export const fetchPlayers = (params: {
 
 export const fetchDeadlines = (): Promise<DeadlineConfigResponse[]> =>
   api.get('api/v1/config/deadlines').json<DeadlineConfigResponse[]>();
+
+type CrystalBallPredictionPublicResponse = components['schemas']['CrystalBallPredictionPublicResponse'];
+
+export const fetchUserCrystalBallAnswers = (userId: string): Promise<CrystalBallPredictionPublicResponse[]> =>
+  api.get(`api/v1/crystal-ball/answers/users/${userId}`).json<CrystalBallPredictionPublicResponse[]>();

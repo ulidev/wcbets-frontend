@@ -6,6 +6,7 @@ import LoginPage from '@/pages/login/LoginPage';
 import RegisterPage from '@/pages/register/RegisterPage';
 import PendingApprovalPage from '@/pages/pending-approval/PendingApprovalPage';
 import LeaderboardPage from '@/pages/leaderboard/LeaderboardPage';
+import LeaderboardUserPage from '@/pages/leaderboard/LeaderboardUserPage';
 import MatchesPage from '@/pages/matches/MatchesPage';
 import PickemPage from '@/pages/pickem/PickemPage';
 import ProfilePage from '@/pages/profile/ProfilePage';
@@ -14,15 +15,12 @@ import CrystalBallPage from '@/pages/crystal-ball/CrystalBallPage';
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
+  { path: '/pending-approval', element: <PendingApprovalPage /> },
 
   // Authenticated tree (token required)
   {
     element: <AuthGuard />,
     children: [
-      // Pending approval — accessible without being approved
-      { path: '/pending-approval', element: <PendingApprovalPage /> },
-
-      // Approved users + layout
       {
         element: <ApprovalGuard />,
         children: [
@@ -31,6 +29,7 @@ const router = createBrowserRouter([
             children: [
               { index: true, element: <Navigate to="/leaderboard" replace /> },
               { path: '/leaderboard', element: <LeaderboardPage /> },
+              { path: '/leaderboard/user/:userId', element: <LeaderboardUserPage /> },
               { path: '/matches', element: <MatchesPage /> },
               { path: '/pickem', element: <PickemPage /> },
               { path: '/crystal-ball', element: <CrystalBallPage /> },

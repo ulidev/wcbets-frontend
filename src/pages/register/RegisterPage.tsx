@@ -2,11 +2,12 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { register } from '@/api/auth';
+import { getHttpErrorStatus } from '@/lib/api-error';
 import { cn } from '@/lib/utils';
 import { AppLogo } from '@/components/app/AppLogo';
 
 export default function RegisterPage() {
-  const { user, isLoading: authLoading, login } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [firstName, setFirstName] = useState('');
@@ -17,8 +18,8 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && user) {
-      navigate(user.approved ? '/leaderboard' : '/pending-approval', { replace: true });
+    if (!authLoading && user?.approved) {
+      navigate('/leaderboard', { replace: true });
     }
   }, [user, authLoading, navigate]);
 
@@ -30,11 +31,19 @@ export default function RegisterPage() {
     setIsSubmitting(true);
     try {
       await register({ email, first_name: firstName, last_name: lastName, password });
-      // Auto-login after registration
-      await login({ email, password });
-      // useAuth will trigger redirect via the effect above
-    } catch {
-      setError('Registration failed. The email may already be in use.');
+      navigate('/pending-approval', {
+        replace: true,
+        state: { email, firstName, lastName },
+      });
+    } catch (err) {
+      const status = await getHttpErrorStatus(err);
+      if (status === 409) {
+        setError(
+          'This email is already registered. Names can repeat — use a different email or sign in.',
+        );
+      } else {
+        setError('Registration failed. Please check your details and try again.');
+      }
       setIsSubmitting(false);
     }
   };
@@ -42,7 +51,6 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
-        {/* Brand */}
         <div className="mb-8 text-center">
           <div className="mb-3 flex justify-center">
             <AppLogo size={72} />
@@ -51,7 +59,6 @@ export default function RegisterPage() {
           <p className="mt-1 text-sm text-muted-foreground">FIFA World Cup 2026 Predictions</p>
         </div>
 
-        {/* Card */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
           <h2 className="mb-5 text-lg font-semibold">Create account</h2>
 

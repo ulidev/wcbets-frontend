@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { getHttpErrorDetail, getHttpErrorStatus } from '@/lib/api-error';
 import { cn } from '@/lib/utils';
 import { AppLogo } from '@/components/app/AppLogo';
 
@@ -14,8 +15,8 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && user) {
-      navigate(user.approved ? '/leaderboard' : '/pending-approval', { replace: true });
+    if (!authLoading && user?.approved) {
+      navigate('/leaderboard', { replace: true });
     }
   }, [user, authLoading, navigate]);
 
@@ -27,8 +28,16 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await login({ email, password });
-    } catch {
-      setError('Invalid email or password. Please try again.');
+    } catch (err) {
+      const status = await getHttpErrorStatus(err);
+      const detail = await getHttpErrorDetail(err);
+      if (status === 403 && detail?.toLowerCase().includes('pending')) {
+        setError('Your account is pending admin approval. Try again once an admin has accepted you.');
+      } else if (status === 403) {
+        setError('Your account has been deactivated.');
+      } else {
+        setError('Invalid email or password. Please try again.');
+      }
       setIsSubmitting(false);
     }
   };

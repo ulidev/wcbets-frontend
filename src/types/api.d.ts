@@ -1547,6 +1547,8 @@ export interface components {
         LeaderboardResponse: {
             /** Entries */
             entries: components["schemas"]["LeaderboardEntryResponse"][];
+            /** Can View Predictions */
+            can_view_predictions: boolean;
         };
         /** LoginRequest */
         LoginRequest: {

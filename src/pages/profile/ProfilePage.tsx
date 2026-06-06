@@ -1,4 +1,5 @@
 import { LogOut, Shield } from 'lucide-react';
+import { AdminUsersPanel } from '@/components/app/AdminUsersPanel';
 import { useAuth } from '@/hooks/useAuth';
 import { cn, getInitials, getAvatarColor } from '@/lib/utils';
 import type { components } from '@/types/api';
@@ -13,19 +14,18 @@ const ROLE_LABELS: Record<Role, string> = {
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
+  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN';
 
   if (!user) return null;
 
   return (
     <div className="flex flex-col">
-      {/* Desktop header */}
       <div className="hidden border-b border-border px-6 py-5 md:block">
         <h1 className="wc-page-title">Profile</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">Your account details</p>
       </div>
 
-      <div className="flex flex-col items-center px-6 pt-12 pb-8">
-        {/* Avatar */}
+      <div className="flex flex-col items-center px-4 pt-10 pb-8">
         <div
           className={cn(
             'flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold text-white',
@@ -35,23 +35,26 @@ export default function ProfilePage() {
           {getInitials(user.first_name, user.last_name)}
         </div>
 
-        {/* Name + email */}
         <h2 className="mt-4 text-xl font-bold">
           {user.first_name} {user.last_name}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">{user.email}</p>
 
-        {/* Role badge */}
         <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary">
           <Shield className="h-3 w-3" />
           {ROLE_LABELS[user.role]}
         </span>
 
-        {/* Divider */}
+        {isAdmin && (
+          <div className="mt-8 w-full max-w-lg">
+            <AdminUsersPanel />
+          </div>
+        )}
+
         <div className="mt-8 w-full max-w-sm border-t border-border" />
 
-        {/* Sign out */}
         <button
+          type="button"
           onClick={() => void logout()}
           className="mt-6 flex w-full max-w-sm items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10"
         >
