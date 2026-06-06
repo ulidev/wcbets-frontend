@@ -1,0 +1,10 @@
+{
+  "_comment": "Catàleg de referència per al picker de l'onze ideal. Cada jugador ha de tenir position = GK | DEF | MID | FWD (línia que es valida contra el slot). En producció es pot substituir per GET /api/v1/tournament/players filtrat per position.",
+  "playerShape": {
+    "id": "uuid — player_id enviat a l'API",
+    "name": "string",
+    "teamName": "string — nom del seleccionable per a la bandera",
+    "position": "GK | DEF | MID | FWD"
+  },
+  "players": []
+}

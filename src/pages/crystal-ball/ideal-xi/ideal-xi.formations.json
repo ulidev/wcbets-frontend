@@ -1,0 +1,227 @@
+{
+  "defaultFormationId": "4-4-2",
+  "formations": [
+    {
+      "id": "4-4-2",
+      "label": "4-4-2",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "LB", "x": 14, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 38, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 62, "y": 67 },
+        { "selectionIndex": 4, "line": "DEF", "uiLabel": "RB", "x": 86, "y": 67 },
+        { "selectionIndex": 5, "line": "MID", "uiLabel": "LM", "x": 14, "y": 43 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "CM", "x": 38, "y": 43 },
+        { "selectionIndex": 7, "line": "MID", "uiLabel": "CM", "x": 62, "y": 43 },
+        { "selectionIndex": 8, "line": "MID", "uiLabel": "RM", "x": 86, "y": 43 },
+        { "selectionIndex": 9, "line": "FWD", "uiLabel": "ST", "x": 33, "y": 14 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "ST", "x": 67, "y": 14 }
+      ]
+    },
+    {
+      "id": "4-5-1",
+      "label": "4-5-1",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "LB", "x": 14, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 38, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 62, "y": 67 },
+        { "selectionIndex": 4, "line": "DEF", "uiLabel": "RB", "x": 86, "y": 67 },
+        { "selectionIndex": 5, "line": "MID", "uiLabel": "LM", "x": 10, "y": 43 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "CM", "x": 30, "y": 43 },
+        { "selectionIndex": 7, "line": "MID", "uiLabel": "CM", "x": 50, "y": 43 },
+        { "selectionIndex": 8, "line": "MID", "uiLabel": "CM", "x": 70, "y": 43 },
+        { "selectionIndex": 9, "line": "MID", "uiLabel": "RM", "x": 90, "y": 43 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "ST", "x": 50, "y": 14 }
+      ]
+    },
+    {
+      "id": "4-3-3",
+      "label": "4-3-3",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "LB", "x": 14, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 38, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 62, "y": 67 },
+        { "selectionIndex": 4, "line": "DEF", "uiLabel": "RB", "x": 86, "y": 67 },
+        { "selectionIndex": 5, "line": "MID", "uiLabel": "CM", "x": 20, "y": 43 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "CM", "x": 50, "y": 43 },
+        { "selectionIndex": 7, "line": "MID", "uiLabel": "CM", "x": 80, "y": 43 },
+        { "selectionIndex": 8, "line": "FWD", "uiLabel": "LW", "x": 20, "y": 15 },
+        { "selectionIndex": 9, "line": "FWD", "uiLabel": "ST", "x": 50, "y": 12 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "RW", "x": 80, "y": 15 }
+      ]
+    },
+    {
+      "id": "3-5-2",
+      "label": "3-5-2",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "CB", "x": 20, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 50, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 80, "y": 67 },
+        { "selectionIndex": 4, "line": "MID", "uiLabel": "LM", "x": 10, "y": 43 },
+        { "selectionIndex": 5, "line": "MID", "uiLabel": "CM", "x": 30, "y": 43 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "CDM", "x": 50, "y": 43 },
+        { "selectionIndex": 7, "line": "MID", "uiLabel": "CM", "x": 70, "y": 43 },
+        { "selectionIndex": 8, "line": "MID", "uiLabel": "RM", "x": 90, "y": 43 },
+        { "selectionIndex": 9, "line": "FWD", "uiLabel": "ST", "x": 33, "y": 14 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "ST", "x": 67, "y": 14 }
+      ]
+    },
+    {
+      "id": "5-3-2",
+      "label": "5-3-2",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "LWB", "x": 10, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 30, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 50, "y": 67 },
+        { "selectionIndex": 4, "line": "DEF", "uiLabel": "CB", "x": 70, "y": 67 },
+        { "selectionIndex": 5, "line": "DEF", "uiLabel": "RWB", "x": 90, "y": 67 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "CM", "x": 20, "y": 43 },
+        { "selectionIndex": 7, "line": "MID", "uiLabel": "CM", "x": 50, "y": 43 },
+        { "selectionIndex": 8, "line": "MID", "uiLabel": "CM", "x": 80, "y": 43 },
+        { "selectionIndex": 9, "line": "FWD", "uiLabel": "ST", "x": 33, "y": 14 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "ST", "x": 67, "y": 14 }
+      ]
+    },
+    {
+      "id": "3-4-3",
+      "label": "3-4-3",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "CB", "x": 20, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 50, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 80, "y": 67 },
+        { "selectionIndex": 4, "line": "MID", "uiLabel": "LM", "x": 14, "y": 43 },
+        { "selectionIndex": 5, "line": "MID", "uiLabel": "CM", "x": 38, "y": 43 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "CM", "x": 62, "y": 43 },
+        { "selectionIndex": 7, "line": "MID", "uiLabel": "RM", "x": 86, "y": 43 },
+        { "selectionIndex": 8, "line": "FWD", "uiLabel": "LW", "x": 20, "y": 15 },
+        { "selectionIndex": 9, "line": "FWD", "uiLabel": "ST", "x": 50, "y": 12 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "RW", "x": 80, "y": 15 }
+      ]
+    },
+    {
+      "id": "5-2-3",
+      "label": "5-2-3",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "LWB", "x": 10, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 30, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 50, "y": 67 },
+        { "selectionIndex": 4, "line": "DEF", "uiLabel": "CB", "x": 70, "y": 67 },
+        { "selectionIndex": 5, "line": "DEF", "uiLabel": "RWB", "x": 90, "y": 67 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "CM", "x": 33, "y": 46 },
+        { "selectionIndex": 7, "line": "MID", "uiLabel": "CM", "x": 67, "y": 46 },
+        { "selectionIndex": 8, "line": "FWD", "uiLabel": "LW", "x": 20, "y": 15 },
+        { "selectionIndex": 9, "line": "FWD", "uiLabel": "ST", "x": 50, "y": 12 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "RW", "x": 80, "y": 15 }
+      ]
+    },
+    {
+      "id": "5-4-1",
+      "label": "5-4-1",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "LWB", "x": 10, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 30, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 50, "y": 67 },
+        { "selectionIndex": 4, "line": "DEF", "uiLabel": "CB", "x": 70, "y": 67 },
+        { "selectionIndex": 5, "line": "DEF", "uiLabel": "RWB", "x": 90, "y": 67 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "LM", "x": 14, "y": 43 },
+        { "selectionIndex": 7, "line": "MID", "uiLabel": "CM", "x": 38, "y": 43 },
+        { "selectionIndex": 8, "line": "MID", "uiLabel": "CM", "x": 62, "y": 43 },
+        { "selectionIndex": 9, "line": "MID", "uiLabel": "RM", "x": 86, "y": 43 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "ST", "x": 50, "y": 14 }
+      ]
+    },
+    {
+      "id": "4-2-4",
+      "label": "4-2-4",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "LB", "x": 14, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 38, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 62, "y": 67 },
+        { "selectionIndex": 4, "line": "DEF", "uiLabel": "RB", "x": 86, "y": 67 },
+        { "selectionIndex": 5, "line": "MID", "uiLabel": "CM", "x": 33, "y": 44 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "CM", "x": 67, "y": 44 },
+        { "selectionIndex": 7, "line": "FWD", "uiLabel": "LW", "x": 14, "y": 14 },
+        { "selectionIndex": 8, "line": "FWD", "uiLabel": "ST", "x": 38, "y": 12 },
+        { "selectionIndex": 9, "line": "FWD", "uiLabel": "ST", "x": 62, "y": 12 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "RW", "x": 86, "y": 14 }
+      ]
+    },
+    {
+      "id": "3-3-4",
+      "label": "3-3-4",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "CB", "x": 20, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 50, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 80, "y": 67 },
+        { "selectionIndex": 4, "line": "MID", "uiLabel": "CM", "x": 20, "y": 44 },
+        { "selectionIndex": 5, "line": "MID", "uiLabel": "CM", "x": 50, "y": 44 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "CM", "x": 80, "y": 44 },
+        { "selectionIndex": 7, "line": "FWD", "uiLabel": "LW", "x": 14, "y": 14 },
+        { "selectionIndex": 8, "line": "FWD", "uiLabel": "ST", "x": 38, "y": 12 },
+        { "selectionIndex": 9, "line": "FWD", "uiLabel": "ST", "x": 62, "y": 12 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "RW", "x": 86, "y": 14 }
+      ]
+    },
+    {
+      "id": "cholismo-puro",
+      "label": "Cholismo Puro",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "LB", "x": 10, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 30, "y": 67 },
+        { "selectionIndex": 3, "line": "DEF", "uiLabel": "CB", "x": 50, "y": 67 },
+        { "selectionIndex": 4, "line": "DEF", "uiLabel": "CB", "x": 70, "y": 67 },
+        { "selectionIndex": 5, "line": "DEF", "uiLabel": "RB", "x": 90, "y": 67 },
+        { "selectionIndex": 6, "line": "MID", "uiLabel": "LM", "x": 10, "y": 40 },
+        { "selectionIndex": 7, "line": "MID", "uiLabel": "CM", "x": 30, "y": 40 },
+        { "selectionIndex": 8, "line": "MID", "uiLabel": "CM", "x": 50, "y": 40 },
+        { "selectionIndex": 9, "line": "MID", "uiLabel": "CM", "x": 70, "y": 40 },
+        { "selectionIndex": 10, "line": "MID", "uiLabel": "RM", "x": 90, "y": 40 }
+      ]
+    },
+    {
+      "id": "real-madrid-2026",
+      "label": "Real Madrid 2026",
+      "slots": [
+        { "selectionIndex": 0, "line": "GK", "uiLabel": "GK", "x": 50, "y": 89 },
+        { "selectionIndex": 1, "line": "DEF", "uiLabel": "CB", "x": 33, "y": 67 },
+        { "selectionIndex": 2, "line": "DEF", "uiLabel": "CB", "x": 67, "y": 67 },
+        { "selectionIndex": 3, "line": "MID", "uiLabel": "CM", "x": 20, "y": 44 },
+        { "selectionIndex": 4, "line": "MID", "uiLabel": "CM", "x": 50, "y": 44 },
+        { "selectionIndex": 5, "line": "MID", "uiLabel": "CM", "x": 80, "y": 44 },
+        { "selectionIndex": 6, "line": "FWD", "uiLabel": "LW", "x": 10, "y": 14 },
+        { "selectionIndex": 7, "line": "FWD", "uiLabel": "SS", "x": 30, "y": 12 },
+        { "selectionIndex": 8, "line": "FWD", "uiLabel": "ST", "x": 50, "y": 10 },
+        { "selectionIndex": 9, "line": "FWD", "uiLabel": "SS", "x": 70, "y": 12 },
+        { "selectionIndex": 10, "line": "FWD", "uiLabel": "RW", "x": 90, "y": 14 }
+      ]
+    }
+  ],
+  "lines": {
+      "GK": {
+          "label": "Porter",
+          "short": "GK"
+      },
+      "DEF": {
+          "label": "Defensa",
+          "short": "DEF"
+      },
+      "MID": {
+          "label": "Mig",
+          "short": "MID"
+      },
+      "FWD": {
+          "label": "Davanter",
+          "short": "DEL"
+      }
+  }
+}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, CheckCircle2, Lock, Search, X, Sparkles } from 'lucide-react';
 import {
@@ -13,6 +13,9 @@ import { PageChrome } from '@/components/app/PageChrome';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import { cn } from '@/lib/utils';
 import { wcBtnPrimary, wcFontBody } from '@/lib/wc-ui';
+import { IdealXIPitch } from '@/pages/crystal-ball/ideal-xi/IdealXIPitch';
+import { isIdealXIComplete } from '@/pages/crystal-ball/ideal-xi/ideal-xi.data';
+import type { IdealXIAnswerDraft } from '@/pages/crystal-ball/ideal-xi/types';
 import type { components } from '@/types/api';
 
 type CrystalBallQuestionResponse = components['schemas']['CrystalBallQuestionResponse'];
@@ -56,6 +59,12 @@ function isDraftComplete(
   question: CrystalBallQuestionResponse,
   drafts: AnswerDraft[],
 ): boolean {
+  if (question.type === 'IDEAL_XI') {
+    const xiDrafts: IdealXIAnswerDraft[] = drafts
+      .filter((d): d is AnswerDraft & { player_id: string } => d.player_id != null)
+      .map((d) => ({ selection_index: d.selection_index, player_id: d.player_id }));
+    return isIdealXIComplete(xiDrafts);
+  }
   if (question.answer_type === 'NUMBER') {
     return drafts[0]?.numeric_value != null;
   }
@@ -410,6 +419,16 @@ function QuestionCard({
     onDraftsChange([...drafts, { selection_index: drafts.length, player_id: playerId }]);
   };
 
+  const idealXiDrafts: IdealXIAnswerDraft[] = drafts
+    .filter((d): d is AnswerDraft & { player_id: string } => d.player_id != null)
+    .map((d) => ({ selection_index: d.selection_index, player_id: d.player_id }));
+
+  const handleIdealXiChange = (next: IdealXIAnswerDraft[]) => {
+    onDraftsChange(
+      next.map((d) => ({ selection_index: d.selection_index, player_id: d.player_id })),
+    );
+  };
+
   const handleNumberChange = (val: string) => {
     const n = val === '' ? undefined : Number(val);
     onDraftsChange([{ selection_index: 0, numeric_value: n }]);
@@ -460,10 +479,19 @@ function QuestionCard({
         )}
       </div>
 
-      {question.max_selections > 1 && question.answer_type !== 'NUMBER' && (
+      {question.max_selections > 1 && question.answer_type !== 'NUMBER' && question.type !== 'IDEAL_XI' && (
         <p className="mb-2 text-xs font-semibold text-wc-dark-gray">
           {drafts.length} / {question.max_selections} seleccionats
         </p>
+      )}
+
+      {question.type === 'IDEAL_XI' && (
+        <IdealXIPitch
+          drafts={idealXiDrafts}
+          onDraftsChange={handleIdealXiChange}
+          teams={teams}
+          locked={locked}
+        />
       )}
 
       {question.answer_type === 'NUMBER' && (
@@ -488,7 +516,7 @@ function QuestionCard({
         />
       )}
 
-      {question.answer_type === 'PLAYER' && (
+      {question.answer_type === 'PLAYER' && question.type !== 'IDEAL_XI' && (
         <PlayerPicker
           teams={teams}
           selected={selectedIds}
@@ -580,6 +608,12 @@ export default function CrystalBallPage() {
 
   const isLoading = loadingQ || loadingA;
 
+  const sortedQuestions = useMemo(() => {
+    const ideal = questions.filter((q) => q.type === 'IDEAL_XI');
+    const rest = questions.filter((q) => q.type !== 'IDEAL_XI');
+    return [...rest, ...ideal];
+  }, [questions]);
+
   return (
     <div className="flex flex-col">
       <PageChrome
@@ -619,7 +653,7 @@ export default function CrystalBallPage() {
 
         {!isLoading &&
           !errorQ &&
-          questions.map((q) => (
+          sortedQuestions.map((q) => (
             <QuestionCard
               key={q.id}
               question={q}
