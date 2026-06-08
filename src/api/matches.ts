@@ -8,6 +8,8 @@ type MatchPredictionResponse = components['schemas']['MatchPredictionResponse'];
 type MatchPlayersResponse = components['schemas']['MatchPlayersResponse'];
 type CreateMatchPredictionRequest = components['schemas']['CreateMatchPredictionRequest'];
 type UpdateMatchPredictionRequest = components['schemas']['UpdateMatchPredictionRequest'];
+type SetMatchResultRequest = components['schemas']['SetMatchResultRequest'];
+type UpdateMatchStatusRequest = components['schemas']['UpdateMatchStatusRequest'];
 
 export const fetchMatches = (): Promise<MatchResponse[]> =>
   api.get('api/v1/tournament/matches').json<MatchResponse[]>();
@@ -36,3 +38,9 @@ export const updateMatchPrediction = (
 
 export const fetchMatchPlayers = (matchId: string): Promise<MatchPlayersResponse> =>
   api.get(`api/v1/tournament/matches/${matchId}/players`).json<MatchPlayersResponse>();
+
+export const overrideMatchResult = (matchId: string, body: SetMatchResultRequest): Promise<void> =>
+  api.patch(`api/v1/tournament/matches/${matchId}/result/override`, { json: body }).then(() => undefined);
+
+export const updateMatchStatus = (matchId: string, body: UpdateMatchStatusRequest): Promise<void> =>
+  api.patch(`api/v1/tournament/matches/${matchId}/status`, { json: body }).then(() => undefined);

@@ -1,5 +1,6 @@
 import { LogOut, Shield } from 'lucide-react';
 import { AdminUsersPanel } from '@/components/app/AdminUsersPanel';
+import { SuperAdminMatchOverridePanel } from '@/components/app/SuperAdminMatchOverridePanel';
 import { useAuth } from '@/hooks/useAuth';
 import { cn, getInitials, getAvatarColor } from '@/lib/utils';
 import type { components } from '@/types/api';
@@ -15,6 +16,7 @@ const ROLE_LABELS: Record<Role, string> = {
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN';
+  const isSuperAdmin = user?.role === 'SUPERADMIN';
 
   if (!user) return null;
 
@@ -48,6 +50,12 @@ export default function ProfilePage() {
         {isAdmin && (
           <div className="mt-8 w-full max-w-lg">
             <AdminUsersPanel />
+          </div>
+        )}
+
+        {isSuperAdmin && (
+          <div className="mt-6 w-full max-w-lg">
+            <SuperAdminMatchOverridePanel />
           </div>
         )}
 

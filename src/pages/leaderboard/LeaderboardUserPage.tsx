@@ -41,7 +41,7 @@ function ReadOnlyGroupCard({
   colorClass,
 }: {
   name: string;
-  teams: { teamId: string; teamName: string; position: number }[];
+  teams: { teamId: string; teamName: string; teamLabel: string; position: number }[];
   colorClass: string;
 }) {
   const sorted = [...teams].sort((a, b) => a.position - b.position);
@@ -56,7 +56,7 @@ function ReadOnlyGroupCard({
           <li key={entry.teamId} className="flex items-center gap-2 px-3 py-2 text-sm">
             <span className="w-5 shrink-0 text-center text-xs font-bold text-muted-foreground">{entry.position}</span>
             <TeamFlag teamName={entry.teamName} size="sm" className="shrink-0" />
-            <span className="min-w-0 truncate uppercase">{entry.teamName}</span>
+            <span className="min-w-0 truncate uppercase">{entry.teamLabel}</span>
           </li>
         ))}
       </ol>
@@ -98,6 +98,7 @@ function PickemPredictions({ userId }: { userId: string }) {
   });
 
   const teamNameById = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.name]));
+  const teamLabelById = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.label_ca ?? t.name]));
   const picksByGroup = new Map((groupPicksQuery.data ?? []).map((p) => [p.group_id, p]));
 
   if (!groupVisible && !bracketVisible) {
@@ -136,6 +137,7 @@ function PickemPredictions({ userId }: { userId: string }) {
                 const teams = pick.entries.map((e) => ({
                   teamId: e.team_id,
                   teamName: teamNameById.get(e.team_id) ?? 'Unknown',
+                  teamLabel: teamLabelById.get(e.team_id) ?? 'Unknown',
                   position: e.predicted_position,
                 }));
                 return (
@@ -172,8 +174,11 @@ function PickemPredictions({ userId }: { userId: string }) {
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     {(slotsByPhase.get(phase) ?? []).map((slot) => {
                       const pick = bracketPicksBySlot.get(slot.slot_id);
-                      const winnerName = pick
+                      const winnerFlagName = pick
                         ? teamNameById.get(pick.predicted_winner_team_id) ?? 'Unknown'
+                        : null;
+                      const winnerName = pick
+                        ? teamLabelById.get(pick.predicted_winner_team_id) ?? 'Unknown'
                         : null;
                       return (
                         <div
@@ -191,7 +196,7 @@ function PickemPredictions({ userId }: { userId: string }) {
                           {winnerName ? (
                             <div className="flex items-center justify-between gap-2">
                               <span className="flex min-w-0 items-center gap-1.5 font-medium uppercase">
-                                <TeamFlag teamName={winnerName} size="sm" className="shrink-0" />
+                                <TeamFlag teamName={winnerFlagName!} size="sm" className="shrink-0" />
                                 <span className="truncate">{winnerName}</span>
                               </span>
                               {pick && pick.points_awarded > 0 && (
@@ -252,6 +257,7 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
 
   const answersByQuestion = new Map((answersQuery.data ?? []).map((a) => [a.question_id, a]));
   const teamNameById = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.name]));
+  const teamLabelById = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.label_ca ?? t.name]));
   const playerNameById = new Map((playersQuery.data ?? []).map((p) => [p.id, p.name]));
 
   function renderAnswer(
@@ -262,11 +268,12 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
       return <span className="font-semibold tabular-nums">{answer.numeric_value ?? '—'}</span>;
     }
     if (question.answer_type === 'TEAM' && answer.team_id) {
-      const name = teamNameById.get(answer.team_id) ?? 'Unknown';
+      const flagName = teamNameById.get(answer.team_id) ?? 'Unknown';
+      const label = teamLabelById.get(answer.team_id) ?? 'Unknown';
       return (
         <span className="inline-flex items-center gap-1.5 uppercase">
-          <TeamFlag teamName={name} size="sm" />
-          {name}
+          <TeamFlag teamName={flagName} size="sm" />
+          {label}
         </span>
       );
     }

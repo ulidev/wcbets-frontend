@@ -128,7 +128,7 @@ function TeamPicker({
   const showResults = canAddMore && pickerOpen;
   const query = filter.trim().toLowerCase();
   const filtered = teams.filter((t) =>
-    query.length === 0 ? true : t.name.toLowerCase().includes(query),
+    query.length === 0 ? true : t.name.toLowerCase().includes(query) || (t.label_ca?.toLowerCase().includes(query) ?? false),
   );
 
   const openPicker = () => {
@@ -166,7 +166,7 @@ function TeamPicker({
                   <span className="text-[10px] text-wc-hermes/60">{idx + 1}.</span>
                 )}
                 <TeamFlag teamName={team.name} size="sm" />
-                {team.name}
+                {team.label_ca ?? team.name}
                 {!locked && (
                   <button
                     type="button"
@@ -226,7 +226,7 @@ function TeamPicker({
                       )}
                     >
                       <TeamFlag teamName={team.name} size="sm" />
-                      {team.name}
+                      {team.label_ca ?? team.name}
                       {isSelected && <CheckCircle2 size={14} className="ml-auto text-wc-green" />}
                     </button>
                   );

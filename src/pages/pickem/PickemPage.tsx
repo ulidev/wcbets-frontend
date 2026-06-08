@@ -19,6 +19,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { AlertCircle, CheckCircle2, GripVertical, Info, LayoutGrid, List, Lock, Trophy, XCircle } from 'lucide-react';
 import { fetchPickemOverview, submitGroupStagePicks, submitBracketPicks } from '@/api/pickem';
+import { fetchTeams } from '@/api/matches';
 import { cn } from '@/lib/utils';
 import { wcBtnPrimaryFull, wcFontBody } from '@/lib/wc-ui';
 import { PageChrome } from '@/components/app/PageChrome';
@@ -40,6 +41,7 @@ import {
 
 type TeamPickemEntry = components['schemas']['TeamPickemEntry'];
 type GroupPickemOverview = components['schemas']['GroupPickemOverview'];
+type TeamResponse = components['schemas']['TeamResponse'];
 
 type PickemTab = 'groups' | 'bracket';
 type BracketViewMode = 'list' | 'tree';
@@ -106,10 +108,12 @@ function GroupStageScoreSummary({ groups }: { groups: GroupPickemOverview[] }) {
 
 function SortableTeamRow({
   team,
+  teamLabel,
   position,
   disabled,
 }: {
   team: TeamPickemEntry;
+  teamLabel: string;
   position: number;
   disabled: boolean;
 }) {
@@ -160,7 +164,7 @@ function SortableTeamRow({
           isWrong && 'text-muted-foreground/70',
         )}
       >
-        {team.name}
+        {teamLabel}
       </span>
 
       {/* Right: result feedback or drag handle */}
@@ -202,12 +206,14 @@ function GroupCard({
   editable,
   color,
   pointsAwarded,
+  teamLabelById,
   onChange,
 }: {
   group: GroupState;
   editable: boolean;
   color: string;
   pointsAwarded?: number | null;
+  teamLabelById: Map<string, string>;
   onChange: (teams: TeamPickemEntry[]) => void;
 }) {
   const sensors = useSensors(
@@ -259,6 +265,7 @@ function GroupCard({
               <SortableTeamRow
                 key={team.team_id}
                 team={team}
+                teamLabel={teamLabelById.get(team.team_id) ?? team.name}
                 position={idx + 1}
                 disabled={!editable}
               />
@@ -276,6 +283,7 @@ function BracketMatchCard({
   slot,
   allSlots,
   teamById,
+  teamLabelById,
   bracketPicks,
   editable,
   onChange,
@@ -283,6 +291,7 @@ function BracketMatchCard({
   slot: BracketSlotPickemOverview;
   allSlots: BracketSlotPickemOverview[];
   teamById: Map<string, TeamInfo>;
+  teamLabelById: Map<string, string>;
   bracketPicks: Record<string, string | null>;
   editable: boolean;
   onChange: (teamId: string | null) => void;
@@ -308,7 +317,11 @@ function BracketMatchCard({
     slot.outcome === 'LOCAL_PEN_W' || slot.outcome === 'AWAY_PEN_W';
 
   const winnerName = !isFinished && selectedId
-    ? (homeTeam?.id === selectedId ? homeTeam?.name : awayTeam?.id === selectedId ? awayTeam?.name : null)
+    ? (homeTeam?.id === selectedId
+        ? (teamLabelById.get(homeTeam.id) ?? homeTeam.name)
+        : awayTeam?.id === selectedId
+          ? (teamLabelById.get(awayTeam.id) ?? awayTeam.name)
+          : null)
     : null;
 
   function TeamButton({
@@ -330,7 +343,7 @@ function BracketMatchCard({
       slotFeedLabel(loserFeedsFrom, true, allSlots) ??
       slotFeedLabel(feedsFrom, false, allSlots) ??
       'TBD';
-    const label = tbd ? placeholder : team.name;
+    const label = tbd ? placeholder : (teamLabelById.get(team.id) ?? team.name);
 
     return (
       <button
@@ -464,6 +477,16 @@ export default function PickemPage() {
     queryKey: ['pickem-overview'],
     queryFn: fetchPickemOverview,
   });
+
+  const teamsQuery = useQuery({
+    queryKey: ['teams'],
+    queryFn: fetchTeams,
+  });
+
+  const teamLabelById = useMemo<Map<string, string>>(
+    () => new Map((teamsQuery.data ?? []).map((t: TeamResponse) => [t.id, t.label_ca || t.name])),
+    [teamsQuery.data],
+  );
 
   // Group stage local state — initialized once from overview
   const [groupPicks, setGroupPicks] = useState<GroupState[]>([]);
@@ -627,6 +650,7 @@ export default function PickemPage() {
                       editable={group_stage.editable}
                       color={GROUP_HEADER_COLORS[idx % GROUP_HEADER_COLORS.length]}
                       pointsAwarded={overview?.points_awarded}
+                      teamLabelById={teamLabelById}
                       onChange={(teams) =>
                         setGroupPicks((prev) =>
                           prev.map((g) => (g.group_id === group.group_id ? { ...g, teams } : g)),
@@ -771,6 +795,7 @@ export default function PickemPage() {
                             slot={slot}
                             allSlots={bracket.slots}
                             teamById={teamById}
+                            teamLabelById={teamLabelById}
                             bracketPicks={bracketPicks}
                             editable={bracket.editable}
                             onChange={(teamId) =>

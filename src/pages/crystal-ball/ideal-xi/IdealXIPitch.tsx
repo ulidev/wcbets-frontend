@@ -23,6 +23,7 @@ type ResolvedPlayer = {
   id: string;
   name: string;
   teamName: string;
+  teamLabel: string;
   position: IdealXILine;
 };
 
@@ -38,6 +39,7 @@ function buildPlayerPool(
   teams: TeamResponse[],
 ): ResolvedPlayer[] {
   const teamNameById = new Map(teams.map((t) => [t.id, t.name]));
+  const teamLabelById = new Map(teams.map((t) => [t.id, t.label_ca || t.name]));
   const fromApi: ResolvedPlayer[] = [];
   for (const p of apiPlayers) {
     const line = toLine(p.position);
@@ -46,12 +48,13 @@ function buildPlayerPool(
       id: p.id,
       name: p.name,
       teamName: teamNameById.get(p.team_id) ?? '',
+      teamLabel: teamLabelById.get(p.team_id) ?? '',
       position: line,
     });
   }
   const seen = new Set(fromApi.map((p) => p.id));
   for (const p of IDEAL_XI_CATALOG_PLAYERS) {
-    if (!seen.has(p.id)) fromApi.push(p);
+    if (!seen.has(p.id)) fromApi.push({ ...p, teamLabel: p.teamName });
   }
   return fromApi;
 }
@@ -200,7 +203,7 @@ function PlayerPickerSheet({
   const filtered = useMemo(() => {
     return players
       .filter((p) => p.position === slot.line)
-      .filter((p) => !q || p.name.toLowerCase().includes(q) || p.teamName.toLowerCase().includes(q))
+      .filter((p) => !q || p.name.toLowerCase().includes(q) || p.teamName.toLowerCase().includes(q) || p.teamLabel.toLowerCase().includes(q))
       .slice(0, 40);
   }, [players, slot.line, q]);
 

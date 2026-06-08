@@ -470,6 +470,23 @@ export interface paths {
         patch: operations["override_match_result_api_v1_tournament_matches__match_id__result_override_patch"];
         trace?: never;
     };
+    "/api/v1/tournament/matches/{match_id}/mvp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set Match Mvp */
+        patch: operations["set_match_mvp_api_v1_tournament_matches__match_id__mvp_patch"];
+        trace?: never;
+    };
     "/api/v1/tournament/matches/{match_id}/players": {
         parameters: {
             query?: never;
@@ -869,6 +886,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/config/scoring/recalculate-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Recalculate All Scores */
+        post: operations["recalculate_all_scores_api_v1_config_scoring_recalculate_all_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/config/phase-multipliers": {
         parameters: {
             query?: never;
@@ -937,6 +971,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/pipeline/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Manual Sync
+         * @description Trigger a match sync immediately, bypassing the scheduler.
+         */
+        post: operations["manual_sync_api_v1_pipeline_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -961,7 +1015,7 @@ export interface components {
          * AuditEventType
          * @enum {string}
          */
-        AuditEventType: "LOGIN_SUCCESS" | "LOGIN_FAILED" | "ACCOUNT_APPROVED" | "ACCOUNT_DEACTIVATED" | "PASSWORD_CHANGED" | "ROLE_PROMOTED" | "ROLE_DEMOTED" | "MATCH_RESULT_ENTERED";
+        AuditEventType: "LOGIN_SUCCESS" | "LOGIN_FAILED" | "ACCOUNT_APPROVED" | "ACCOUNT_DEACTIVATED" | "PASSWORD_CHANGED" | "ROLE_PROMOTED" | "ROLE_DEMOTED" | "MATCH_RESULT_ENTERED" | "MATCH_MVP_SET";
         /** AuditLogResponse */
         AuditLogResponse: {
             /**
@@ -1168,6 +1222,11 @@ export interface components {
             /** New Password */
             new_password: string;
         };
+        /**
+         * Competition
+         * @enum {string}
+         */
+        Competition: "match_predictions" | "group_stage" | "bracket" | "crystal_ball";
         /** CreateBracketSlotRequest */
         CreateBracketSlotRequest: {
             /**
@@ -1249,6 +1308,8 @@ export interface components {
             name: string;
             /** Confederation */
             confederation?: string | null;
+            /** Label Ca */
+            label_ca?: string | null;
         };
         /** CrystalBallAnswerRequest */
         CrystalBallAnswerRequest: {
@@ -1547,7 +1608,10 @@ export interface components {
         LeaderboardResponse: {
             /** Entries */
             entries: components["schemas"]["LeaderboardEntryResponse"][];
-            /** Can View Predictions */
+            /**
+             * Can View Predictions
+             * @default false
+             */
             can_view_predictions: boolean;
         };
         /** LoginRequest */
@@ -1597,10 +1661,8 @@ export interface components {
             mvp_player_id: string | null;
             /** Points Awarded */
             points_awarded: number;
-            /** Direction Pts Awarded */
-            direction_pts_awarded: number;
-            /** Exact Bonus Awarded */
-            exact_bonus_awarded: number;
+            /** Result Pts Awarded */
+            result_pts_awarded: number;
             /** Mvp Pts Awarded */
             mvp_pts_awarded: number;
         };
@@ -1624,10 +1686,8 @@ export interface components {
             mvp_player_id: string | null;
             /** Points Awarded */
             points_awarded: number;
-            /** Direction Pts Awarded */
-            direction_pts_awarded: number;
-            /** Exact Bonus Awarded */
-            exact_bonus_awarded: number;
+            /** Result Pts Awarded */
+            result_pts_awarded: number;
             /** Mvp Pts Awarded */
             mvp_pts_awarded: number;
         };
@@ -1676,7 +1736,7 @@ export interface components {
          * MatchStatus
          * @enum {string}
          */
-        MatchStatus: "DEFINED" | "STARTED" | "HALF_TIME" | "FINISHED";
+        MatchStatus: "DEFINED" | "STARTED" | "HALF_TIME" | "EXTRA_TIME" | "PENALTIES" | "FINISHED";
         /** PaginatedAuditLogResponse */
         PaginatedAuditLogResponse: {
             /** Items */
@@ -1737,6 +1797,42 @@ export interface components {
          * @enum {string}
          */
         Position: "GK" | "DEF" | "MID" | "FWD";
+        /** RecalculateAllRequest */
+        RecalculateAllRequest: {
+            /**
+             * Competitions
+             * @default [
+             *       "match_predictions",
+             *       "group_stage",
+             *       "bracket",
+             *       "crystal_ball"
+             *     ]
+             */
+            competitions: components["schemas"]["Competition"][];
+        };
+        /** RecalculateAllResponse */
+        RecalculateAllResponse: {
+            /**
+             * Match Predictions
+             * @default 0
+             */
+            match_predictions: number;
+            /**
+             * Group Stage
+             * @default 0
+             */
+            group_stage: number;
+            /**
+             * Bracket
+             * @default 0
+             */
+            bracket: number;
+            /**
+             * Crystal Ball
+             * @default 0
+             */
+            crystal_ball: number;
+        };
         /** RecalculateResponse */
         RecalculateResponse: {
             /** Recalculated Predictions */
@@ -1807,22 +1903,20 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            /** Match Direction Pts */
-            match_direction_pts: number;
-            /** Match Exact Bonus */
-            match_exact_bonus: number;
+            /** Match Outcome Pts */
+            match_outcome_pts: number;
+            /** Match Goal Diff Pts */
+            match_goal_diff_pts: number;
+            /** Match Exact Score Pts */
+            match_exact_score_pts: number;
             /** Match Mvp Pts */
             match_mvp_pts: number;
-            /** Group Stage Pts 1 Correct */
-            group_stage_pts_1_correct: number;
-            /** Group Stage Pts 2 Correct */
-            group_stage_pts_2_correct: number;
-            /** Group Stage Pts 3 Correct */
-            group_stage_pts_3_correct: number;
-            /** Group Stage Pts 4 Correct */
-            group_stage_pts_4_correct: number;
-            /** Bracket Base Pts */
-            bracket_base_pts: number;
+            /** Group Stage Exact Pts */
+            group_stage_exact_pts: number;
+            /** Group Stage Swap Pts */
+            group_stage_swap_pts: number;
+            /** Group Stage Perfect Bonus */
+            group_stage_perfect_bonus: number;
         };
         /** SetCrystalBallResolutionRequest */
         SetCrystalBallResolutionRequest: {
@@ -1833,6 +1927,11 @@ export interface components {
         SetGroupFinalStandingsRequest: {
             /** Standings */
             standings: components["schemas"]["FinalStandingItem"][];
+        };
+        /** SetMatchMvpRequest */
+        SetMatchMvpRequest: {
+            /** Mvp Player Id */
+            mvp_player_id?: string | null;
         };
         /** SetMatchResultRequest */
         SetMatchResultRequest: {
@@ -1916,6 +2015,8 @@ export interface components {
             name: string;
             /** Confederation */
             confederation: string | null;
+            /** Label Ca */
+            label_ca: string | null;
         };
         /** TokenResponse */
         TokenResponse: {
@@ -1950,22 +2051,20 @@ export interface components {
         };
         /** UpdateScoringConfigRequest */
         UpdateScoringConfigRequest: {
-            /** Match Direction Pts */
-            match_direction_pts: number;
-            /** Match Exact Bonus */
-            match_exact_bonus: number;
+            /** Match Outcome Pts */
+            match_outcome_pts: number;
+            /** Match Goal Diff Pts */
+            match_goal_diff_pts: number;
+            /** Match Exact Score Pts */
+            match_exact_score_pts: number;
             /** Match Mvp Pts */
             match_mvp_pts: number;
-            /** Group Stage Pts 1 Correct */
-            group_stage_pts_1_correct: number;
-            /** Group Stage Pts 2 Correct */
-            group_stage_pts_2_correct: number;
-            /** Group Stage Pts 3 Correct */
-            group_stage_pts_3_correct: number;
-            /** Group Stage Pts 4 Correct */
-            group_stage_pts_4_correct: number;
-            /** Bracket Base Pts */
-            bracket_base_pts: number;
+            /** Group Stage Exact Pts */
+            group_stage_exact_pts: number;
+            /** Group Stage Swap Pts */
+            group_stage_swap_pts: number;
+            /** Group Stage Perfect Bonus */
+            group_stage_perfect_bonus: number;
         };
         /** UpsertPhaseMultiplierRequest */
         UpsertPhaseMultiplierRequest: {
@@ -3041,6 +3140,41 @@ export interface operations {
             };
         };
     };
+    set_match_mvp_api_v1_tournament_matches__match_id__mvp_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMatchMvpRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_match_players_api_v1_tournament_matches__match_id__players_get: {
         parameters: {
             query?: never;
@@ -3609,7 +3743,7 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3893,6 +4027,39 @@ export interface operations {
             };
         };
     };
+    recalculate_all_scores_api_v1_config_scoring_recalculate_all_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RecalculateAllRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecalculateAllResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_phase_multipliers_api_v1_config_phase_multipliers_get: {
         parameters: {
             query?: never;
@@ -3999,6 +4166,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    manual_sync_api_v1_pipeline_sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };

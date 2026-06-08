@@ -147,12 +147,12 @@ function PointChip({ label, pts }: { label: string; pts: number }) {
       className={cn(
         'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold',
         hit
-          ? 'border-green-500/30 bg-green-500/10 text-green-400'
+          ? 'border-wc-green/30 bg-wc-green/10 text-wc-green'
           : 'border-border bg-muted/40 text-muted-foreground/50',
       )}
     >
       {label}
-      <span className={cn('font-bold tabular-nums', hit ? 'text-green-300' : '')}>
+      <span className={cn('font-bold tabular-nums', hit ? 'text-wc-green' : '')}>
         {hit ? `+${pts}` : '0'}
       </span>
     </span>
@@ -176,7 +176,9 @@ const POSITION_COLORS: Record<PlayerResponse['position'], string> = {
 interface MvpPickerSheetProps {
   matchId: string;
   homeTeamName: string;
+  homeTeamLabel: string;
   awayTeamName: string;
+  awayTeamLabel: string;
   selectedPlayerId: string | null;
   onSelect: (playerId: string | null) => void;
   onClose: () => void;
@@ -185,7 +187,9 @@ interface MvpPickerSheetProps {
 function MvpPickerSheet({
   matchId,
   homeTeamName,
+  homeTeamLabel,
   awayTeamName,
+  awayTeamLabel,
   selectedPlayerId,
   onSelect,
   onClose,
@@ -257,14 +261,14 @@ function MvpPickerSheet({
     );
   }
 
-  function TeamSection({ players, teamName }: { players: PlayerResponse[]; teamName: string }) {
+  function TeamSection({ players, teamName, teamLabel }: { players: PlayerResponse[]; teamName: string; teamLabel: string }) {
     if (players.length === 0 && q) return null;
     return (
       <div>
         <div className="sticky top-0 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur">
           <TeamFlag teamName={teamName} size="sm" />
           <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            {teamName}
+            {teamLabel}
           </span>
         </div>
         {players.length === 0 ? (
@@ -340,8 +344,8 @@ function MvpPickerSheet({
           )}
           {playersQuery.data && (
             <>
-              <TeamSection players={homePlayers} teamName={homeTeamName} />
-              <TeamSection players={awayPlayers} teamName={awayTeamName} />
+              <TeamSection players={homePlayers} teamName={homeTeamName} teamLabel={homeTeamLabel} />
+              <TeamSection players={awayPlayers} teamName={awayTeamName} teamLabel={awayTeamLabel} />
               {homePlayers.length === 0 && awayPlayers.length === 0 && q && (
                 <p className="px-4 py-6 text-center text-sm text-muted-foreground">
                   No players found for "{search}".
@@ -358,12 +362,14 @@ function MvpPickerSheet({
 interface PredictionCardProps {
   match: Match;
   homeTeam: string;
+  homeTeamLabel: string;
   awayTeam: string;
+  awayTeamLabel: string;
   roundLabel: string;
   prediction: MatchPrediction | undefined;
 }
 
-function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: PredictionCardProps) {
+function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabel, roundLabel, prediction }: PredictionCardProps) {
   const queryClient = useQueryClient();
   const isLive = match.status === 'STARTED' || match.status === 'HALF_TIME';
   const isFinished = match.status === 'FINISHED';
@@ -380,12 +386,13 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
     prediction?.mvp_player_id ?? null,
   );
   const [showMvpPicker, setShowMvpPicker] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   // Fetch players lazily so we can resolve the MVP name for display
   const playersQuery = useQuery({
     queryKey: ['match-players', match.id],
     queryFn: () => fetchMatchPlayers(match.id),
-    enabled: showMvpPicker || mvpPlayerId !== null,
+    enabled: showMvpPicker || mvpPlayerId !== null || match.mvp_player_id !== null,
   });
 
   const allPlayers = [
@@ -398,6 +405,20 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
         ? homeTeam
         : awayTeam)
     : null;
+
+  const pickedMvp = playersQuery.data
+    ? allPlayers.find((p) => p.id === prediction?.mvp_player_id) ?? null
+    : null;
+  const pickedTeam = pickedMvp && playersQuery.data
+    ? (playersQuery.data.home_team.some((p) => p.id === pickedMvp.id) ? homeTeam : awayTeam)
+    : null;
+  const officialMvp = playersQuery.data
+    ? allPlayers.find((p) => p.id === match.mvp_player_id) ?? null
+    : null;
+  const officialTeam = officialMvp && playersQuery.data
+    ? (playersQuery.data.home_team.some((p) => p.id === officialMvp.id) ? homeTeam : awayTeam)
+    : null;
+  const mvpCorrect = isFinished && pickedMvp != null && pickedMvp.id === officialMvp?.id;
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -461,27 +482,56 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
               homeWins && 'text-wc-hermes',
             )}
           >
-            {homeTeam}
+            {homeTeamLabel}
           </span>
         </div>
 
         {/* Score / inputs */}
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 flex-col items-center gap-0.5">
           {isEditable ? (
-            <>
+            <div className="flex items-center gap-1.5">
               <ScoreInput value={homeInput} onChange={setHomeInput} />
               <span className="text-sm font-bold text-muted-foreground">–</span>
               <ScoreInput value={awayInput} onChange={setAwayInput} />
-            </>
+            </div>
           ) : (
-            <span
-              className={cn(
-                'font-mono text-2xl font-bold tabular-nums',
-                isLive && 'text-green-500',
+            <>
+              <span
+                className={cn(
+                  'font-mono text-2xl font-bold tabular-nums',
+                  isLive && 'text-green-500',
+                )}
+              >
+                {match.home_goals}&nbsp;–&nbsp;{match.away_goals}
+              </span>
+              {prediction && (
+                <button
+                  onClick={isFinished ? () => setDetailOpen((v) => !v) : undefined}
+                  className={cn(
+                    'flex items-center gap-1.5',
+                    isFinished && 'cursor-pointer',
+                  )}
+                >
+                  <span className="font-mono text-xs font-semibold tabular-nums text-wc-hermes">
+                    {prediction.home_goals}&nbsp;–&nbsp;{prediction.away_goals}
+                  </span>
+                  {isFinished && (
+                    <>
+                      <span className={cn(
+                        'text-xs font-bold tabular-nums',
+                        prediction.points_awarded > 0 ? 'text-wc-green' : 'text-muted-foreground',
+                      )}>
+                        {prediction.points_awarded > 0 ? `+${prediction.points_awarded}` : '0'}
+                      </span>
+                      <ChevronDown className={cn(
+                        'h-3 w-3 text-muted-foreground transition-transform duration-200',
+                        detailOpen && 'rotate-180',
+                      )} />
+                    </>
+                  )}
+                </button>
               )}
-            >
-              {match.home_goals}&nbsp;–&nbsp;{match.away_goals}
-            </span>
+            </>
           )}
         </div>
 
@@ -495,7 +545,7 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
               awayWins && 'text-wc-hermes',
             )}
           >
-            {awayTeam}
+            {awayTeamLabel}
           </span>
         </div>
       </div>
@@ -549,64 +599,71 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
         </div>
       )}
 
-      {/* User's prediction footer for live / finished matches */}
-      {(isLive || isFinished) && (
+      {/* Live: MVP pick or "no prediction" */}
+      {isLive && (!prediction || pickedMvp) && (
         <div className="border-t border-border px-4 py-2.5">
-          {prediction ? (
-            <div className="flex flex-col gap-2">
-              {/* Pick summary row */}
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  Your pick:&nbsp;
-                  <span className="font-semibold tabular-nums text-foreground">
-                    {prediction.home_goals}&nbsp;–&nbsp;{prediction.away_goals}
-                  </span>
-                  {prediction.mvp_player_id && playersQuery.data && (() => {
-                    const mvp = allPlayers.find((p) => p.id === prediction.mvp_player_id);
-                    const mvpTeam = mvp
-                      ? (playersQuery.data.home_team.some((p) => p.id === mvp.id) ? homeTeam : awayTeam)
-                      : null;
-                    return mvp ? (
-                      <span className="ml-1">
-                        · MVP: <TeamFlag teamName={mvpTeam!} size="sm" className="align-middle" /> {mvp.name}
-                      </span>
-                    ) : null;
-                  })()}
-                </p>
-                {isFinished && (
-                  <span className={cn(
-                    'text-xs font-bold tabular-nums',
-                    prediction.points_awarded > 0 ? 'text-primary' : 'text-muted-foreground',
-                  )}>
-                    {prediction.points_awarded > 0 ? `+${prediction.points_awarded}` : '0'} pts
-                  </span>
-                )}
-              </div>
-
-              {/* Points breakdown — only when finished */}
-              {isFinished && (
-                <div className="flex flex-wrap gap-1.5">
-                  <PointChip
-                    label="Outcome"
-                    pts={prediction.direction_pts_awarded}
-                  />
-                  <PointChip
-                    label="Exact score"
-                    pts={prediction.exact_bonus_awarded}
-                  />
-                  {prediction.mvp_player_id != null && (
-                    <PointChip
-                      label="MVP"
-                      pts={prediction.mvp_pts_awarded}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
+          {prediction && pickedMvp && pickedTeam ? (
+            <p className="text-xs text-muted-foreground">
+              MVP pick:&nbsp;
+              <span className="inline-flex items-center gap-1 font-semibold text-foreground">
+                <TeamFlag teamName={pickedTeam} size="sm" className="align-middle" />
+                {pickedMvp.name}
+              </span>
+            </p>
           ) : (
             <p className="text-xs text-muted-foreground/50">No prediction made</p>
           )}
         </div>
+      )}
+
+      {/* Finished: foldable detail */}
+      {isFinished && (
+        <>
+          {!prediction && (
+            <div className="border-t border-border px-4 py-2.5">
+              <p className="text-xs text-muted-foreground/50">No prediction made</p>
+            </div>
+          )}
+          {prediction && detailOpen && (
+            <div className="flex flex-col divide-y divide-border/50 border-t border-border px-4">
+              {/* Score row */}
+              <div className="flex items-center justify-between py-2">
+                <span className="text-xs text-muted-foreground">Your pick</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold tabular-nums text-sm">
+                    {prediction.home_goals}&nbsp;–&nbsp;{prediction.away_goals}
+                  </span>
+                  <PointChip label="Result" pts={prediction.result_pts_awarded} />
+                </div>
+              </div>
+
+              {/* MVP pick row — only if user picked one */}
+              {pickedMvp && pickedTeam && (
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-xs text-muted-foreground">MVP pick</span>
+                  <div className="flex items-center gap-2">
+                    <div className="grid grid-cols-[auto_1fr] items-center gap-x-1 gap-y-0.5">
+                      <TeamFlag teamName={pickedTeam} size="sm" />
+                      <span className={cn(
+                        'text-xs font-semibold',
+                        mvpCorrect ? 'text-wc-green' : 'text-red-400',
+                      )}>
+                        {pickedMvp.name}
+                      </span>
+                      {!mvpCorrect && officialMvp && officialTeam && (
+                        <>
+                          <TeamFlag teamName={officialTeam} size="sm" />
+                          <span className="text-xs text-wc-hermes">{officialMvp.name}</span>
+                        </>
+                      )}
+                    </div>
+                    <PointChip label="MVP" pts={prediction.mvp_pts_awarded} />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       {/* MVP picker sheet */}
@@ -614,7 +671,9 @@ function PredictionCard({ match, homeTeam, awayTeam, roundLabel, prediction }: P
         <MvpPickerSheet
           matchId={match.id}
           homeTeamName={homeTeam}
+          homeTeamLabel={homeTeamLabel}
           awayTeamName={awayTeam}
+          awayTeamLabel={awayTeamLabel}
           selectedPlayerId={mvpPlayerId}
           onSelect={setMvpPlayerId}
           onClose={() => setShowMvpPicker(false)}
@@ -666,6 +725,7 @@ export default function MatchesPage() {
   const isError = matchesQuery.isError || teamsQuery.isError || roundsQuery.isError;
 
   const teamMap = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.name]));
+  const teamLabelMap = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.label_ca ?? t.name]));
   const roundMap = new Map((roundsQuery.data ?? []).map((r) => [r.id, r]));
   const predictionMap = new Map((predictionsQuery.data ?? []).map((p) => [p.match_id, p]));
 
@@ -711,7 +771,9 @@ export default function MatchesPage() {
                 key={match.id}
                 match={match}
                 homeTeam={teamMap.get(match.home_team_id) ?? '—'}
+                homeTeamLabel={teamLabelMap.get(match.home_team_id) ?? '—'}
                 awayTeam={teamMap.get(match.away_team_id) ?? '—'}
+                awayTeamLabel={teamLabelMap.get(match.away_team_id) ?? '—'}
                 roundLabel={round ? getRoundLabel(round) : ''}
                 prediction={predictionMap.get(match.id)}
               />

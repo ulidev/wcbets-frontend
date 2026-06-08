@@ -1493,6 +1493,64 @@
         }
       }
     },
+    "/api/v1/tournament/matches/{match_id}/mvp": {
+      "patch": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "Set Match Mvp",
+        "operationId": "set_match_mvp_api_v1_tournament_matches__match_id__mvp_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "match_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Match Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMatchMvpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/tournament/matches/{match_id}/players": {
       "get": {
         "tags": [
@@ -2402,7 +2460,7 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
@@ -2820,6 +2878,59 @@
         ]
       }
     },
+    "/api/v1/config/scoring/recalculate-all": {
+      "post": {
+        "tags": [
+          "config"
+        ],
+        "summary": "Recalculate All Scores",
+        "operationId": "recalculate_all_scores_api_v1_config_scoring_recalculate_all_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecalculateAllRequest",
+                "default": {
+                  "competitions": [
+                    "match_predictions",
+                    "group_stage",
+                    "bracket",
+                    "crystal_ball"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecalculateAllResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/config/phase-multipliers": {
       "get": {
         "tags": [
@@ -2991,6 +3102,35 @@
           }
         }
       }
+    },
+    "/api/v1/pipeline/sync": {
+      "post": {
+        "tags": [
+          "pipeline"
+        ],
+        "summary": "Manual Sync",
+        "description": "Trigger a match sync immediately, bypassing the scheduler.",
+        "operationId": "manual_sync_api_v1_pipeline_sync_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Manual Sync Api V1 Pipeline Sync Post"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -3033,7 +3173,8 @@
           "PASSWORD_CHANGED",
           "ROLE_PROMOTED",
           "ROLE_DEMOTED",
-          "MATCH_RESULT_ENTERED"
+          "MATCH_RESULT_ENTERED",
+          "MATCH_MVP_SET"
         ],
         "title": "AuditEventType"
       },
@@ -3647,6 +3788,16 @@
         ],
         "title": "ChangePasswordRequest"
       },
+      "Competition": {
+        "type": "string",
+        "enum": [
+          "match_predictions",
+          "group_stage",
+          "bracket",
+          "crystal_ball"
+        ],
+        "title": "Competition"
+      },
       "CreateBracketSlotRequest": {
         "properties": {
           "round_id": {
@@ -3864,6 +4015,17 @@
               }
             ],
             "title": "Confederation"
+          },
+          "label_ca": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label Ca"
           }
         },
         "type": "object",
@@ -4588,6 +4750,11 @@
             },
             "type": "array",
             "title": "Entries"
+          },
+          "can_view_predictions": {
+            "type": "boolean",
+            "title": "Can View Predictions",
+            "default": false
           }
         },
         "type": "object",
@@ -4691,13 +4858,9 @@
             "type": "integer",
             "title": "Points Awarded"
           },
-          "direction_pts_awarded": {
+          "result_pts_awarded": {
             "type": "integer",
-            "title": "Direction Pts Awarded"
-          },
-          "exact_bonus_awarded": {
-            "type": "integer",
-            "title": "Exact Bonus Awarded"
+            "title": "Result Pts Awarded"
           },
           "mvp_pts_awarded": {
             "type": "integer",
@@ -4713,8 +4876,7 @@
           "away_goals",
           "mvp_player_id",
           "points_awarded",
-          "direction_pts_awarded",
-          "exact_bonus_awarded",
+          "result_pts_awarded",
           "mvp_pts_awarded"
         ],
         "title": "MatchPredictionPublicResponse"
@@ -4755,13 +4917,9 @@
             "type": "integer",
             "title": "Points Awarded"
           },
-          "direction_pts_awarded": {
+          "result_pts_awarded": {
             "type": "integer",
-            "title": "Direction Pts Awarded"
-          },
-          "exact_bonus_awarded": {
-            "type": "integer",
-            "title": "Exact Bonus Awarded"
+            "title": "Result Pts Awarded"
           },
           "mvp_pts_awarded": {
             "type": "integer",
@@ -4776,8 +4934,7 @@
           "away_goals",
           "mvp_player_id",
           "points_awarded",
-          "direction_pts_awarded",
-          "exact_bonus_awarded",
+          "result_pts_awarded",
           "mvp_pts_awarded"
         ],
         "title": "MatchPredictionResponse"
@@ -4870,6 +5027,8 @@
           "DEFINED",
           "STARTED",
           "HALF_TIME",
+          "EXTRA_TIME",
+          "PENALTIES",
           "FINISHED"
         ],
         "title": "MatchStatus"
@@ -5007,6 +5166,51 @@
         ],
         "title": "Position"
       },
+      "RecalculateAllRequest": {
+        "properties": {
+          "competitions": {
+            "items": {
+              "$ref": "#/components/schemas/Competition"
+            },
+            "type": "array",
+            "title": "Competitions",
+            "default": [
+              "match_predictions",
+              "group_stage",
+              "bracket",
+              "crystal_ball"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "RecalculateAllRequest"
+      },
+      "RecalculateAllResponse": {
+        "properties": {
+          "match_predictions": {
+            "type": "integer",
+            "title": "Match Predictions",
+            "default": 0
+          },
+          "group_stage": {
+            "type": "integer",
+            "title": "Group Stage",
+            "default": 0
+          },
+          "bracket": {
+            "type": "integer",
+            "title": "Bracket",
+            "default": 0
+          },
+          "crystal_ball": {
+            "type": "integer",
+            "title": "Crystal Ball",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "RecalculateAllResponse"
+      },
       "RecalculateResponse": {
         "properties": {
           "recalculated_predictions": {
@@ -5126,50 +5330,45 @@
             "format": "uuid",
             "title": "Id"
           },
-          "match_direction_pts": {
+          "match_outcome_pts": {
             "type": "integer",
-            "title": "Match Direction Pts"
+            "title": "Match Outcome Pts"
           },
-          "match_exact_bonus": {
+          "match_goal_diff_pts": {
             "type": "integer",
-            "title": "Match Exact Bonus"
+            "title": "Match Goal Diff Pts"
+          },
+          "match_exact_score_pts": {
+            "type": "integer",
+            "title": "Match Exact Score Pts"
           },
           "match_mvp_pts": {
             "type": "integer",
             "title": "Match Mvp Pts"
           },
-          "group_stage_pts_1_correct": {
+          "group_stage_exact_pts": {
             "type": "integer",
-            "title": "Group Stage Pts 1 Correct"
+            "title": "Group Stage Exact Pts"
           },
-          "group_stage_pts_2_correct": {
+          "group_stage_swap_pts": {
             "type": "integer",
-            "title": "Group Stage Pts 2 Correct"
+            "title": "Group Stage Swap Pts"
           },
-          "group_stage_pts_3_correct": {
+          "group_stage_perfect_bonus": {
             "type": "integer",
-            "title": "Group Stage Pts 3 Correct"
-          },
-          "group_stage_pts_4_correct": {
-            "type": "integer",
-            "title": "Group Stage Pts 4 Correct"
-          },
-          "bracket_base_pts": {
-            "type": "integer",
-            "title": "Bracket Base Pts"
+            "title": "Group Stage Perfect Bonus"
           }
         },
         "type": "object",
         "required": [
           "id",
-          "match_direction_pts",
-          "match_exact_bonus",
+          "match_outcome_pts",
+          "match_goal_diff_pts",
+          "match_exact_score_pts",
           "match_mvp_pts",
-          "group_stage_pts_1_correct",
-          "group_stage_pts_2_correct",
-          "group_stage_pts_3_correct",
-          "group_stage_pts_4_correct",
-          "bracket_base_pts"
+          "group_stage_exact_pts",
+          "group_stage_swap_pts",
+          "group_stage_perfect_bonus"
         ],
         "title": "ScoringConfigResponse"
       },
@@ -5204,6 +5403,24 @@
           "standings"
         ],
         "title": "SetGroupFinalStandingsRequest"
+      },
+      "SetMatchMvpRequest": {
+        "properties": {
+          "mvp_player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mvp Player Id"
+          }
+        },
+        "type": "object",
+        "title": "SetMatchMvpRequest"
       },
       "SetMatchResultRequest": {
         "properties": {
@@ -5410,13 +5627,25 @@
               }
             ],
             "title": "Confederation"
+          },
+          "label_ca": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label Ca"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "confederation"
+          "confederation",
+          "label_ca"
         ],
         "title": "TeamResponse"
       },
@@ -5498,49 +5727,44 @@
       },
       "UpdateScoringConfigRequest": {
         "properties": {
-          "match_direction_pts": {
+          "match_outcome_pts": {
             "type": "integer",
-            "title": "Match Direction Pts"
+            "title": "Match Outcome Pts"
           },
-          "match_exact_bonus": {
+          "match_goal_diff_pts": {
             "type": "integer",
-            "title": "Match Exact Bonus"
+            "title": "Match Goal Diff Pts"
+          },
+          "match_exact_score_pts": {
+            "type": "integer",
+            "title": "Match Exact Score Pts"
           },
           "match_mvp_pts": {
             "type": "integer",
             "title": "Match Mvp Pts"
           },
-          "group_stage_pts_1_correct": {
+          "group_stage_exact_pts": {
             "type": "integer",
-            "title": "Group Stage Pts 1 Correct"
+            "title": "Group Stage Exact Pts"
           },
-          "group_stage_pts_2_correct": {
+          "group_stage_swap_pts": {
             "type": "integer",
-            "title": "Group Stage Pts 2 Correct"
+            "title": "Group Stage Swap Pts"
           },
-          "group_stage_pts_3_correct": {
+          "group_stage_perfect_bonus": {
             "type": "integer",
-            "title": "Group Stage Pts 3 Correct"
-          },
-          "group_stage_pts_4_correct": {
-            "type": "integer",
-            "title": "Group Stage Pts 4 Correct"
-          },
-          "bracket_base_pts": {
-            "type": "integer",
-            "title": "Bracket Base Pts"
+            "title": "Group Stage Perfect Bonus"
           }
         },
         "type": "object",
         "required": [
-          "match_direction_pts",
-          "match_exact_bonus",
+          "match_outcome_pts",
+          "match_goal_diff_pts",
+          "match_exact_score_pts",
           "match_mvp_pts",
-          "group_stage_pts_1_correct",
-          "group_stage_pts_2_correct",
-          "group_stage_pts_3_correct",
-          "group_stage_pts_4_correct",
-          "bracket_base_pts"
+          "group_stage_exact_pts",
+          "group_stage_swap_pts",
+          "group_stage_perfect_bonus"
         ],
         "title": "UpdateScoringConfigRequest"
       },
