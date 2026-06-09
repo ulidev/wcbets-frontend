@@ -14,6 +14,7 @@ import CrystalBallPage from '@/pages/crystal-ball/CrystalBallPage';
 import MaintenancePage from '@/pages/maintenance/MaintenancePage';
 import CountdownPage from '@/pages/maintenance/CountdownPage';
 import { getConfig } from '@/lib/config';
+import { useAuth } from '@/hooks/useAuth';
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -48,9 +49,21 @@ const router = createBrowserRouter([
   { path: '*', element: <Navigate to="/" replace /> },
 ]);
 
+const isCooking = new URLSearchParams(window.location.search).get('cooking') === 'true';
+
 export default function App() {
   const { maintenanceMode } = getConfig();
-  if (maintenanceMode === 'maintenance') return <MaintenancePage />;
-  if (maintenanceMode === 'countdown') return <CountdownPage />;
+  const { user, isLoading } = useAuth();
+
+  if (maintenanceMode && !isCooking) {
+    if (isLoading) return null;
+
+    const isPrivileged = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN';
+    if (!isPrivileged) {
+      if (maintenanceMode === 'maintenance') return <MaintenancePage />;
+      if (maintenanceMode === 'countdown') return <CountdownPage />;
+    }
+  }
+
   return <RouterProvider router={router} />;
 }
