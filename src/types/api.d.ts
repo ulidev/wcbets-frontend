@@ -1372,6 +1372,8 @@ export interface components {
              * Format: uuid
              */
             question_id: string;
+            /** Formation Id */
+            formation_id?: string | null;
             /** Points Awarded */
             points_awarded: number;
             /** Answers */
@@ -1967,6 +1969,8 @@ export interface components {
              * Format: uuid
              */
             question_id: string;
+            /** Formation Id */
+            formation_id?: string | null;
             /** Answers */
             answers: components["schemas"]["CrystalBallAnswerRequest"][];
         };

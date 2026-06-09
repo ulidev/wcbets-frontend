@@ -20,6 +20,27 @@ export function getFormationById(id: string): IdealXIFormation | undefined {
   return IDEAL_XI_FORMATIONS.find((f) => f.id === id);
 }
 
+export type IdealXIPitchRow = {
+  y: number;
+  slots: IdealXISlot[];
+};
+
+/** Group slots sharing the same row (y) for even horizontal spacing on the pitch. */
+export function groupFormationSlotsByRow(slots: IdealXISlot[]): IdealXIPitchRow[] {
+  const byY = new Map<number, IdealXISlot[]>();
+  for (const slot of slots) {
+    const row = byY.get(slot.y) ?? [];
+    row.push(slot);
+    byY.set(slot.y, row);
+  }
+  return [...byY.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([y, rowSlots]) => ({
+      y,
+      slots: rowSlots.sort((a, b) => a.x - b.x),
+    }));
+}
+
 export function draftsFromAnswers(
   answers: { selection_index: number; player_id: string | null }[],
 ): IdealXIAnswerDraft[] {
@@ -42,4 +63,52 @@ export function isIdealXIComplete(drafts: IdealXIAnswerDraft[]): boolean {
     if (!indices.has(i)) return false;
   }
   return true;
+}
+
+/** Re-seat drafted players onto a new formation, keeping same-line picks when possible. */
+export function remapDraftsForFormation(
+  drafts: IdealXIAnswerDraft[],
+  newFormation: IdealXIFormation,
+  getPlayerLine: (playerId: string) => IdealXILine | undefined,
+): IdealXIAnswerDraft[] {
+  const availableByLine = new Map<IdealXILine, string[]>();
+  const seen = new Set<string>();
+  for (const d of drafts) {
+    if (seen.has(d.player_id)) continue;
+    const line = getPlayerLine(d.player_id);
+    if (!line) continue;
+    seen.add(d.player_id);
+    const pool = availableByLine.get(line) ?? [];
+    pool.push(d.player_id);
+    availableByLine.set(line, pool);
+  }
+
+  const assigned = new Set<string>();
+  const result: IdealXIAnswerDraft[] = [];
+
+  for (const slot of [...newFormation.slots].sort(
+    (a, b) => a.selectionIndex - b.selectionIndex,
+  )) {
+    const pool = availableByLine.get(slot.line) ?? [];
+    const atSameIndex = drafts.find((d) => d.selection_index === slot.selectionIndex);
+    let playerId: string | undefined;
+
+    if (atSameIndex && !assigned.has(atSameIndex.player_id)) {
+      const line = getPlayerLine(atSameIndex.player_id);
+      if (line === slot.line) {
+        playerId = atSameIndex.player_id;
+      }
+    }
+
+    if (!playerId) {
+      playerId = pool.find((id) => !assigned.has(id));
+    }
+
+    if (playerId) {
+      assigned.add(playerId);
+      result.push({ selection_index: slot.selectionIndex, player_id: playerId });
+    }
+  }
+
+  return result;
 }
