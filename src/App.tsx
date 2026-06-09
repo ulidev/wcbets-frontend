@@ -11,6 +11,9 @@ import MatchesPage from '@/pages/matches/MatchesPage';
 import PickemPage from '@/pages/pickem/PickemPage';
 import ProfilePage from '@/pages/profile/ProfilePage';
 import CrystalBallPage from '@/pages/crystal-ball/CrystalBallPage';
+import MaintenancePage from '@/pages/maintenance/MaintenancePage';
+import CountdownPage from '@/pages/maintenance/CountdownPage';
+import { getConfig } from '@/lib/config';
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -46,5 +49,8 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
+  const { maintenanceMode } = getConfig();
+  if (maintenanceMode === 'maintenance') return <MaintenancePage />;
+  if (maintenanceMode === 'countdown') return <CountdownPage />;
   return <RouterProvider router={router} />;
 }
