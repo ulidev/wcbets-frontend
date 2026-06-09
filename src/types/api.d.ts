@@ -141,6 +141,23 @@ export interface paths {
         patch: operations["approve_user_api_v1_users__user_id__approve_patch"];
         trace?: never;
     };
+    "/api/v1/users/{user_id}/group": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Assign Group */
+        patch: operations["assign_group_api_v1_users__user_id__group_patch"];
+        trace?: never;
+    };
     "/api/v1/users/{user_id}/deactivate": {
         parameters: {
             query?: never;
@@ -190,6 +207,41 @@ export interface paths {
         head?: never;
         /** Demote To Player */
         patch: operations["demote_to_player_api_v1_users__user_id__demote_patch"];
+        trace?: never;
+    };
+    "/api/v1/user-groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List User Groups */
+        get: operations["list_user_groups_api_v1_user_groups_get"];
+        put?: never;
+        /** Create User Group */
+        post: operations["create_user_group_api_v1_user_groups_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/user-groups/{group_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete User Group */
+        delete: operations["delete_user_group_api_v1_user_groups__group_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/tournament/teams": {
@@ -995,6 +1047,16 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ApproveWithGroupRequest */
+        ApproveWithGroupRequest: {
+            /** Group Id */
+            group_id?: string | null;
+        };
+        /** AssignGroupRequest */
+        AssignGroupRequest: {
+            /** Group Id */
+            group_id: string | null;
+        };
         /** AssignMatchToBracketSlotRequest */
         AssignMatchToBracketSlotRequest: {
             /**
@@ -1256,6 +1318,8 @@ export interface components {
             label: string;
             /** Scope */
             scope?: string | null;
+            /** @default EXACT */
+            scoring_mode: components["schemas"]["CrystalBallScoringMode"];
         };
         /** CreateGroupRequest */
         CreateGroupRequest: {
@@ -1311,6 +1375,11 @@ export interface components {
             /** Label Ca */
             label_ca?: string | null;
         };
+        /** CreateUserGroupRequest */
+        CreateUserGroupRequest: {
+            /** Name */
+            name: string;
+        };
         /** CrystalBallAnswerRequest */
         CrystalBallAnswerRequest: {
             /** Selection Index */
@@ -1319,8 +1388,8 @@ export interface components {
             player_id?: string | null;
             /** Team Id */
             team_id?: string | null;
-            /** Numeric Value */
-            numeric_value?: number | null;
+            /** Range Value */
+            range_value?: string | null;
         };
         /** CrystalBallAnswerResponse */
         CrystalBallAnswerResponse: {
@@ -1330,8 +1399,8 @@ export interface components {
             player_id: string | null;
             /** Team Id */
             team_id: string | null;
-            /** Numeric Value */
-            numeric_value: number | null;
+            /** Range Value */
+            range_value: string | null;
         };
         /**
          * CrystalBallAnswerType
@@ -1394,12 +1463,24 @@ export interface components {
             label: string;
             /** Scope */
             scope: string | null;
+            scoring_mode: components["schemas"]["CrystalBallScoringMode"];
         };
         /**
          * CrystalBallQuestionType
          * @enum {string}
          */
         CrystalBallQuestionType: "TOP_SCORER" | "TOP_ASSISTS" | "IDEAL_XI" | "FURTHEST_TEAM_PER_CONTINENT" | "MOST_CLEAN_SHEETS" | "TOURNAMENT_MVP" | "YOUNG_MVP" | "TOP_4" | "WINNER" | "MOST_YELLOW_CARDS" | "MOST_RED_CARDS" | "BIGGEST_WIN" | "YELLOW_CARDS_GAVI" | "NEYMAR_MATCHES" | "BEST_PENALTY_STOPPER" | "TOTAL_OVERHEAD_KICKS" | "TOTAL_PITCH_INVADERS" | "TOTAL_SUSPENDED_MATCHES" | "REVELATION_TEAM" | "STANDOUT_PLAYER" | "BEST_FANS" | "CHIRINGUITO_MEMES" | "TOTAL_INJURIES";
+        /** CrystalBallResolutionAnswerRequest */
+        CrystalBallResolutionAnswerRequest: {
+            /** Selection Index */
+            selection_index: number;
+            /** Player Id */
+            player_id?: string | null;
+            /** Team Id */
+            team_id?: string | null;
+            /** Numeric Value */
+            numeric_value?: number | null;
+        };
         /** CrystalBallResolutionAnswerResponse */
         CrystalBallResolutionAnswerResponse: {
             /** Selection Index */
@@ -1426,6 +1507,11 @@ export interface components {
             /** Answers */
             answers: components["schemas"]["CrystalBallResolutionAnswerResponse"][];
         };
+        /**
+         * CrystalBallScoringMode
+         * @enum {string}
+         */
+        CrystalBallScoringMode: "EXACT" | "UNORDERED" | "PARTIAL_CREDIT";
         /** DeadlineConfigResponse */
         DeadlineConfigResponse: {
             /**
@@ -1597,6 +1683,8 @@ export interface components {
              * Format: uuid
              */
             user_id: string;
+            /** Username */
+            username: string;
             /** First Name */
             first_name: string;
             /** Last Name */
@@ -1845,6 +1933,8 @@ export interface components {
              * Format: email
              */
             email: string;
+            /** Username */
+            username: string;
             /** First Name */
             first_name: string;
             /** Last Name */
@@ -1921,7 +2011,7 @@ export interface components {
         /** SetCrystalBallResolutionRequest */
         SetCrystalBallResolutionRequest: {
             /** Answers */
-            answers: components["schemas"]["CrystalBallAnswerRequest"][];
+            answers: components["schemas"]["CrystalBallResolutionAnswerRequest"][];
         };
         /** SetGroupFinalStandingsRequest */
         SetGroupFinalStandingsRequest: {
@@ -2080,6 +2170,8 @@ export interface components {
             id: string;
             /** Email */
             email: string;
+            /** Username */
+            username: string;
             /** First Name */
             first_name: string;
             /** Last Name */
@@ -2089,12 +2181,33 @@ export interface components {
             approved: boolean;
             /** Active */
             active: boolean;
+            group: components["schemas"]["UserGroupSummary"] | null;
             /** Match Prediction Score */
             match_prediction_score: number;
             /** Pickem Score */
             pickem_score: number;
             /** Crystal Ball Score */
             crystal_ball_score: number;
+        };
+        /** UserGroupResponse */
+        UserGroupResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+        };
+        /** UserGroupSummary */
+        UserGroupSummary: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
         };
         /** UserResponse */
         UserResponse: {
@@ -2105,6 +2218,8 @@ export interface components {
             id: string;
             /** Email */
             email: string;
+            /** Username */
+            username: string;
             /** First Name */
             first_name: string;
             /** Last Name */
@@ -2114,6 +2229,7 @@ export interface components {
             approved: boolean;
             /** Active */
             active: boolean;
+            group: components["schemas"]["UserGroupSummary"] | null;
         };
         /** ValidationError */
         ValidationError: {
@@ -2354,7 +2470,44 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApproveWithGroupRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_group_api_v1_users__user_id__group_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignGroupRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             204: {
@@ -2438,6 +2591,88 @@ export interface operations {
             header?: never;
             path: {
                 user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_user_groups_api_v1_user_groups_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserGroupResponse"][];
+                };
+            };
+        };
+    };
+    create_user_group_api_v1_user_groups_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserGroupRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserGroupResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_user_group_api_v1_user_groups__group_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                group_id: string;
             };
             cookie?: never;
         };

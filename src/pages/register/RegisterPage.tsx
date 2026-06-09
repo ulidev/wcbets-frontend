@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  const [username, setUsername] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -30,7 +31,7 @@ export default function RegisterPage() {
     setError('');
     setIsSubmitting(true);
     try {
-      await register({ email, first_name: firstName, last_name: lastName, password });
+      await register({ username, email, first_name: firstName, last_name: lastName, password });
       navigate('/pending-approval', {
         replace: true,
         state: { email, firstName, lastName },
@@ -39,7 +40,7 @@ export default function RegisterPage() {
       const status = await getHttpErrorStatus(err);
       if (status === 409) {
         setError(
-          'This email is already registered. Names can repeat — use a different email or sign in.',
+          'This email or username is already taken. Try a different one or sign in.',
         );
       } else {
         setError('Registration failed. Please check your details and try again.');
@@ -69,6 +70,22 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+            <div>
+              <label htmlFor="username" className="mb-1.5 block text-sm font-medium">
+                Username
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none transition focus:ring-2 focus:ring-ring"
+                placeholder="alexsmith"
+                autoComplete="username"
+                required
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="firstName" className="mb-1.5 block text-sm font-medium">

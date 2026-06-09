@@ -299,6 +299,67 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApproveWithGroupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/{user_id}/group": {
+      "patch": {
+        "tags": [
+          "users"
+        ],
+        "summary": "Assign Group",
+        "operationId": "assign_group_api_v1_users__user_id__group_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignGroupRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "Successful Response"
@@ -419,6 +480,121 @@
               "type": "string",
               "format": "uuid",
               "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/user-groups": {
+      "get": {
+        "tags": [
+          "user-groups"
+        ],
+        "summary": "List User Groups",
+        "operationId": "list_user_groups_api_v1_user_groups_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UserGroupResponse"
+                  },
+                  "type": "array",
+                  "title": "Response List User Groups Api V1 User Groups Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "user-groups"
+        ],
+        "summary": "Create User Group",
+        "operationId": "create_user_group_api_v1_user_groups_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserGroupResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/user-groups/{group_id}": {
+      "delete": {
+        "tags": [
+          "user-groups"
+        ],
+        "summary": "Delete User Group",
+        "operationId": "delete_user_group_api_v1_user_groups__group_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "group_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Group Id"
             }
           }
         ],
@@ -3135,6 +3311,45 @@
   },
   "components": {
     "schemas": {
+      "ApproveWithGroupRequest": {
+        "properties": {
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          }
+        },
+        "type": "object",
+        "title": "ApproveWithGroupRequest"
+      },
+      "AssignGroupRequest": {
+        "properties": {
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_id"
+        ],
+        "title": "AssignGroupRequest"
+      },
       "AssignMatchToBracketSlotRequest": {
         "properties": {
           "match_id": {
@@ -3874,6 +4089,10 @@
               }
             ],
             "title": "Scope"
+          },
+          "scoring_mode": {
+            "$ref": "#/components/schemas/CrystalBallScoringMode",
+            "default": "EXACT"
           }
         },
         "type": "object",
@@ -4034,6 +4253,19 @@
         ],
         "title": "CreateTeamRequest"
       },
+      "CreateUserGroupRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CreateUserGroupRequest"
+      },
       "CrystalBallAnswerRequest": {
         "properties": {
           "selection_index": {
@@ -4065,16 +4297,16 @@
             ],
             "title": "Team Id"
           },
-          "numeric_value": {
+          "range_value": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Numeric Value"
+            "title": "Range Value"
           }
         },
         "type": "object",
@@ -4113,16 +4345,16 @@
             ],
             "title": "Team Id"
           },
-          "numeric_value": {
+          "range_value": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Numeric Value"
+            "title": "Range Value"
           }
         },
         "type": "object",
@@ -4130,7 +4362,7 @@
           "selection_index",
           "player_id",
           "team_id",
-          "numeric_value"
+          "range_value"
         ],
         "title": "CrystalBallAnswerResponse"
       },
@@ -4250,6 +4482,9 @@
               }
             ],
             "title": "Scope"
+          },
+          "scoring_mode": {
+            "$ref": "#/components/schemas/CrystalBallScoringMode"
           }
         },
         "type": "object",
@@ -4260,7 +4495,8 @@
           "max_selections",
           "points_value",
           "label",
-          "scope"
+          "scope",
+          "scoring_mode"
         ],
         "title": "CrystalBallQuestionResponse"
       },
@@ -4292,6 +4528,55 @@
           "TOTAL_INJURIES"
         ],
         "title": "CrystalBallQuestionType"
+      },
+      "CrystalBallResolutionAnswerRequest": {
+        "properties": {
+          "selection_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Selection Index"
+          },
+          "player_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Player Id"
+          },
+          "team_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Team Id"
+          },
+          "numeric_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numeric Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "selection_index"
+        ],
+        "title": "CrystalBallResolutionAnswerRequest"
       },
       "CrystalBallResolutionAnswerResponse": {
         "properties": {
@@ -4371,6 +4656,15 @@
           "answers"
         ],
         "title": "CrystalBallResolutionResponse"
+      },
+      "CrystalBallScoringMode": {
+        "type": "string",
+        "enum": [
+          "EXACT",
+          "UNORDERED",
+          "PARTIAL_CREDIT"
+        ],
+        "title": "CrystalBallScoringMode"
       },
       "DeadlineConfigResponse": {
         "properties": {
@@ -4720,6 +5014,10 @@
             "format": "uuid",
             "title": "User Id"
           },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
           "first_name": {
             "type": "string",
             "title": "First Name"
@@ -4736,6 +5034,7 @@
         "type": "object",
         "required": [
           "user_id",
+          "username",
           "first_name",
           "last_name",
           "points"
@@ -5231,6 +5530,10 @@
             "format": "email",
             "title": "Email"
           },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
           "first_name": {
             "type": "string",
             "title": "First Name"
@@ -5247,6 +5550,7 @@
         "type": "object",
         "required": [
           "email",
+          "username",
           "first_name",
           "last_name",
           "password"
@@ -5376,7 +5680,7 @@
         "properties": {
           "answers": {
             "items": {
-              "$ref": "#/components/schemas/CrystalBallAnswerRequest"
+              "$ref": "#/components/schemas/CrystalBallResolutionAnswerRequest"
             },
             "type": "array",
             "title": "Answers"
@@ -5792,6 +6096,10 @@
             "type": "string",
             "title": "Email"
           },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
           "first_name": {
             "type": "string",
             "title": "First Name"
@@ -5810,6 +6118,16 @@
           "active": {
             "type": "boolean",
             "title": "Active"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserGroupSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "match_prediction_score": {
             "type": "integer",
@@ -5828,16 +6146,56 @@
         "required": [
           "id",
           "email",
+          "username",
           "first_name",
           "last_name",
           "role",
           "approved",
           "active",
+          "group",
           "match_prediction_score",
           "pickem_score",
           "crystal_ball_score"
         ],
         "title": "UserAdminView"
+      },
+      "UserGroupResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "UserGroupResponse"
+      },
+      "UserGroupSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "UserGroupSummary"
       },
       "UserResponse": {
         "properties": {
@@ -5849,6 +6207,10 @@
           "email": {
             "type": "string",
             "title": "Email"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
           },
           "first_name": {
             "type": "string",
@@ -5868,17 +6230,29 @@
           "active": {
             "type": "boolean",
             "title": "Active"
+          },
+          "group": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserGroupSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
         "required": [
           "id",
           "email",
+          "username",
           "first_name",
           "last_name",
           "role",
           "approved",
-          "active"
+          "active",
+          "group"
         ],
         "title": "UserResponse"
       },
