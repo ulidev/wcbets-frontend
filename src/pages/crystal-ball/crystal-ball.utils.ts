@@ -31,7 +31,7 @@ export function savedToDrafts(answers: CrystalBallAnswerResponse[]): AnswerDraft
     selection_index: a.selection_index,
     player_id: a.player_id ?? undefined,
     team_id: a.team_id ?? undefined,
-    numeric_value: a.numeric_value ?? undefined,
+    range_value: a.range_value ?? undefined,
   }));
 }
 
@@ -46,7 +46,7 @@ export function isDraftComplete(
     return isIdealXIComplete(xiDrafts);
   }
   if (question.answer_type === 'NUMBER') {
-    return drafts[0]?.numeric_value != null;
+    return drafts[0]?.range_value != null;
   }
   return drafts.length === question.max_selections;
 }
@@ -54,7 +54,7 @@ export function isDraftComplete(
 export function draftsEqual(a: AnswerDraft[], b: AnswerDraft[]): boolean {
   if (a.length !== b.length) return false;
   const key = (d: AnswerDraft) =>
-    `${d.selection_index}:${d.team_id ?? ''}:${d.player_id ?? ''}:${d.numeric_value ?? ''}`;
+    `${d.selection_index}:${d.team_id ?? ''}:${d.player_id ?? ''}:${d.range_value ?? ''}`;
   const sorted = (list: AnswerDraft[]) =>
     [...list].sort((x, y) => x.selection_index - y.selection_index).map(key);
   return sorted(a).every((k, i) => k === sorted(b)[i]);

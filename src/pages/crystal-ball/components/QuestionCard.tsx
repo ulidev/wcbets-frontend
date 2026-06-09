@@ -96,13 +96,11 @@ export function QuestionCard({
     );
   };
 
-  const handleNumberChange = (val: string) => {
-    const n = val === '' ? undefined : Number(val);
-    onDraftsChange([{ selection_index: 0, numeric_value: n }]);
+  const handleRangeChange = (val: string) => {
+    onDraftsChange([{ selection_index: 0, range_value: val || undefined }]);
   };
 
-  const numberVal =
-    question.answer_type === 'NUMBER' ? (drafts[0]?.numeric_value ?? '') : '';
+  const rangeVal = question.answer_type === 'NUMBER' ? (drafts[0]?.range_value ?? '') : '';
 
   const scopeLabel = question.scope ? ` · ${question.scope}` : '';
 
@@ -163,14 +161,32 @@ export function QuestionCard({
         />
       )}
 
-      {question.answer_type === 'NUMBER' && (
+      {question.answer_type === 'NUMBER' && question.allowed_ranges && question.allowed_ranges.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {question.allowed_ranges.map((range) => (
+            <button
+              key={range}
+              type="button"
+              disabled={locked}
+              onClick={() => handleRangeChange(rangeVal === range ? '' : range)}
+              className={`rounded-full border px-3 py-1 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+                rangeVal === range
+                  ? 'border-wc-gold bg-wc-gold text-wc-navy'
+                  : 'border-wc-light-gray bg-transparent text-wc-card-text hover:border-wc-gold'
+              }`}
+            >
+              {range}
+            </button>
+          ))}
+        </div>
+      )}
+      {question.answer_type === 'NUMBER' && (!question.allowed_ranges || question.allowed_ranges.length === 0) && (
         <input
-          type="number"
-          min={0}
-          value={numberVal}
+          type="text"
+          value={rangeVal}
           disabled={locked}
-          onChange={(e) => handleNumberChange(e.target.value)}
-          placeholder="Introdueix un número…"
+          onChange={(e) => handleRangeChange(e.target.value)}
+          placeholder="Introdueix un valor…"
           className="w-full rounded-xl border border-wc-light-gray bg-white px-3 py-2.5 text-sm text-wc-card-text focus:outline-none focus:ring-2 focus:ring-wc-green/40 disabled:cursor-not-allowed disabled:opacity-60"
         />
       )}
