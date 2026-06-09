@@ -1,6 +1,6 @@
 import formationsJson from './ideal-xi.formations.json';
 import playersJson from './ideal-xi.players.json';
-import type { IdealXIAnswerDraft, IdealXIFormation, IdealXILine, IdealXIPlayerCatalogEntry } from './types';
+import type { IdealXIAnswerDraft, IdealXIFormation, IdealXILine, IdealXIPlayerCatalogEntry, IdealXISlot } from './types';
 
 export const IDEAL_XI_MAX_PLAYERS = 11;
 
@@ -24,6 +24,15 @@ export type IdealXIPitchRow = {
   y: number;
   slots: IdealXISlot[];
 };
+
+/** Max slots sharing the exact same y row (for wide-pitch scroll). */
+export function getMaxSlotsPerExactRow(slots: IdealXISlot[]): number {
+  const byY = new Map<number, number>();
+  for (const slot of slots) {
+    byY.set(slot.y, (byY.get(slot.y) ?? 0) + 1);
+  }
+  return Math.max(0, ...byY.values());
+}
 
 /** Group slots sharing the same row (y) for even horizontal spacing on the pitch. */
 export function groupFormationSlotsByRow(slots: IdealXISlot[]): IdealXIPitchRow[] {

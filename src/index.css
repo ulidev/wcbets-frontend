@@ -546,19 +546,35 @@
   left: var(--ideal-xi-inset-x);
 }
 
-.ideal-xi-pitch-row {
-  position: absolute;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  transform: translateY(-50%);
-  gap: var(--ideal-xi-slot-gap);
+.ideal-xi-root--sheet-open .ideal-xi-pitch-wrap {
+  pointer-events: none;
 }
 
-.ideal-xi-pitch-row--solo {
-  justify-content: center;
+.ideal-xi-pitch-slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+/* Delanteros por debajo; medios/defensa/porter no se encogen al compactar FWD */
+.ideal-xi-pitch-slot--fwd {
+  z-index: 1;
+}
+
+.ideal-xi-pitch-slot--mid {
+  z-index: 2;
+}
+
+.ideal-xi-pitch-slot--def {
+  z-index: 3;
+}
+
+.ideal-xi-pitch-slot--gk {
+  z-index: 4;
+}
+
+.ideal-xi-pitch-slot--fwd-compact .ideal-xi-slot {
+  width: 3.45rem;
 }
 
 @media (max-width: 639px) {
@@ -577,6 +593,10 @@
 
   .ideal-xi-pitch--wide-row {
     min-width: calc(5 * var(--ideal-xi-slot-w) + 4 * var(--ideal-xi-slot-gap) + 1rem);
+  }
+
+  .ideal-xi-pitch-slot--fwd-compact .ideal-xi-slot {
+    width: 4.35rem;
   }
 }
 
@@ -641,6 +661,22 @@
   padding: 0.3rem 0.2rem 0.4rem;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
   transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.ideal-xi-pitch-slot--fwd-compact .ideal-xi-slot-card {
+  height: 4.35rem;
+  padding: 0.2rem 0.15rem 0.3rem;
+  gap: 0.1rem;
+}
+
+.ideal-xi-pitch-slot--fwd-compact .ideal-xi-slot-avatar {
+  height: 1.5rem;
+  width: 1.5rem;
+  font-size: 0.5625rem;
+}
+
+.ideal-xi-pitch-slot--fwd-compact .ideal-xi-slot-name {
+  font-size: 0.5rem;
 }
 
 /* GK sits on top when rows are tight */
@@ -755,7 +791,7 @@
 .ideal-xi-sheet-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 200;
   background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: flex-end;

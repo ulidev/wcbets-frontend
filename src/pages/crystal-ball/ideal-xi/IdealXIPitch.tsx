@@ -11,7 +11,7 @@ import {
   IDEAL_XI_FORMATIONS,
   IDEAL_XI_MAX_PLAYERS,
   getFormationById,
-  groupFormationSlotsByRow,
+  getMaxSlotsPerExactRow,
   remapDraftsForFormation,
 } from './ideal-xi.data';
 import { buildPlayerPool } from './ideal-xi.players';
@@ -41,12 +41,17 @@ export function IdealXIPitch({
 
   const formation = getFormationById(formationId) ?? IDEAL_XI_FORMATIONS[0]!;
 
-  const pitchRows = useMemo(
-    () => groupFormationSlotsByRow(formation.slots),
+  const maxRowWidth = useMemo(
+    () => getMaxSlotsPerExactRow(formation.slots),
     [formation.slots],
   );
 
-  const hasWideRow = pitchRows.some((row) => row.slots.length >= 5);
+  const forwardCount = useMemo(
+    () => formation.slots.filter((s) => s.line === 'FWD').length,
+    [formation.slots],
+  );
+
+  const compactForwards = forwardCount >= 3;
 
   const { data: apiPlayers = [] } = useQuery({
     queryKey: ['ideal-xi-players'],
@@ -97,7 +102,7 @@ export function IdealXIPitch({
   }
 
   return (
-    <div className="ideal-xi-root">
+    <div className={cn('ideal-xi-root', (activeSlot || formationOpen) && 'ideal-xi-root--sheet-open')}>
       <div className="mb-3 flex flex-col gap-2">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-semibold text-wc-dark-gray">
@@ -120,7 +125,10 @@ export function IdealXIPitch({
 
       <div className="ideal-xi-pitch-wrap">
         <div
-          className={cn('ideal-xi-pitch', hasWideRow && 'ideal-xi-pitch--wide-row')}
+          className={cn(
+            'ideal-xi-pitch',
+            maxRowWidth >= 5 && 'ideal-xi-pitch--wide-row',
+          )}
           aria-label="Camp de l'onze ideal"
         >
           <div className="ideal-xi-pitch-line ideal-xi-pitch-line--half" />
@@ -129,31 +137,29 @@ export function IdealXIPitch({
           <div className="ideal-xi-pitch-box ideal-xi-pitch-box--bottom" />
 
           <div className="ideal-xi-pitch-slots">
-            {pitchRows.map((row) => (
-              <div
-                key={row.y}
-                className={cn(
-                  'ideal-xi-pitch-row',
-                  row.slots.length === 1 && 'ideal-xi-pitch-row--solo',
-                )}
-                style={{ top: `${row.y}%` }}
-              >
-                {row.slots.map((slot) => {
-                  const playerId = draftByIndex.get(slot.selectionIndex);
-                  const player = playerId ? playerById.get(playerId) : undefined;
-                  return (
-                    <SlotCard
-                      key={`${formation.id}-${slot.selectionIndex}`}
-                      slot={slot}
-                      player={player}
-                      locked={locked}
-                      onClick={() => !locked && setActiveSlot(slot)}
-                      onClear={() => clearSlot(slot.selectionIndex)}
-                    />
-                  );
-                })}
-              </div>
-            ))}
+            {formation.slots.map((slot) => {
+              const playerId = draftByIndex.get(slot.selectionIndex);
+              const player = playerId ? playerById.get(playerId) : undefined;
+              return (
+                <div
+                  key={`${formation.id}-${slot.selectionIndex}`}
+                  className={cn(
+                    'ideal-xi-pitch-slot',
+                    `ideal-xi-pitch-slot--${slot.line.toLowerCase()}`,
+                    slot.line === 'FWD' && compactForwards && 'ideal-xi-pitch-slot--fwd-compact',
+                  )}
+                  style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
+                >
+                  <SlotCard
+                    slot={slot}
+                    player={player}
+                    locked={locked}
+                    onClick={() => !locked && setActiveSlot(slot)}
+                    onClear={() => clearSlot(slot.selectionIndex)}
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
