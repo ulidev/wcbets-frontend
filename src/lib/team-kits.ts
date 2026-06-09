@@ -100,8 +100,27 @@ export function getTeamKitColors(teamName: string): string[] {
   return [...(WC_2026_KIT_PRIMARIES[key] ?? DEFAULT_KIT)];
 }
 
+function isWhiteKitColor(hex: string): boolean {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return false;
+  return rgb.r >= 0xf0 && rgb.g >= 0xf0 && rgb.b >= 0xf0;
+}
+
+/**
+ * Kit colors for borders / stripes. Two-color kits with white use the non-white
+ * color only so borders stay visible on white card backgrounds.
+ */
+export function getTeamKitDisplayColors(teamName: string): string[] {
+  const colors = getTeamKitColors(teamName);
+  if (colors.length === 2 && colors.some(isWhiteKitColor)) {
+    const nonWhite = colors.filter((c) => !isWhiteKitColor(c));
+    if (nonWhite.length === 1) return nonWhite;
+  }
+  return colors;
+}
+
 export function getTeamKitPrimary(teamName: string): string {
-  return getTeamKitColors(teamName)[0] ?? DEFAULT_KIT[0];
+  return getTeamKitDisplayColors(teamName)[0] ?? DEFAULT_KIT[0];
 }
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -142,7 +161,7 @@ export function getTeamKitAccent(teamName: string): string {
 }
 
 export function getTeamKitTheme(teamName: string): TeamKitTheme {
-  const colors = getTeamKitColors(teamName);
+  const colors = getTeamKitDisplayColors(teamName);
   return {
     colors,
     fill: kitColorsGradient(colors, '160deg'),

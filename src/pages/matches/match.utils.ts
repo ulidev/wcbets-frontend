@@ -1,4 +1,5 @@
-import { getTeamKitColors, getTeamKitPrimary, kitColorsGradient } from '@/lib/team-kits';
+import type { CSSProperties } from 'react';
+import { getTeamKitDisplayColors, getTeamKitPrimary, kitColorsGradient } from '@/lib/team-kits';
 
 /** FIFA-style 3-letter code from canonical team name. */
 export function teamFifaCode(teamName: string): string {
@@ -64,21 +65,21 @@ export function teamAccentColor(teamName: string): string {
 
 /** Top / side stripe gradient from kit colors. */
 export function teamKitStripe(teamName: string): string {
-  const colors = getTeamKitColors(teamName);
+  const colors = getTeamKitDisplayColors(teamName);
   if (colors.length <= 1) return colors[0] ?? '#d1d5db';
   return kitColorsGradient(colors, '90deg');
 }
 
 /** Full-card border gradient from kit colors (1–3 bands). */
 export function teamCardBorderGradient(teamName: string, side: 'home' | 'away'): string {
-  const colors = getTeamKitColors(teamName);
+  const colors = getTeamKitDisplayColors(teamName);
   const angle = side === 'home' ? '135deg' : '225deg';
   const c1 = colors[0] ?? '#64748b';
   const c2 = colors[1] ?? c1;
   const c3 = colors[2];
 
   if (!colors[1]) {
-    return `linear-gradient(${angle}, ${c1} 0%, color-mix(in srgb, ${c1} 55%, #ffffff) 100%)`;
+    return `linear-gradient(${angle}, ${c1} 0%, color-mix(in srgb, ${c1} 72%, #000000) 100%)`;
   }
 
   if (!c3) {
@@ -89,3 +90,24 @@ export function teamCardBorderGradient(teamName: string, side: 'home' | 'away'):
 }
 
 export const WC_2026_CENTER_LOGO = '/FIFA World Cup 2026.jpeg';
+
+/** Border-only highlight for MatchOddsBar when the user picks a score outcome. */
+export function getMatchOddsCellSurface(
+  variant: 'home' | 'draw' | 'away',
+  teamName: string,
+  isActive: boolean,
+): { className: string; style?: CSSProperties } {
+  if (!isActive) {
+    return { className: 'match-odds-bar__cell--neutral' };
+  }
+
+  if (variant === 'draw') {
+    return { className: 'match-odds-bar__cell--draw' };
+  }
+
+  const side = variant === 'home' ? 'home' : 'away';
+  return {
+    className: 'match-odds-bar__cell--team',
+    style: { '--team-border': teamCardBorderGradient(teamName, side) } as CSSProperties,
+  };
+}

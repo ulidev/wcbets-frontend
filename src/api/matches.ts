@@ -23,6 +23,9 @@ export const fetchRounds = (): Promise<RoundResponse[]> =>
 export const fetchMyPredictions = (): Promise<MatchPredictionResponse[]> =>
   api.get('api/v1/predictions/matches').json<MatchPredictionResponse[]>();
 
+export const fetchUserMatchPredictions = (userId: string): Promise<MatchPredictionResponse[]> =>
+  api.get(`api/v1/predictions/matches/users/${userId}`).json<MatchPredictionResponse[]>();
+
 export const createMatchPrediction = (
   body: CreateMatchPredictionRequest,
 ): Promise<MatchPredictionResponse> =>

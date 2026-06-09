@@ -97,15 +97,13 @@ function EntryRow({
     clickable && 'cursor-pointer',
   );
 
-  if (!clickable || game === 'match') {
+  if (!clickable) {
     return <div className={className}>{content}</div>;
   }
 
-  const gameParam = game === 'crystal-ball' ? 'crystal-ball' : 'pickem';
-
   return (
     <Link
-      to={`/leaderboard/user/${entry.user_id}?game=${gameParam}`}
+      to={`/leaderboard/user/${entry.user_id}?game=${game}`}
       state={{
         firstName: entry.first_name,
         lastName: entry.last_name,
@@ -183,7 +181,7 @@ export default function LeaderboardPage() {
       />
 
       <div className="p-4">
-        {rowsClickable && activeTab !== 'match' && (
+        {rowsClickable && (
           <p className="mb-3 text-xs text-muted-foreground">
             Toca un jugador per veure les seves prediccions.
           </p>

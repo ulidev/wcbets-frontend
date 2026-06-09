@@ -1188,3 +1188,76 @@
   padding: 0.15rem 0.55rem;
   background: color-mix(in srgb, var(--color-wc-hermes) 8%, #fff);
 }
+
+/* ── Match odds bar (opening 1X2) ── */
+
+.match-odds-bar {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-wc-card-text) 8%, transparent);
+}
+
+.match-odds-bar__heading {
+  margin: 0 0 0.4rem;
+  text-align: center;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-wc-dark-gray);
+  opacity: 0.85;
+}
+
+.match-odds-bar__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+}
+
+.match-odds-bar__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.35rem 0.25rem;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.match-odds-bar__cell--neutral {
+  border: 1px solid color-mix(in srgb, var(--color-wc-light-gray) 70%, transparent);
+}
+
+.match-odds-bar__cell--draw {
+  border: 2px solid color-mix(in srgb, var(--color-wc-dark-gray) 38%, white);
+}
+
+.match-odds-bar__cell--team {
+  border: 2px solid transparent;
+  background-image: linear-gradient(#ffffff, #ffffff), var(--team-border);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.match-odds-bar__label {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-wc-dark-gray);
+}
+
+.match-odds-bar__value {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-wc-card-text);
+  line-height: 1.2;
+}
+
+.match-odds-bar__mult {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  color: var(--color-wc-green);
+  line-height: 1;
+}
