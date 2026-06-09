@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 import { wcBtnPrimaryFull, wcFontBody } from '@/lib/wc-ui';
 import { PageChrome } from '@/components/app/PageChrome';
 import { TeamFlag } from '@/components/app/TeamFlag';
+import { MatchScoreboard } from './components/MatchScoreboard';
 
 type Match = components['schemas']['MatchResponse'];
 type Phase = components['schemas']['Phase'];
@@ -62,8 +63,8 @@ function getRoundLabel(round: RoundResponse): string {
 function StatusBadge({ status }: { status: Match['status'] }) {
   if (status === 'STARTED') {
     return (
-      <span className="flex items-center gap-1.5 rounded-full bg-green-500/15 px-2.5 py-1 text-xs font-bold text-green-500">
-        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500" />
+      <span className="flex items-center gap-1.5 rounded-full bg-wc-hermes/10 px-2.5 py-1 text-xs font-bold text-wc-hermes">
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-wc-hermes" />
         LIVE
       </span>
     );
@@ -119,24 +120,6 @@ function TimeRemaining({ scheduledAt }: { scheduledAt: string }) {
       <Clock className="h-3 w-3" />
       {state.label}
     </span>
-  );
-}
-
-function ScoreInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  return (
-    <input
-      type="number"
-      min={0}
-      max={20}
-      value={value}
-      onChange={(e) => {
-        const raw = e.target.value;
-        if (raw === '' || /^\d{1,2}$/.test(raw)) onChange(raw);
-      }}
-      className="h-11 w-11 rounded-lg border border-border bg-background text-center text-xl font-bold tabular-nums focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-      inputMode="numeric"
-      placeholder="–"
-    />
   );
 }
 
@@ -451,14 +434,28 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
   const homeWins = (isLive || isFinished) && match.home_goals > match.away_goals;
   const awayWins = (isLive || isFinished) && match.away_goals > match.home_goals;
 
+  const liveMinute =
+    match.status === 'HALF_TIME' ? 'HT' : match.status === 'STARTED' ? 'LIVE' : null;
+
+  const predictionLine =
+    !isEditable && prediction
+      ? `Your pick ${prediction.home_goals} – ${prediction.away_goals}`
+      : null;
+
+  const predictionSuffix =
+    isFinished && prediction ? (
+      <span
+        className={cn(
+          'font-bold',
+          prediction.points_awarded > 0 ? 'text-wc-green' : 'text-muted-foreground',
+        )}
+      >
+        {prediction.points_awarded > 0 ? `+${prediction.points_awarded}` : '0'}
+      </span>
+    ) : null;
+
   return (
-    <div
-      className={cn(
-        'overflow-hidden rounded-xl border border-border bg-card',
-        isLive && 'border-green-500/30',
-      )}
-    >
-      {/* Header: time + round label + status / countdown */}
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       <div className="flex items-center justify-between border-b border-border bg-muted/30 px-3 py-2">
         <span className="text-xs text-muted-foreground">
           {formatMatchTime(match.scheduled_at)} · {roundLabel}
@@ -470,87 +467,32 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         )}
       </div>
 
-      {/* Teams + score area */}
-      <div className="flex items-center gap-2 px-4 py-4">
-        {/* Home team */}
-        <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
-          <TeamFlag teamName={homeTeam} size="lg" />
-          <span
-            className={cn(
-              'w-full truncate text-center text-sm uppercase',
-              wcFontBody,
-              homeWins && 'text-wc-hermes',
-            )}
-          >
-            {homeTeamLabel}
-          </span>
-        </div>
-
-        {/* Score / inputs */}
-        <div className="flex shrink-0 flex-col items-center gap-0.5">
-          {isEditable ? (
-            <div className="flex items-center gap-1.5">
-              <ScoreInput value={homeInput} onChange={setHomeInput} />
-              <span className="text-sm font-bold text-muted-foreground">–</span>
-              <ScoreInput value={awayInput} onChange={setAwayInput} />
-            </div>
-          ) : (
-            <>
-              <span
-                className={cn(
-                  'font-mono text-2xl font-bold tabular-nums',
-                  isLive && 'text-green-500',
-                )}
-              >
-                {match.home_goals}&nbsp;–&nbsp;{match.away_goals}
-              </span>
-              {prediction && (
-                <button
-                  onClick={isFinished ? () => setDetailOpen((v) => !v) : undefined}
-                  className={cn(
-                    'flex items-center gap-1.5',
-                    isFinished && 'cursor-pointer',
-                  )}
-                >
-                  <span className="font-mono text-xs font-semibold tabular-nums text-wc-hermes">
-                    {prediction.home_goals}&nbsp;–&nbsp;{prediction.away_goals}
-                  </span>
-                  {isFinished && (
-                    <>
-                      <span className={cn(
-                        'text-xs font-bold tabular-nums',
-                        prediction.points_awarded > 0 ? 'text-wc-green' : 'text-muted-foreground',
-                      )}>
-                        {prediction.points_awarded > 0 ? `+${prediction.points_awarded}` : '0'}
-                      </span>
-                      <ChevronDown className={cn(
-                        'h-3 w-3 text-muted-foreground transition-transform duration-200',
-                        detailOpen && 'rotate-180',
-                      )} />
-                    </>
-                  )}
-                </button>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Away team */}
-        <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
-          <TeamFlag teamName={awayTeam} size="lg" />
-          <span
-            className={cn(
-              'w-full truncate text-center text-sm uppercase',
-              wcFontBody,
-              awayWins && 'text-wc-hermes',
-            )}
-          >
-            {awayTeamLabel}
-          </span>
-        </div>
+      <div className="px-3 py-3">
+        <MatchScoreboard
+          homeTeamName={homeTeam}
+          awayTeamName={awayTeam}
+          homeTeamLabel={homeTeamLabel}
+          awayTeamLabel={awayTeamLabel}
+          homeGoals={isEditable ? null : match.home_goals}
+          awayGoals={isEditable ? null : match.away_goals}
+          editable={isEditable}
+          homeInput={homeInput}
+          awayInput={awayInput}
+          onHomeInputChange={setHomeInput}
+          onAwayInputChange={setAwayInput}
+          isLive={isLive}
+          matchMinute={liveMinute}
+          predictionLine={predictionLine}
+          predictionSuffix={predictionSuffix}
+          onPredictionClick={
+            isFinished && prediction ? () => setDetailOpen((v) => !v) : undefined
+          }
+          predictionOpen={detailOpen}
+          homeWin={homeWins}
+          awayWin={awayWins}
+        />
       </div>
 
-      {/* MVP selection for editable matches */}
       {isEditable && (
         <div className="border-t border-border px-4 py-2.5">
           <div className="flex items-center justify-between">
@@ -577,7 +519,6 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         </div>
       )}
 
-      {/* Save / update button for editable matches */}
       {isEditable && (
         <div className="border-t border-border px-4 pb-3 pt-2.5">
           <button
@@ -599,7 +540,6 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         </div>
       )}
 
-      {/* Live: MVP pick or "no prediction" */}
       {isLive && (!prediction || pickedMvp) && (
         <div className="border-t border-border px-4 py-2.5">
           {prediction && pickedMvp && pickedTeam ? (
@@ -616,7 +556,6 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         </div>
       )}
 
-      {/* Finished: foldable detail */}
       {isFinished && (
         <>
           {!prediction && (
@@ -687,20 +626,10 @@ function SkeletonCard() {
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-card">
       <div className="h-9 animate-pulse bg-muted/50" />
-      <div className="flex items-center gap-2 px-4 py-4">
-        <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
-          <div className="h-3 w-16 animate-pulse rounded bg-muted" />
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="h-11 w-11 animate-pulse rounded-lg bg-muted" />
-          <div className="h-4 w-3 animate-pulse rounded bg-muted" />
-          <div className="h-11 w-11 animate-pulse rounded-lg bg-muted" />
-        </div>
-        <div className="flex flex-1 flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
-          <div className="h-3 w-16 animate-pulse rounded bg-muted" />
-        </div>
+      <div className="flex gap-2 px-3 py-3">
+        <div className="h-[4.5rem] flex-1 animate-pulse rounded-[18px] bg-muted/60" />
+        <div className="h-8 w-8 shrink-0 animate-pulse self-center rounded-full bg-muted/40" />
+        <div className="h-[4.5rem] flex-1 animate-pulse rounded-[18px] bg-muted/60" />
       </div>
       <div className="border-t border-border px-4 pb-3 pt-2.5">
         <div className="h-9 animate-pulse rounded-lg bg-muted" />
