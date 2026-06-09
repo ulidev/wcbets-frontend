@@ -8,7 +8,7 @@ import type { components } from '@/types/api';
 type Role = components['schemas']['Role'];
 
 const ROLE_LABELS: Record<Role, string> = {
-  PLAYER: 'Player',
+  PLAYER: 'Jugador',
   ADMIN: 'Admin',
   SUPERADMIN: 'Super Admin',
 };
@@ -23,8 +23,8 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col">
       <div className="hidden border-b border-border px-6 py-5 md:block">
-        <h1 className="wc-page-title">Profile</h1>
-        <p className="mt-0.5 text-sm text-muted-foreground">Your account details</p>
+        <h1 className="wc-page-title">Perfil</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">Les teves dades de compte</p>
       </div>
 
       <div className="flex flex-col items-center px-4 pt-10 pb-8">
@@ -67,7 +67,7 @@ export default function ProfilePage() {
           className="mt-6 flex w-full max-w-sm items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10"
         >
           <LogOut className="h-4 w-4" />
-          Sign out
+          Tancar sessió
         </button>
       </div>
     </div>

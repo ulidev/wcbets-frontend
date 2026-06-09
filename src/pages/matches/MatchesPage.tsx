@@ -24,12 +24,12 @@ type MatchPrediction = components['schemas']['MatchPredictionResponse'];
 type PlayerResponse = components['schemas']['PlayerResponse'];
 
 const PHASE_LABELS: Record<Phase, string> = {
-  GROUP_STAGE: 'Group Stage',
-  ROUND_OF_32: 'Round of 32',
-  ROUND_OF_16: 'Round of 16',
-  QUARTER_FINAL: 'Quarter-Finals',
-  SEMI_FINAL: 'Semi-Finals',
-  THIRD_FOURTH_POSITION: 'Third Place Play-off',
+  GROUP_STAGE: 'Fase de grups',
+  ROUND_OF_32: 'Vuitens de final',
+  ROUND_OF_16: 'Setzens de final',
+  QUARTER_FINAL: 'Quarts de final',
+  SEMI_FINAL: 'Semifinals',
+  THIRD_FOURTH_POSITION: 'Tercer i quart lloc',
   FINAL: 'Final',
 };
 
@@ -39,7 +39,7 @@ function getSpanishDateKey(iso: string): string {
 
 function formatDayHeader(dateKey: string): string {
   const [y, m, d] = dateKey.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString('en-GB', {
+  return new Date(y, m - 1, d).toLocaleDateString('ca-ES', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -56,7 +56,7 @@ function formatMatchTime(iso: string): string {
 }
 
 function getRoundLabel(round: RoundResponse): string {
-  if (round.phase === 'GROUP_STAGE') return `Matchday ${round.round_number}`;
+  if (round.phase === 'GROUP_STAGE') return `Jornada ${round.round_number}`;
   return PHASE_LABELS[round.phase];
 }
 
@@ -255,7 +255,7 @@ function MvpPickerSheet({
           </span>
         </div>
         {players.length === 0 ? (
-          <p className="px-4 py-3 text-xs text-muted-foreground">No players match.</p>
+          <p className="px-4 py-3 text-xs text-muted-foreground">Cap jugador coincideix.</p>
         ) : (
           <div className="divide-y divide-border/50">
             {players.map((p) => (
@@ -276,7 +276,7 @@ function MvpPickerSheet({
       <div className="relative flex max-h-[75vh] flex-col rounded-t-2xl border border-border bg-background shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="wc-section-heading text-base">Select MVP</h2>
+          <h2 className="wc-section-heading text-base">Triar MVP</h2>
           <button onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:text-foreground">
             <X className="h-4 w-4" />
           </button>
@@ -290,7 +290,7 @@ function MvpPickerSheet({
               ref={inputRef}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, position, number…"
+              placeholder="Cerca per nom, posició, dorsal…"
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
             />
             {search && (
@@ -307,7 +307,7 @@ function MvpPickerSheet({
             onClick={() => { onSelect(null); onClose(); }}
             className="border-b border-border px-4 py-2.5 text-left text-xs font-medium text-destructive hover:bg-destructive/5"
           >
-            Clear MVP selection
+            Esborrar selecció MVP
           </button>
         )}
 
@@ -322,7 +322,7 @@ function MvpPickerSheet({
           )}
           {playersQuery.isError && (
             <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-              Failed to load players.
+              No s'han pogut carregar els jugadors.
             </p>
           )}
           {playersQuery.data && (
@@ -331,7 +331,7 @@ function MvpPickerSheet({
               <TeamSection players={awayPlayers} teamName={awayTeamName} teamLabel={awayTeamLabel} />
               {homePlayers.length === 0 && awayPlayers.length === 0 && q && (
                 <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                  No players found for "{search}".
+                  No s'han trobat jugadors per a "{search}".
                 </p>
               )}
             </>
@@ -439,7 +439,7 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
 
   const predictionLine =
     !isEditable && prediction
-      ? `Your pick ${prediction.home_goals} – ${prediction.away_goals}`
+      ? `La teva predicció ${prediction.home_goals} – ${prediction.away_goals}`
       : null;
 
   const predictionSuffix =
@@ -512,7 +512,7 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
                   <span>#{selectedPlayer.dorsal_number} {selectedPlayer.name}</span>
                 </>
               ) : (
-                <span>Pick player…</span>
+                <span>Triar jugador…</span>
               )}
             </button>
           </div>
@@ -529,13 +529,13 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
               prediction && 'bg-wc-dark-gray shadow-none hover:bg-wc-dark-gray/90',
             )}
           >
-            {mutation.isPending ? 'Saving…' : prediction ? 'Update Prediction' : 'Save Prediction'}
+            {mutation.isPending ? 'Guardant…' : prediction ? 'Actualitzar predicció' : 'Guardar predicció'}
           </button>
           {mutation.isError && (
-            <p className="mt-1 text-center text-xs text-destructive">Failed to save. Try again.</p>
+            <p className="mt-1 text-center text-xs text-destructive">Error en guardar. Torna-ho a provar.</p>
           )}
           {mutation.isSuccess && (
-            <p className="mt-1 text-center text-xs text-green-500">Saved!</p>
+            <p className="mt-1 text-center text-xs text-green-500">Guardat!</p>
           )}
         </div>
       )}
@@ -544,14 +544,14 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         <div className="border-t border-border px-4 py-2.5">
           {prediction && pickedMvp && pickedTeam ? (
             <p className="text-xs text-muted-foreground">
-              MVP pick:&nbsp;
+              MVP:&nbsp;
               <span className="inline-flex items-center gap-1 font-semibold text-foreground">
                 <TeamFlag teamName={pickedTeam} size="sm" className="align-middle" />
                 {pickedMvp.name}
               </span>
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground/50">No prediction made</p>
+            <p className="text-xs text-muted-foreground/50">Sense predicció</p>
           )}
         </div>
       )}
@@ -560,26 +560,26 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         <>
           {!prediction && (
             <div className="border-t border-border px-4 py-2.5">
-              <p className="text-xs text-muted-foreground/50">No prediction made</p>
+              <p className="text-xs text-muted-foreground/50">Sense predicció</p>
             </div>
           )}
           {prediction && detailOpen && (
             <div className="flex flex-col divide-y divide-border/50 border-t border-border px-4">
               {/* Score row */}
               <div className="flex items-center justify-between py-2">
-                <span className="text-xs text-muted-foreground">Your pick</span>
+                <span className="text-xs text-muted-foreground">La teva predicció</span>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold tabular-nums text-sm">
                     {prediction.home_goals}&nbsp;–&nbsp;{prediction.away_goals}
                   </span>
-                  <PointChip label="Result" pts={prediction.result_pts_awarded} />
+                  <PointChip label="Resultat" pts={prediction.result_pts_awarded} />
                 </div>
               </div>
 
               {/* MVP pick row — only if user picked one */}
               {pickedMvp && pickedTeam && (
                 <div className="flex items-center justify-between py-2">
-                  <span className="text-xs text-muted-foreground">MVP pick</span>
+                  <span className="text-xs text-muted-foreground">MVP</span>
                   <div className="flex items-center gap-2">
                     <div className="grid grid-cols-[auto_1fr] items-center gap-x-1 gap-y-0.5">
                       <TeamFlag teamName={pickedTeam} size="sm" />
@@ -716,8 +716,8 @@ export default function MatchesPage() {
   return (
     <div className="flex flex-col">
       <PageChrome
-        title="Matches"
-        description="Predict match scores for World Cup 2026"
+        title="Partits"
+        description="Prediu el resultat dels partits del Mundial 2026"
       />
 
       {isLoading && (
@@ -731,14 +731,14 @@ export default function MatchesPage() {
       {isError && (
         <div className="flex flex-col items-center gap-2 px-4 py-20 text-center text-muted-foreground">
           <AlertCircle className="h-8 w-8" />
-          <p className="text-sm font-medium">Failed to load matches</p>
-          <p className="text-xs">Check your connection and try again.</p>
+          <p className="text-sm font-medium">No s'han pogut carregar els partits</p>
+          <p className="text-xs">Comprova la connexió i torna-ho a provar.</p>
         </div>
       )}
 
       {!isLoading && !isError && totalDayGroups === 0 && (
         <div className="px-4 py-20 text-center text-sm text-muted-foreground">
-          No matches scheduled yet.
+          Encara no hi ha partits programats.
         </div>
       )}
 
@@ -749,8 +749,8 @@ export default function MatchesPage() {
             className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-muted/30"
           >
             <span className="text-sm font-semibold text-muted-foreground">
-              Past results
-              <span className="ml-1.5 text-xs font-normal">({finishedMatchCount} matches)</span>
+              Resultats anteriors
+              <span className="ml-1.5 text-xs font-normal">({finishedMatchCount} partits)</span>
             </span>
             <ChevronDown
               className={cn(

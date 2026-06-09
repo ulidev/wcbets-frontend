@@ -463,7 +463,7 @@ export default function CrystalBallPage() {
     <div className="flex flex-col">
       <PageChrome
         title="Crystal Ball"
-        description="Predict the unusual — special tournament questions"
+        description="Prediu l'imprevisible — preguntes especials del torneig"
       />
 
       {isLocked && (
@@ -485,14 +485,14 @@ export default function CrystalBallPage() {
         {!isLoading && errorQ && (
           <div className="flex flex-col items-center gap-2 py-16 text-center text-muted-foreground">
             <AlertCircle className="h-8 w-8" />
-            <p className="text-sm font-medium">Failed to load Crystal Ball questions</p>
+            <p className="text-sm font-medium">No s'han pogut carregar les preguntes del Crystal Ball</p>
           </div>
         )}
 
         {!isLoading && !errorQ && questions.length === 0 && (
           <div className="flex flex-col items-center gap-2 py-16 text-center text-muted-foreground">
             <Sparkles className="h-8 w-8" />
-            <p className="text-sm">No questions available yet — check back soon!</p>
+            <p className="text-sm">Encara no hi ha preguntes disponibles — torna aviat!</p>
           </div>
         )}
 

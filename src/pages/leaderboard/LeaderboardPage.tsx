@@ -18,7 +18,7 @@ type LeaderboardEntry = components['schemas']['LeaderboardEntryResponse'];
 type Tab = 'match' | 'pickem' | 'crystal-ball';
 
 const tabs: { key: Tab; label: string }[] = [
-  { key: 'match', label: 'Match Prediction' },
+  { key: 'match', label: 'Predicció de partits' },
   { key: 'pickem', label: "Pick'em" },
   { key: 'crystal-ball', label: 'Crystal Ball' },
 ];
@@ -78,7 +78,7 @@ function EntryRow({
         </span>
         {isCurrentUser && (
           <span className="shrink-0 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
-            You
+            Tu
           </span>
         )}
       </div>
@@ -175,8 +175,8 @@ export default function LeaderboardPage() {
   return (
     <div className="flex flex-col">
       <PageChrome<Tab>
-        title="Leaderboard"
-        description="Rankings across all three prediction games"
+        title="Classificació"
+        description="Rànquings dels tres jocs de predicció"
         tabs={tabs.map(({ key, label }) => ({ id: key, label }))}
         active={activeTab}
         onChange={handleTabChange}
@@ -185,7 +185,7 @@ export default function LeaderboardPage() {
       <div className="p-4">
         {rowsClickable && activeTab !== 'match' && (
           <p className="mb-3 text-xs text-muted-foreground">
-            Tap a player to view their predictions.
+            Toca un jugador per veure les seves prediccions.
           </p>
         )}
 
@@ -198,14 +198,14 @@ export default function LeaderboardPage() {
         {isError && (
           <div className="overflow-hidden rounded-xl border border-border bg-card flex flex-col items-center gap-2 px-4 py-16 text-center text-muted-foreground">
             <AlertCircle className="h-8 w-8" />
-            <p className="text-sm font-medium">Failed to load leaderboard</p>
-            <p className="text-xs">Check your connection and try again.</p>
+            <p className="text-sm font-medium">No s'ha pogut carregar la classificació</p>
+            <p className="text-xs">Comprova la connexió i torna-ho a provar.</p>
           </div>
         )}
 
         {!isLoading && !isError && ranked.length === 0 && (
           <div className="overflow-hidden rounded-xl border border-border bg-card px-4 py-16 text-center text-sm text-muted-foreground">
-            No scores yet — be the first to predict!
+            Encara no hi ha puntuacions — sigues el primer en predir!
           </div>
         )}
 

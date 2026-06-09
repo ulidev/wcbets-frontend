@@ -105,7 +105,7 @@ function PickemPredictions({ userId }: { userId: string }) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
         <Lock className="h-4 w-4 shrink-0" />
-        Predictions are not visible yet — the deadline has not passed.
+        Les prediccions encara no són visibles — el termini no ha passat.
       </div>
     );
   }
@@ -121,13 +121,13 @@ function PickemPredictions({ userId }: { userId: string }) {
     <div className="flex flex-col gap-8">
       {groupVisible && (
         <section>
-          <h2 className="wc-section-heading mb-4">Group Stage</h2>
-          {groupPicksQuery.isLoading && <p className="text-sm text-muted-foreground">Loading group picks…</p>}
+          <h2 className="wc-section-heading mb-4">Fase de grups</h2>
+          {groupPicksQuery.isLoading && <p className="text-sm text-muted-foreground">Carregant prediccions de grups…</p>}
           {groupPicksQuery.isError && (
-            <p className="text-sm text-destructive">Could not load group picks.</p>
+            <p className="text-sm text-destructive">No s'han pogut carregar les prediccions de grups.</p>
           )}
           {groupPicksQuery.isSuccess && groupPicksQuery.data.length === 0 && (
-            <p className="text-sm text-muted-foreground">No group stage picks submitted.</p>
+            <p className="text-sm text-muted-foreground">No s'han enviat prediccions de fase de grups.</p>
           )}
           {groupPicksQuery.isSuccess && groupPicksQuery.data.length > 0 && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -157,12 +157,12 @@ function PickemPredictions({ userId }: { userId: string }) {
       {bracketVisible && (
         <section>
           <h2 className="wc-section-heading mb-4">Bracket</h2>
-          {bracketPicksQuery.isLoading && <p className="text-sm text-muted-foreground">Loading bracket picks…</p>}
+          {bracketPicksQuery.isLoading && <p className="text-sm text-muted-foreground">Carregant prediccions del bracket…</p>}
           {bracketPicksQuery.isError && (
-            <p className="text-sm text-destructive">Could not load bracket picks.</p>
+            <p className="text-sm text-destructive">No s'han pogut carregar les prediccions del bracket.</p>
           )}
           {bracketPicksQuery.isSuccess && bracketPicksQuery.data.length === 0 && (
-            <p className="text-sm text-muted-foreground">No bracket picks submitted.</p>
+            <p className="text-sm text-muted-foreground">No s'han enviat prediccions del bracket.</p>
           )}
           {bracketPicksQuery.isSuccess && bracketPicksQuery.data.length > 0 && (
             <div className="flex flex-col gap-6">
@@ -250,7 +250,7 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
     return (
       <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
         <Lock className="h-4 w-4 shrink-0" />
-        Crystal Ball answers are not visible yet — the deadline has not passed.
+        Les respostes del Crystal Ball encara no són visibles — el termini no ha passat.
       </div>
     );
   }
@@ -285,10 +285,10 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {answersQuery.isLoading && <p className="text-sm text-muted-foreground">Loading answers…</p>}
-      {answersQuery.isError && <p className="text-sm text-destructive">Could not load Crystal Ball answers.</p>}
+      {answersQuery.isLoading && <p className="text-sm text-muted-foreground">Carregant respostes…</p>}
+      {answersQuery.isError && <p className="text-sm text-destructive">No s'han pogut carregar les respostes del Crystal Ball.</p>}
       {answersQuery.isSuccess && answersQuery.data.length === 0 && (
-        <p className="text-sm text-muted-foreground">No Crystal Ball answers submitted.</p>
+        <p className="text-sm text-muted-foreground">No s'han enviat respostes del Crystal Ball.</p>
       )}
       {(questionsQuery.data ?? []).map((question) => {
         const prediction = answersByQuestion.get(question.id);
@@ -304,7 +304,7 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
               )}
             </div>
             {sortedAnswers.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No answer submitted.</p>
+              <p className="text-sm text-muted-foreground">No s'ha enviat cap resposta.</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {sortedAnswers.map((answer) => (
@@ -338,9 +338,10 @@ export default function LeaderboardUserPage() {
   const displayName =
     state.firstName && state.lastName
       ? `${state.firstName} ${state.lastName}`
-      : 'Player';
+      : 'Jugador';
 
   const gameLabel = game === 'crystal-ball' ? 'Crystal Ball' : "Pick'em";
+  // gameLabel already in Catalan (proper nouns kept)
 
   return (
     <div className="flex flex-col">
@@ -350,7 +351,7 @@ export default function LeaderboardUserPage() {
           className="mb-3 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Leaderboard
+          Tornar a la classificació
         </Link>
         <div className="flex items-center gap-3">
           <div
@@ -380,7 +381,7 @@ export default function LeaderboardUserPage() {
         {!userId ? (
           <div className="flex flex-col items-center gap-2 py-16 text-muted-foreground">
             <AlertCircle className="h-8 w-8" />
-            <p className="text-sm">User not found.</p>
+            <p className="text-sm">Usuari no trobat.</p>
           </div>
         ) : game === 'crystal-ball' ? (
           <CrystalBallPredictions userId={userId} />

@@ -71,13 +71,13 @@ function GroupStageScoreSummary({ groups }: { groups: GroupPickemOverview[] }) {
       <div className="flex divide-x divide-border/60">
         <div className="flex flex-1 flex-col gap-0.5 px-4 py-3">
           <span className="text-[10px] font-bold uppercase tracking-wider text-wc-dark-gray">
-            Points
+            Punts
           </span>
           <span className="text-2xl font-black tabular-nums text-wc-red">{totalPoints}</span>
         </div>
         <div className="flex flex-1 flex-col gap-0.5 px-4 py-3">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Correct
+            Correctes
           </span>
           <span className="text-2xl font-black tabular-nums text-foreground">
             {correct}
@@ -86,7 +86,7 @@ function GroupStageScoreSummary({ groups }: { groups: GroupPickemOverview[] }) {
         </div>
         <div className="flex flex-1 flex-col gap-0.5 px-4 py-3">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Groups
+            Grups
           </span>
           <span className="text-2xl font-black tabular-nums text-foreground">
             {scoredGroups.length}
@@ -579,9 +579,9 @@ export default function PickemPage() {
     <div className="flex flex-col">
       <PageChrome<PickemTab>
         title="Pick'em"
-        description="Predict group standings and the knockout bracket"
+        description="Prediu la classificació de grups i el bracket eliminatori"
         tabs={[
-          { id: 'groups', label: 'Group Stage' },
+          { id: 'groups', label: 'Fase de grups' },
           { id: 'bracket', label: 'Bracket' },
         ]}
         active={tab}
@@ -596,8 +596,8 @@ export default function PickemPage() {
           {isError && (
             <div className="flex flex-col items-center gap-2 px-4 py-20 text-center text-muted-foreground">
               <AlertCircle className="h-8 w-8" />
-              <p className="text-sm font-medium">Failed to load Pick'em</p>
-              <p className="text-xs">Check your connection and try again.</p>
+              <p className="text-sm font-medium">No s'ha pogut carregar el Pick'em</p>
+              <p className="text-xs">Comprova la connexió i torna-ho a provar.</p>
             </div>
           )}
 
@@ -608,31 +608,31 @@ export default function PickemPage() {
                 {!group_stage.is_available && (
                   <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
                     <Lock className="h-4 w-4 shrink-0" />
-                    Group Stage Pick'em is not available yet.
+                    El Pick'em de fase de grups encara no està disponible.
                   </div>
                 )}
                 {group_stage.is_available && !group_stage.editable && group_stage.has_submitted && (
                   <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-600">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
-                    Your Group Stage picks are locked in.
+                    Les teves prediccions de fase de grups estan confirmades.
                   </div>
                 )}
                 {group_stage.is_available && !group_stage.editable && !group_stage.has_submitted && (
                   <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     <XCircle className="h-4 w-4 shrink-0" />
-                    Deadline passed — you didn't submit any picks for this round.
+                    Termini superat — no has enviat cap predicció per a aquesta ronda.
                   </div>
                 )}
                 {group_stage.is_available && group_stage.editable && group_stage.has_submitted && (
                   <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-600">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
-                    Picks submitted — you can still update them before the deadline.
+                    Prediccions enviades — encara pots actualitzar-les abans del termini.
                   </div>
                 )}
                 {group_stage.is_available && group_stage.editable && !group_stage.has_submitted && (
                   <div className="flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent">
                     <Info className="h-4 w-4 shrink-0" />
-                    No picks yet — drag teams into your predicted finishing order for each group.
+                    Sense prediccions — arrossega els equips per ordenar-los en cada grup.
                   </div>
                 )}
               </div>
@@ -670,18 +670,18 @@ export default function PickemPage() {
                     className={wcBtnPrimaryFull}
                   >
                     {groupMutation.isPending
-                      ? 'Saving…'
+                      ? 'Guardant…'
                       : group_stage.has_submitted
-                        ? 'Update Picks'
-                        : 'Submit Picks'}
+                        ? 'Actualitzar prediccions'
+                        : 'Enviar prediccions'}
                   </button>
                   {groupMutation.isError && (
                     <p className="text-center text-sm text-destructive">
-                      Failed to save. Please try again.
+                      Error en guardar. Torna-ho a provar.
                     </p>
                   )}
                   {groupMutation.isSuccess && (
-                    <p className="text-center text-sm text-green-500">Picks saved!</p>
+                    <p className="text-center text-sm text-green-500">Prediccions guardades!</p>
                   )}
                 </div>
               )}
@@ -698,8 +698,8 @@ export default function PickemPage() {
           {isError && (
             <div className="flex flex-col items-center gap-2 px-4 py-20 text-center text-muted-foreground">
               <AlertCircle className="h-8 w-8" />
-              <p className="text-sm font-medium">Failed to load Pick'em</p>
-              <p className="text-xs">Check your connection and try again.</p>
+              <p className="text-sm font-medium">No s'ha pogut carregar el Pick'em</p>
+              <p className="text-xs">Comprova la connexió i torna-ho a provar.</p>
             </div>
           )}
 
@@ -710,31 +710,31 @@ export default function PickemPage() {
                 {!bracket.is_available && (
                   <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
                     <Lock className="h-4 w-4 shrink-0" />
-                    Bracket Pick'em is not available yet.
+                    El Pick'em de bracket encara no està disponible.
                   </div>
                 )}
                 {bracket.is_available && !bracket.editable && bracket.has_submitted && (
                   <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-600">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
-                    Your Bracket picks are locked in.
+                    Les teves prediccions del bracket estan confirmades.
                   </div>
                 )}
                 {bracket.is_available && !bracket.editable && !bracket.has_submitted && (
                   <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     <XCircle className="h-4 w-4 shrink-0" />
-                    Deadline passed — you didn't submit a bracket for this round.
+                    Termini superat — no has enviat cap bracket per a aquesta ronda.
                   </div>
                 )}
                 {bracket.is_available && bracket.editable && bracket.has_submitted && (
                   <div className="flex items-center gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-600">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
-                    Picks submitted — you can still update them before the deadline.
+                    Prediccions enviades — encara pots actualitzar-les abans del termini.
                   </div>
                 )}
                 {bracket.is_available && bracket.editable && !bracket.has_submitted && (
                   <div className="flex items-center gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 text-sm text-accent">
                     <Info className="h-4 w-4 shrink-0" />
-                    No picks yet — pick the winner of each knockout match across every round.
+                    Sense prediccions — tria el guanyador de cada eliminatòria en totes les rondes.
                   </div>
                 )}
               </div>
@@ -751,7 +751,7 @@ export default function PickemPage() {
                       )}
                     >
                       <List className="h-3.5 w-3.5" />
-                      Lista
+                      Llista
                     </button>
                     <button
                       type="button"
@@ -762,7 +762,7 @@ export default function PickemPage() {
                       )}
                     >
                       <LayoutGrid className="h-3.5 w-3.5" />
-                      Bracket completo
+                      Bracket complet
                     </button>
                   </div>
                 </div>
@@ -811,7 +811,7 @@ export default function PickemPage() {
 
               {bracket.slots.length === 0 && (
                 <p className="px-4 py-12 text-center text-sm text-muted-foreground">
-                  No bracket slots available yet.
+                  Encara no hi ha partits de bracket disponibles.
                 </p>
               )}
 
@@ -824,18 +824,18 @@ export default function PickemPage() {
                     className={wcBtnPrimaryFull}
                   >
                     {bracketMutation.isPending
-                      ? 'Saving…'
+                      ? 'Guardant…'
                       : bracket.has_submitted
-                        ? 'Update Bracket'
-                        : 'Submit Bracket'}
+                        ? 'Actualitzar bracket'
+                        : 'Enviar bracket'}
                   </button>
                   {bracketMutation.isError && (
                     <p className="text-center text-sm text-destructive">
-                      Failed to save. Please try again.
+                      Error en guardar. Torna-ho a provar.
                     </p>
                   )}
                   {bracketMutation.isSuccess && (
-                    <p className="text-center text-sm text-green-500">Bracket saved!</p>
+                    <p className="text-center text-sm text-green-500">Bracket guardat!</p>
                   )}
                 </div>
               )}

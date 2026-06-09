@@ -22,20 +22,20 @@ type RoundResponse = components['schemas']['RoundResponse'];
 type PlayerResponse = components['schemas']['PlayerResponse'];
 
 const STATUS_LABELS: Record<MatchStatus, string> = {
-  DEFINED: 'Defined',
-  STARTED: 'Started',
-  HALF_TIME: 'Half Time',
-  EXTRA_TIME: 'Extra Time',
-  PENALTIES: 'Penalties',
-  FINISHED: 'Finished',
+  DEFINED: 'Definit',
+  STARTED: 'En joc',
+  HALF_TIME: 'Descans',
+  EXTRA_TIME: 'Pròrroga',
+  PENALTIES: 'Penals',
+  FINISHED: 'Finalitzat',
 };
 
 const OUTCOME_LABELS: Record<MatchOutcome, string> = {
-  LOCAL_W: 'Home wins',
-  AWAY_W: 'Away wins',
-  DRAW: 'Draw',
-  LOCAL_PEN_W: 'Home wins (penalties)',
-  AWAY_PEN_W: 'Away wins (penalties)',
+  LOCAL_W: 'Guanya local',
+  AWAY_W: 'Guanya visitant',
+  DRAW: 'Empat',
+  LOCAL_PEN_W: 'Guanya local (penals)',
+  AWAY_PEN_W: 'Guanya visitant (penals)',
 };
 
 function deriveOutcome(home: string, away: string, prev: MatchOutcome): MatchOutcome {
@@ -49,12 +49,12 @@ function deriveOutcome(home: string, away: string, prev: MatchOutcome): MatchOut
 }
 
 const PHASE_LABELS: Record<Phase, string> = {
-  GROUP_STAGE: 'Group Stage',
-  ROUND_OF_32: 'Round of 32',
-  ROUND_OF_16: 'Round of 16',
-  QUARTER_FINAL: 'Quarter-Finals',
-  SEMI_FINAL: 'Semi-Finals',
-  THIRD_FOURTH_POSITION: 'Third Place',
+  GROUP_STAGE: 'Fase de grups',
+  ROUND_OF_32: 'Vuitens de final',
+  ROUND_OF_16: 'Setzens de final',
+  QUARTER_FINAL: 'Quarts de final',
+  SEMI_FINAL: 'Semifinals',
+  THIRD_FOURTH_POSITION: 'Tercer i quart lloc',
   FINAL: 'Final',
 };
 
@@ -66,7 +66,7 @@ const POSITION_COLORS: Record<PlayerResponse['position'], string> = {
 };
 
 function getRoundLabel(round: RoundResponse): string {
-  if (round.phase === 'GROUP_STAGE') return `MD ${round.round_number}`;
+  if (round.phase === 'GROUP_STAGE') return `J${round.round_number}`;
   return PHASE_LABELS[round.phase];
 }
 
@@ -175,7 +175,7 @@ function MvpSheet({
           </span>
         </div>
         {players.length === 0 ? (
-          <p className="px-4 py-3 text-xs text-muted-foreground">No players match.</p>
+          <p className="px-4 py-3 text-xs text-muted-foreground">Cap jugador coincideix.</p>
         ) : (
           <div className="divide-y divide-border/50">
             {players.map((p) => (
@@ -192,7 +192,7 @@ function MvpSheet({
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative flex max-h-[75vh] flex-col rounded-t-2xl border border-border bg-background shadow-2xl">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <h2 className="wc-section-heading text-base">Select MVP</h2>
+          <h2 className="wc-section-heading text-base">Triar MVP</h2>
           <button
             onClick={onClose}
             className="rounded-md p-1 text-muted-foreground hover:text-foreground"
@@ -207,7 +207,7 @@ function MvpSheet({
               ref={inputRef}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search player…"
+              placeholder="Cercar jugador…"
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
             />
             {search && (
@@ -228,7 +228,7 @@ function MvpSheet({
             }}
             className="border-b border-border px-4 py-2.5 text-left text-xs font-medium text-destructive hover:bg-destructive/5"
           >
-            Clear MVP
+            Esborrar MVP
           </button>
         )}
         <div className="overflow-y-auto">
@@ -245,7 +245,7 @@ function MvpSheet({
               <TeamSection players={awayPlayers} teamName={awayTeamName} />
               {homePlayers.length === 0 && awayPlayers.length === 0 && q && (
                 <p className="px-4 py-6 text-center text-sm text-muted-foreground">
-                  No players found.
+                  No s'han trobat jugadors.
                 </p>
               )}
             </>
@@ -329,7 +329,7 @@ function MatchOverrideForm({
     <div className="border-t border-border bg-muted/30 px-4 py-3 space-y-4">
       {/* Status section */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-muted-foreground">Match status</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Estat del partit</label>
         <div className="flex gap-2">
           <select
             value={status}
@@ -348,14 +348,14 @@ function MatchOverrideForm({
             disabled={statusMutation.isPending || status === match.status}
             className="rounded-xl border border-primary/40 bg-primary/10 px-4 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/20 disabled:opacity-50"
           >
-            {statusMutation.isPending ? 'Saving…' : 'Update'}
+            {statusMutation.isPending ? 'Guardant…' : 'Actualitzar'}
           </button>
         </div>
         {statusMutation.isSuccess && (
-          <p className="mt-1 text-xs text-green-500">Status updated.</p>
+          <p className="mt-1 text-xs text-green-500">Estat actualitzat.</p>
         )}
         {statusMutation.isError && (
-          <p className="mt-1 text-xs text-destructive">Failed to update status.</p>
+          <p className="mt-1 text-xs text-destructive">Error en actualitzar l'estat.</p>
         )}
       </div>
 
@@ -378,7 +378,7 @@ function MatchOverrideForm({
 
       {/* Outcome — filtered to valid options for current score */}
       <div>
-        <label className="mb-1 block text-xs font-medium text-muted-foreground">Outcome</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">Resultat</label>
         <select
           value={outcome}
           onChange={(e) => setOutcome(e.target.value as MatchOutcome)}
@@ -406,7 +406,7 @@ function MatchOverrideForm({
         >
           {selectedPlayer
             ? `#${selectedPlayer.dorsal_number} ${selectedPlayer.name}`
-            : 'Pick player…'}
+            : 'Triar jugador…'}
         </button>
       </div>
 
@@ -417,7 +417,7 @@ function MatchOverrideForm({
           onClick={onClose}
           className="flex-1 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted/50"
         >
-          Cancel
+          Cancel·lar
         </button>
         <button
           type="button"
@@ -425,12 +425,12 @@ function MatchOverrideForm({
           disabled={!canSaveResult || resultMutation.isPending}
           className={cn(wcBtnPrimaryFull, 'flex-1')}
         >
-          {resultMutation.isPending ? 'Saving…' : 'Override result'}
+          {resultMutation.isPending ? 'Guardant…' : 'Sobreescriure resultat'}
         </button>
       </div>
 
       {resultMutation.isError && (
-        <p className="text-center text-xs text-destructive">Failed to override. Try again.</p>
+        <p className="text-center text-xs text-destructive">Error en sobreescriure. Torna-ho a provar.</p>
       )}
 
       {showMvpPicker && (
@@ -470,7 +470,7 @@ export function SuperAdminMatchOverridePanel() {
     <section className="w-full">
       <div className="mb-3 flex items-center gap-2">
         <Shield className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-semibold text-wc-card-text">Override Match Result</h3>
+        <h3 className="text-sm font-semibold text-wc-card-text">Sobreescriure resultat del partit</h3>
       </div>
 
       <div className="mb-3 flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2">
@@ -478,7 +478,7 @@ export function SuperAdminMatchOverridePanel() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by team name…"
+          placeholder="Cerca per nom d'equip…"
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
         />
         {search && (
@@ -502,14 +502,14 @@ export function SuperAdminMatchOverridePanel() {
       {matchesQuery.isError && (
         <div className="flex items-center gap-2 rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
           <AlertCircle className="h-4 w-4 shrink-0" />
-          Failed to load matches.
+          No s'han pogut carregar els partits.
         </div>
       )}
 
       {!matchesQuery.isLoading && !matchesQuery.isError && (
         <div className="overflow-hidden rounded-[18px] border border-wc-light-gray bg-white shadow-sm">
           {matches.length === 0 && (
-            <p className="px-4 py-6 text-center text-sm text-muted-foreground">No matches found.</p>
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">No s'han trobat partits.</p>
           )}
           {matches.map((match) => {
             const homeName = teamMap.get(match.home_team_id) ?? '—';

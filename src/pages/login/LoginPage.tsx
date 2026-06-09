@@ -32,11 +32,11 @@ export default function LoginPage() {
       const status = await getHttpErrorStatus(err);
       const detail = await getHttpErrorDetail(err);
       if (status === 403 && detail?.toLowerCase().includes('pending')) {
-        setError('Your account is pending admin approval. Try again once an admin has accepted you.');
+        setError("El teu compte està pendent d'aprovació. Torna-ho a provar quan un administrador t'hagi acceptat.");
       } else if (status === 403) {
-        setError('Your account has been deactivated.');
+        setError('El teu compte ha estat desactivat.');
       } else {
-        setError('Invalid email or password. Please try again.');
+        setError('Correu electrònic o contrasenya incorrectes. Torna-ho a provar.');
       }
       setIsSubmitting(false);
     }
@@ -51,12 +51,12 @@ export default function LoginPage() {
             <AppLogo size={72} />
           </div>
           <h1 className="wc-page-title text-2xl">WC Bets</h1>
-          <p className="mt-1 text-sm text-muted-foreground">FIFA World Cup 2026 Predictions</p>
+          <p className="mt-1 text-sm text-muted-foreground">Prediccions del Mundial de Futbol 2026</p>
         </div>
 
         {/* Card */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
-          <h2 className="mb-5 text-lg font-semibold">Sign in</h2>
+          <h2 className="mb-5 text-lg font-semibold">Iniciar sessió</h2>
 
           {error && (
             <div className="mb-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -67,7 +67,7 @@ export default function LoginPage() {
           <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div>
               <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-                Email
+                Correu electrònic
               </label>
               <input
                 id="email"
@@ -83,7 +83,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
-                Password
+                Contrasenya
               </label>
               <input
                 id="password"
@@ -105,14 +105,14 @@ export default function LoginPage() {
                 isSubmitting ? 'opacity-60' : 'hover:opacity-90',
               )}
             >
-              {isSubmitting ? 'Signing in…' : 'Sign in'}
+              {isSubmitting ? 'Iniciant sessió…' : 'Iniciar sessió'}
             </button>
           </form>
 
           <p className="mt-5 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
+            No tens compte?{' '}
             <Link to="/register" className="font-medium text-wc-red hover:underline">
-              Register
+              Registra't
             </Link>
           </p>
         </div>

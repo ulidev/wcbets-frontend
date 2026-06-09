@@ -140,7 +140,7 @@ export function QuestionCard({
           </div>
         </div>
         {isSaved && !isDirty && !locked && (
-          <CheckCircle2 size={20} className="shrink-0 text-wc-green" aria-label="Saved" />
+<CheckCircle2 size={20} className="shrink-0 text-wc-green" aria-label="Guardat" />
         )}
       </div>
 

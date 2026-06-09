@@ -8,9 +8,9 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { to: '/matches', icon: Calendar, label: 'Matches' },
+  { to: '/matches', icon: Calendar, label: 'Partits' },
   { to: '/pickem', icon: ListChecks, label: "Pick'em" },
   { to: '/crystal-ball', icon: Sparkles, label: 'Crystal Ball' },
-  { to: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
-  { to: '/profile', icon: User, label: 'Profile' },
+  { to: '/leaderboard', icon: Trophy, label: 'Classificació' },
+  { to: '/profile', icon: User, label: 'Perfil' },
 ];

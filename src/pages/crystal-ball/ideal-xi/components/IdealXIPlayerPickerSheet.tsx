@@ -66,7 +66,7 @@ export function IdealXIPlayerPickerSheet({
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar jugador…"
+              placeholder="Cercar jugador…"
               className="w-full rounded-xl border border-wc-light-gray bg-white py-2 pl-8 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-wc-green/40"
             />
           </div>

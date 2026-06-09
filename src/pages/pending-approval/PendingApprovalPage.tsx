@@ -28,14 +28,14 @@ export default function PendingApprovalPage() {
         <Clock className="h-8 w-8 text-wc-hermes" />
       </div>
 
-      <h1 className="text-2xl font-bold">Your account is pending approval</h1>
+      <h1 className="text-2xl font-bold">El teu compte està pendent d'aprovació</h1>
       <p className="mt-3 max-w-sm text-sm text-muted-foreground">
-        We&apos;ve received your registration for{' '}
-        <span className="font-semibold text-wc-card-text">{displayName}</span>. An admin must
-        approve your account before you can sign in and start making predictions.
+        Hem rebut el registre de{' '}
+        <span className="font-semibold text-wc-card-text">{displayName}</span>. Un administrador ha
+        d'aprovar el teu compte abans que puguis iniciar sessió i fer prediccions.
       </p>
       <p className="mt-2 max-w-sm text-xs text-muted-foreground">
-        Once approved, come back here and sign in with{' '}
+        Un cop aprovat, torna aquí i inicia sessió amb{' '}
         <span className="font-medium text-wc-hermes">{state.email}</span>.
       </p>
 
@@ -43,7 +43,7 @@ export default function PendingApprovalPage() {
         to="/login"
         className="wc-btn-primary mt-8 inline-flex items-center justify-center px-6 py-2.5 text-sm"
       >
-        Back to sign in
+        Tornar a l'inici de sessió
       </Link>
     </div>
   );

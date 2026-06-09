@@ -15,11 +15,11 @@ export const BRACKET_PHASE_ORDER = [
 export type BracketPhase = (typeof BRACKET_PHASE_ORDER)[number];
 
 export const PHASE_LABELS: Record<string, string> = {
-  ROUND_OF_32: 'Round of 32',
-  ROUND_OF_16: 'Round of 16',
-  QUARTER_FINAL: 'Quarter-Finals',
-  SEMI_FINAL: 'Semi-Finals',
-  THIRD_FOURTH_POSITION: 'Third Place',
+  ROUND_OF_32: 'Vuitens de final',
+  ROUND_OF_16: 'Setzens de final',
+  QUARTER_FINAL: 'Quarts de final',
+  SEMI_FINAL: 'Semifinals',
+  THIRD_FOURTH_POSITION: 'Tercer i quart lloc',
   FINAL: 'Final',
 };
 

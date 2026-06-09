@@ -33,7 +33,7 @@ function GroupSelect({
       onChange={(e) => onChange(e.target.value)}
       className="rounded-lg border border-input bg-background px-2 py-1.5 text-xs outline-none focus:ring-2 focus:ring-ring"
     >
-      <option value="">Sin grupo</option>
+      <option value="">Sense grup</option>
       {groups.map((g) => (
         <option key={g.id} value={g.id}>
           {g.name}
@@ -93,7 +93,7 @@ function PendingUserRow({
             className={cn(wcBtnPrimary, 'inline-flex items-center gap-1.5 text-xs disabled:opacity-50')}
           >
             <Check className="h-3.5 w-3.5" />
-            Aceptar
+            Acceptar
           </button>
         </div>
       </div>
@@ -166,12 +166,12 @@ function AllUserRow({
             </span>
             {!user.approved && (
               <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                Pendiente
+                Pendent
               </span>
             )}
             {!user.active && (
               <span className="rounded-full bg-wc-red/10 px-2 py-0.5 text-[10px] font-semibold text-wc-red">
-                Inactivo
+                Inactiu
               </span>
             )}
           </div>

@@ -40,10 +40,10 @@ export default function RegisterPage() {
       const status = await getHttpErrorStatus(err);
       if (status === 409) {
         setError(
-          'This email or username is already taken. Try a different one or sign in.',
+          'Aquest correu o nom d\'usuari ja estan en ús. Prova un altre o inicia sessió.',
         );
       } else {
-        setError('Registration failed. Please check your details and try again.');
+        setError('Error en el registre. Comprova les dades i torna-ho a provar.');
       }
       setIsSubmitting(false);
     }
@@ -57,11 +57,11 @@ export default function RegisterPage() {
             <AppLogo size={72} />
           </div>
           <h1 className="wc-page-title text-2xl">WC Bets</h1>
-          <p className="mt-1 text-sm text-muted-foreground">FIFA World Cup 2026 Predictions</p>
+          <p className="mt-1 text-sm text-muted-foreground">Prediccions del Mundial de Futbol 2026</p>
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6 shadow-lg">
-          <h2 className="mb-5 text-lg font-semibold">Create account</h2>
+          <h2 className="mb-5 text-lg font-semibold">Crear compte</h2>
 
           {error && (
             <div className="mb-4 rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -72,7 +72,7 @@ export default function RegisterPage() {
           <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div>
               <label htmlFor="username" className="mb-1.5 block text-sm font-medium">
-                Username
+                Nom d'usuari
               </label>
               <input
                 id="username"
@@ -89,7 +89,7 @@ export default function RegisterPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="firstName" className="mb-1.5 block text-sm font-medium">
-                  First name
+                  Nom
                 </label>
                 <input
                   id="firstName"
@@ -104,7 +104,7 @@ export default function RegisterPage() {
               </div>
               <div>
                 <label htmlFor="lastName" className="mb-1.5 block text-sm font-medium">
-                  Last name
+                  Cognoms
                 </label>
                 <input
                   id="lastName"
@@ -121,7 +121,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-                Email
+                Correu electrònic
               </label>
               <input
                 id="email"
@@ -137,7 +137,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
-                Password
+                Contrasenya
               </label>
               <input
                 id="password"
@@ -160,14 +160,14 @@ export default function RegisterPage() {
                 isSubmitting ? 'opacity-60' : 'hover:opacity-90',
               )}
             >
-              {isSubmitting ? 'Creating account…' : 'Create account'}
+              {isSubmitting ? 'Creant compte…' : 'Crear compte'}
             </button>
           </form>
 
           <p className="mt-5 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
+            Ja tens compte?{' '}
             <Link to="/login" className="font-medium text-primary">
-              Sign in
+              Inicia sessió
             </Link>
           </p>
         </div>

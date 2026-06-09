@@ -100,7 +100,7 @@ export function TeamPicker({
               }}
               onFocus={openPicker}
               onBlur={scheduleClose}
-              placeholder="Buscar equipo…"
+              placeholder="Buscar equip…"
               className="w-full rounded-xl border border-wc-light-gray bg-white py-2 pl-8 pr-3 text-sm text-wc-card-text focus:outline-none focus:ring-2 focus:ring-wc-green/40"
             />
           </div>
@@ -110,7 +110,7 @@ export function TeamPicker({
               onMouseDown={(e) => e.preventDefault()}
             >
               {filtered.length === 0 ? (
-                <div className="px-3 py-2 text-sm text-wc-dark-gray">No teams found</div>
+                <div className="px-3 py-2 text-sm text-wc-dark-gray">No s'han trobat equips</div>
               ) : (
                 filtered.map((team) => {
                   const isSelected = selected.includes(team.id);

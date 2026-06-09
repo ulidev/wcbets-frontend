@@ -80,7 +80,7 @@ export function PlayerPicker({
             <input
               value={query}
               onChange={(e) => onChange(e.target.value)}
-              placeholder="Buscar jugador (mín. 2 letras)…"
+              placeholder="Buscar jugador (mín. 2 lletres)…"
               className="w-full rounded-xl border border-wc-light-gray bg-white py-2 pl-8 pr-3 text-sm text-wc-card-text focus:outline-none focus:ring-2 focus:ring-wc-green/40"
             />
           </div>
@@ -91,10 +91,10 @@ export function PlayerPicker({
               onMouseDown={(e) => e.preventDefault()}
             >
               {isFetching && (
-                <div className="px-3 py-2 text-sm text-wc-dark-gray">Searching…</div>
+                <div className="px-3 py-2 text-sm text-wc-dark-gray">Cercant…</div>
               )}
               {!isFetching && players.length === 0 && (
-                <div className="px-3 py-2 text-sm text-wc-dark-gray">No players found</div>
+                <div className="px-3 py-2 text-sm text-wc-dark-gray">No s'han trobat jugadors</div>
               )}
               {!isFetching &&
                 players.map((player) => {

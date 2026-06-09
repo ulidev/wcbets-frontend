@@ -58,7 +58,7 @@ export function Sidebar() {
             <button
               onClick={() => void logout()}
               className="shrink-0 rounded p-1 text-sidebar-foreground/50 hover:text-sidebar-foreground transition-colors"
-              title="Sign out"
+              title="Tancar sessió"
             >
               <LogOut className="h-4 w-4" />
             </button>
