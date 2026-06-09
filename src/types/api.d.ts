@@ -522,6 +522,23 @@ export interface paths {
         patch: operations["override_match_result_api_v1_tournament_matches__match_id__result_override_patch"];
         trace?: never;
     };
+    "/api/v1/tournament/matches/{match_id}/odds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set Match Odds */
+        patch: operations["set_match_odds_api_v1_tournament_matches__match_id__odds_patch"];
+        trace?: never;
+    };
     "/api/v1/tournament/matches/{match_id}/mvp": {
         parameters: {
             query?: never;
@@ -1049,13 +1066,13 @@ export interface components {
     schemas: {
         /** ApproveWithGroupRequest */
         ApproveWithGroupRequest: {
-            /** Group Id */
-            group_id?: string | null;
+            /** Group */
+            group?: string | null;
         };
         /** AssignGroupRequest */
         AssignGroupRequest: {
-            /** Group Id */
-            group_id: string | null;
+            /** Group */
+            group: string | null;
         };
         /** AssignMatchToBracketSlotRequest */
         AssignMatchToBracketSlotRequest: {
@@ -1320,6 +1337,8 @@ export interface components {
             scope?: string | null;
             /** @default EXACT */
             scoring_mode: components["schemas"]["CrystalBallScoringMode"];
+            /** Allowed Ranges */
+            allowed_ranges?: string[] | null;
         };
         /** CreateGroupRequest */
         CreateGroupRequest: {
@@ -1424,6 +1443,8 @@ export interface components {
              * Format: uuid
              */
             question_id: string;
+            /** Formation Id */
+            formation_id?: string | null;
             /** Points Awarded */
             points_awarded: number;
             /** Answers */
@@ -1466,6 +1487,8 @@ export interface components {
             /** Scope */
             scope: string | null;
             scoring_mode: components["schemas"]["CrystalBallScoringMode"];
+            /** Allowed Ranges */
+            allowed_ranges: string[] | null;
         };
         /**
          * CrystalBallQuestionType
@@ -1506,6 +1529,8 @@ export interface components {
              * Format: uuid
              */
             question_id: string;
+            /** Formation Id */
+            formation_id?: string | null;
             /** Answers */
             answers: components["schemas"]["CrystalBallResolutionAnswerResponse"][];
         };
@@ -1821,6 +1846,12 @@ export interface components {
             outcome: components["schemas"]["MatchOutcome"] | null;
             /** Mvp Player Id */
             mvp_player_id: string | null;
+            /** Home Win Odds */
+            home_win_odds: number | null;
+            /** Draw Odds */
+            draw_odds: number | null;
+            /** Away Win Odds */
+            away_win_odds: number | null;
         };
         /**
          * MatchStatus
@@ -2012,6 +2043,8 @@ export interface components {
         };
         /** SetCrystalBallResolutionRequest */
         SetCrystalBallResolutionRequest: {
+            /** Formation Id */
+            formation_id?: string | null;
             /** Answers */
             answers: components["schemas"]["CrystalBallResolutionAnswerRequest"][];
         };
@@ -2024,6 +2057,15 @@ export interface components {
         SetMatchMvpRequest: {
             /** Mvp Player Id */
             mvp_player_id?: string | null;
+        };
+        /** SetMatchOddsRequest */
+        SetMatchOddsRequest: {
+            /** Home Win Odds */
+            home_win_odds?: number | null;
+            /** Draw Odds */
+            draw_odds?: number | null;
+            /** Away Win Odds */
+            away_win_odds?: number | null;
         };
         /** SetMatchResultRequest */
         SetMatchResultRequest: {
@@ -3356,6 +3398,41 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["SetMatchResultRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_match_odds_api_v1_tournament_matches__match_id__odds_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                match_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMatchOddsRequest"];
             };
         };
         responses: {

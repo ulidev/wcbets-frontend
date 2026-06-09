@@ -265,7 +265,7 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
     answer: components['schemas']['CrystalBallAnswerResponse'],
   ) {
     if (question.answer_type === 'NUMBER') {
-      return <span className="font-semibold tabular-nums">{answer.numeric_value ?? '—'}</span>;
+      return <span className="font-semibold tabular-nums">{answer.range_value ?? '—'}</span>;
     }
     if (question.answer_type === 'TEAM' && answer.team_id) {
       const flagName = teamNameById.get(answer.team_id) ?? 'Unknown';

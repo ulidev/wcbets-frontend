@@ -1669,6 +1669,64 @@
         }
       }
     },
+    "/api/v1/tournament/matches/{match_id}/odds": {
+      "patch": {
+        "tags": [
+          "matches"
+        ],
+        "summary": "Set Match Odds",
+        "operationId": "set_match_odds_api_v1_tournament_matches__match_id__odds_patch",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "match_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Match Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMatchOddsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/tournament/matches/{match_id}/mvp": {
       "patch": {
         "tags": [
@@ -3313,7 +3371,7 @@
     "schemas": {
       "ApproveWithGroupRequest": {
         "properties": {
-          "group_id": {
+          "group": {
             "anyOf": [
               {
                 "type": "string",
@@ -3323,7 +3381,7 @@
                 "type": "null"
               }
             ],
-            "title": "Group Id"
+            "title": "Group"
           }
         },
         "type": "object",
@@ -3331,7 +3389,7 @@
       },
       "AssignGroupRequest": {
         "properties": {
-          "group_id": {
+          "group": {
             "anyOf": [
               {
                 "type": "string",
@@ -3341,12 +3399,12 @@
                 "type": "null"
               }
             ],
-            "title": "Group Id"
+            "title": "Group"
           }
         },
         "type": "object",
         "required": [
-          "group_id"
+          "group"
         ],
         "title": "AssignGroupRequest"
       },
@@ -4093,6 +4151,20 @@
           "scoring_mode": {
             "$ref": "#/components/schemas/CrystalBallScoringMode",
             "default": "EXACT"
+          },
+          "allowed_ranges": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Ranges"
           }
         },
         "type": "object",
@@ -4392,6 +4464,17 @@
             "format": "uuid",
             "title": "Question Id"
           },
+          "formation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formation Id"
+          },
           "points_awarded": {
             "type": "integer",
             "title": "Points Awarded"
@@ -4425,6 +4508,17 @@
             "type": "string",
             "format": "uuid",
             "title": "Question Id"
+          },
+          "formation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formation Id"
           },
           "points_awarded": {
             "type": "integer",
@@ -4485,6 +4579,20 @@
           },
           "scoring_mode": {
             "$ref": "#/components/schemas/CrystalBallScoringMode"
+          },
+          "allowed_ranges": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Ranges"
           }
         },
         "type": "object",
@@ -4496,7 +4604,8 @@
           "points_value",
           "label",
           "scope",
-          "scoring_mode"
+          "scoring_mode",
+          "allowed_ranges"
         ],
         "title": "CrystalBallQuestionResponse"
       },
@@ -4640,6 +4749,17 @@
             "type": "string",
             "format": "uuid",
             "title": "Question Id"
+          },
+          "formation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formation Id"
           },
           "answers": {
             "items": {
@@ -5302,6 +5422,39 @@
               }
             ],
             "title": "Mvp Player Id"
+          },
+          "home_win_odds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Win Odds"
+          },
+          "draw_odds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draw Odds"
+          },
+          "away_win_odds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Away Win Odds"
           }
         },
         "type": "object",
@@ -5316,7 +5469,10 @@
           "home_goals",
           "away_goals",
           "outcome",
-          "mvp_player_id"
+          "mvp_player_id",
+          "home_win_odds",
+          "draw_odds",
+          "away_win_odds"
         ],
         "title": "MatchResponse"
       },
@@ -5678,6 +5834,17 @@
       },
       "SetCrystalBallResolutionRequest": {
         "properties": {
+          "formation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formation Id"
+          },
           "answers": {
             "items": {
               "$ref": "#/components/schemas/CrystalBallResolutionAnswerRequest"
@@ -5725,6 +5892,48 @@
         },
         "type": "object",
         "title": "SetMatchMvpRequest"
+      },
+      "SetMatchOddsRequest": {
+        "properties": {
+          "home_win_odds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Home Win Odds"
+          },
+          "draw_odds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draw Odds"
+          },
+          "away_win_odds": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Away Win Odds"
+          }
+        },
+        "type": "object",
+        "title": "SetMatchOddsRequest"
       },
       "SetMatchResultRequest": {
         "properties": {
@@ -5808,6 +6017,17 @@
             "type": "string",
             "format": "uuid",
             "title": "Question Id"
+          },
+          "formation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Formation Id"
           },
           "answers": {
             "items": {
