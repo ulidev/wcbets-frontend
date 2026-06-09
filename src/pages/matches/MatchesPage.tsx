@@ -16,6 +16,16 @@ import { wcBtnPrimaryFull, wcFontBody } from '@/lib/wc-ui';
 import { PageChrome } from '@/components/app/PageChrome';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import { MatchScoreboard } from './components/MatchScoreboard';
+import { MatchPredictionBreakdown } from './components/MatchPredictionBreakdown';
+import { MatchOddsBar } from './components/MatchOddsBar';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { hasMatchOdds, shouldShowMatchOdds } from '@/lib/match-odds';
+import {
+  getFinishedMatchCardStyle,
+  getOverallPredictionTier,
+  OVERALL_POINTS_STYLES,
+} from '@/lib/match-prediction-score';
+import { applyMatchOddsPlaceholder } from '@/fixtures/apply-match-odds-placeholder';
 
 type Match = components['schemas']['MatchResponse'];
 type Phase = components['schemas']['Phase'];
@@ -119,25 +129,6 @@ function TimeRemaining({ scheduledAt }: { scheduledAt: string }) {
     <span className={cn('flex items-center gap-1 text-xs font-medium', colorClass)}>
       <Clock className="h-3 w-3" />
       {state.label}
-    </span>
-  );
-}
-
-function PointChip({ label, pts }: { label: string; pts: number }) {
-  const hit = pts > 0;
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold',
-        hit
-          ? 'border-wc-green/30 bg-wc-green/10 text-wc-green'
-          : 'border-border bg-muted/40 text-muted-foreground/50',
-      )}
-    >
-      {label}
-      <span className={cn('font-bold tabular-nums', hit ? 'text-wc-green' : '')}>
-        {hit ? `+${pts}` : '0'}
-      </span>
     </span>
   );
 }
@@ -354,6 +345,7 @@ interface PredictionCardProps {
 
 function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabel, roundLabel, prediction }: PredictionCardProps) {
   const queryClient = useQueryClient();
+  const isDesktop = useBreakpoint(768);
   const isLive = match.status === 'STARTED' || match.status === 'HALF_TIME';
   const isFinished = match.status === 'FINISHED';
   const isEditable =
@@ -371,11 +363,21 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
   const [showMvpPicker, setShowMvpPicker] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
 
+  useEffect(() => {
+    if (isFinished && prediction) {
+      setDetailOpen(isDesktop);
+    }
+  }, [isDesktop, isFinished, prediction?.id]);
+
   // Fetch players lazily so we can resolve the MVP name for display
   const playersQuery = useQuery({
     queryKey: ['match-players', match.id],
     queryFn: () => fetchMatchPlayers(match.id),
-    enabled: showMvpPicker || mvpPlayerId !== null || match.mvp_player_id !== null,
+    enabled:
+      showMvpPicker ||
+      mvpPlayerId !== null ||
+      match.mvp_player_id != null ||
+      (isFinished && detailOpen && prediction != null),
   });
 
   const allPlayers = [
@@ -401,7 +403,6 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
   const officialTeam = officialMvp && playersQuery.data
     ? (playersQuery.data.home_team.some((p) => p.id === officialMvp.id) ? homeTeam : awayTeam)
     : null;
-  const mvpCorrect = isFinished && pickedMvp != null && pickedMvp.id === officialMvp?.id;
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -442,21 +443,32 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
       ? `La teva predicció ${prediction.home_goals} – ${prediction.away_goals}`
       : null;
 
+  const overallTier =
+    isFinished && prediction
+      ? getOverallPredictionTier(match, prediction)
+      : null;
+
   const predictionSuffix =
-    isFinished && prediction ? (
-      <span
-        className={cn(
-          'font-bold',
-          prediction.points_awarded > 0 ? 'text-wc-green' : 'text-muted-foreground',
-        )}
-      >
+    isFinished && prediction && overallTier != null ? (
+      <span className={cn('font-bold', OVERALL_POINTS_STYLES[overallTier])}>
         {prediction.points_awarded > 0 ? `+${prediction.points_awarded}` : '0'}
       </span>
     ) : null;
 
+  const cardSurfaceStyle = isFinished
+    ? getFinishedMatchCardStyle(match, prediction)
+    : 'bg-card';
+
+  const showOdds = shouldShowMatchOdds(match.status) && hasMatchOdds(match);
+
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card">
-      <div className="flex items-center justify-between border-b border-border bg-muted/30 px-3 py-2">
+    <div
+      className={cn(
+        'flex flex-col overflow-hidden rounded-xl border border-border',
+        cardSurfaceStyle,
+      )}
+    >
+      <div className="flex items-center justify-between border-b border-border/60 bg-black/[0.03] px-3 py-2">
         <span className="text-xs text-muted-foreground">
           {formatMatchTime(match.scheduled_at)} · {roundLabel}
         </span>
@@ -467,7 +479,7 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         )}
       </div>
 
-      <div className="px-3 py-3">
+      <div className="flex flex-col px-3 py-3">
         <MatchScoreboard
           homeTeamName={homeTeam}
           awayTeamName={awayTeam}
@@ -491,6 +503,23 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
           homeWin={homeWins}
           awayWin={awayWins}
         />
+
+        {showOdds && (
+          <MatchOddsBar
+            match={match}
+            homeTeamName={homeTeam}
+            awayTeamName={awayTeam}
+            homeInput={homeInput}
+            awayInput={awayInput}
+            showMultiplierHint={isEditable}
+          />
+        )}
+
+        {isFinished && !prediction && (
+          <p className="pt-3 text-center text-xs text-muted-foreground/70">
+            No vas predir en aquest partit
+          </p>
+        )}
       </div>
 
       {isEditable && (
@@ -556,53 +585,15 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         </div>
       )}
 
-      {isFinished && (
-        <>
-          {!prediction && (
-            <div className="border-t border-border px-4 py-2.5">
-              <p className="text-xs text-muted-foreground/50">Sense predicció</p>
-            </div>
-          )}
-          {prediction && detailOpen && (
-            <div className="flex flex-col divide-y divide-border/50 border-t border-border px-4">
-              {/* Score row */}
-              <div className="flex items-center justify-between py-2">
-                <span className="text-xs text-muted-foreground">La teva predicció</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold tabular-nums text-sm">
-                    {prediction.home_goals}&nbsp;–&nbsp;{prediction.away_goals}
-                  </span>
-                  <PointChip label="Resultat" pts={prediction.result_pts_awarded} />
-                </div>
-              </div>
-
-              {/* MVP pick row — only if user picked one */}
-              {pickedMvp && pickedTeam && (
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-xs text-muted-foreground">MVP</span>
-                  <div className="flex items-center gap-2">
-                    <div className="grid grid-cols-[auto_1fr] items-center gap-x-1 gap-y-0.5">
-                      <TeamFlag teamName={pickedTeam} size="sm" />
-                      <span className={cn(
-                        'text-xs font-semibold',
-                        mvpCorrect ? 'text-wc-green' : 'text-red-400',
-                      )}>
-                        {pickedMvp.name}
-                      </span>
-                      {!mvpCorrect && officialMvp && officialTeam && (
-                        <>
-                          <TeamFlag teamName={officialTeam} size="sm" />
-                          <span className="text-xs text-wc-hermes">{officialMvp.name}</span>
-                        </>
-                      )}
-                    </div>
-                    <PointChip label="MVP" pts={prediction.mvp_pts_awarded} />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </>
+      {isFinished && prediction && detailOpen && (
+        <MatchPredictionBreakdown
+          match={match}
+          prediction={prediction}
+          pickedMvp={pickedMvp}
+          pickedTeam={pickedTeam}
+          officialMvp={officialMvp}
+          officialTeam={officialTeam}
+        />
       )}
 
       {/* MVP picker sheet */}
@@ -658,6 +649,8 @@ export default function MatchesPage() {
   const roundMap = new Map((roundsQuery.data ?? []).map((r) => [r.id, r]));
   const predictionMap = new Map((predictionsQuery.data ?? []).map((p) => [p.match_id, p]));
 
+  const matches = applyMatchOddsPlaceholder(matchesQuery.data ?? []);
+
   // Group matches by day in Europe/Madrid timezone, sorted chronologically
   type DayGroup = { dateKey: string; matches: Match[] };
   const activeDayGroups: DayGroup[] = [];
@@ -665,7 +658,7 @@ export default function MatchesPage() {
 
   if (!isLoading && !isError && matchesQuery.data) {
     const byDay = new Map<string, Match[]>();
-    for (const match of matchesQuery.data) {
+    for (const match of matches) {
       const key = getSpanishDateKey(match.scheduled_at);
       if (!byDay.has(key)) byDay.set(key, []);
       byDay.get(key)!.push(match);
@@ -692,7 +685,7 @@ export default function MatchesPage() {
         <div className="sticky top-0 z-10 border-b border-wc-light-gray bg-white/90 px-4 py-2 backdrop-blur">
           <h2 className="wc-day-heading">{formatDayHeader(dateKey)}</h2>
         </div>
-        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-3 p-4 sm:grid-cols-2">
           {matches.map((match) => {
             const round = roundMap.get(match.round_id);
             return (
@@ -721,7 +714,7 @@ export default function MatchesPage() {
       />
 
       {isLoading && (
-        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 items-start gap-3 p-4 sm:grid-cols-2">
           {Array.from({ length: 6 }, (_, i) => (
             <SkeletonCard key={i} />
           ))}

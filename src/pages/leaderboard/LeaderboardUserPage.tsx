@@ -9,14 +9,32 @@ import {
 } from '@/api/pickem';
 import { fetchUserCrystalBallAnswers, fetchCrystalBallQuestions, fetchTeams, fetchPlayers } from '@/api/crystal-ball';
 import { fetchDeadlines } from '@/api/crystal-ball';
-import { fetchTeams as fetchAllTeams } from '@/api/matches';
+import { fetchTeams as fetchAllTeams, fetchMatches, fetchRounds, fetchUserMatchPredictions } from '@/api/matches';
 import { deadlineHasPassed } from '@/lib/deadlines';
 import { cn, getAvatarColor, getInitials } from '@/lib/utils';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import { PHASE_LABELS, slotsByPhaseOrdered, BRACKET_PHASE_ORDER } from '@/pages/pickem/bracket-utils';
+import { FinishedMatchPredictionCard } from '@/pages/matches/components/FinishedMatchPredictionCard';
 import type { components } from '@/types/api';
 
-type LeaderboardGame = 'pickem' | 'crystal-ball';
+type LeaderboardGame = 'pickem' | 'crystal-ball' | 'match';
+type RoundResponse = components['schemas']['RoundResponse'];
+type Phase = components['schemas']['Phase'];
+
+const MATCH_PHASE_LABELS: Record<Phase, string> = {
+  GROUP_STAGE: 'Fase de grups',
+  ROUND_OF_32: 'Vuitens de final',
+  ROUND_OF_16: 'Setzens de final',
+  QUARTER_FINAL: 'Quarts de final',
+  SEMI_FINAL: 'Semifinals',
+  THIRD_FOURTH_POSITION: 'Tercer i quart lloc',
+  FINAL: 'Final',
+};
+
+function getRoundLabel(round: RoundResponse): string {
+  if (round.phase === 'GROUP_STAGE') return `Jornada ${round.round_number}`;
+  return MATCH_PHASE_LABELS[round.phase];
+}
 
 type LocationState = {
   firstName?: string;
@@ -324,6 +342,94 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
   );
 }
 
+function MatchPredictions({ userId }: { userId: string }) {
+  const matchesQuery = useQuery({ queryKey: ['matches'], queryFn: fetchMatches });
+  const teamsQuery = useQuery({ queryKey: ['teams'], queryFn: fetchAllTeams });
+  const roundsQuery = useQuery({ queryKey: ['rounds'], queryFn: fetchRounds });
+  const predictionsQuery = useQuery({
+    queryKey: ['user-match-predictions', userId],
+    queryFn: () => fetchUserMatchPredictions(userId),
+    retry: false,
+  });
+
+  const hasFinishedMatches = (matchesQuery.data ?? []).some((m) => m.status === 'FINISHED');
+
+  if (matchesQuery.isSuccess && !hasFinishedMatches) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+        <Lock className="h-4 w-4 shrink-0" />
+        Les prediccions encara no són visibles — cap partit ha acabat.
+      </div>
+    );
+  }
+
+  const teamNameById = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.name]));
+  const teamLabelById = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.label_ca ?? t.name]));
+  const roundById = new Map((roundsQuery.data ?? []).map((r) => [r.id, r]));
+  const matchById = new Map((matchesQuery.data ?? []).map((m) => [m.id, m]));
+
+  const sortedPredictions = [...(predictionsQuery.data ?? [])].sort((a, b) => {
+    const ma = matchById.get(a.match_id);
+    const mb = matchById.get(b.match_id);
+    if (!ma || !mb) return 0;
+    return new Date(mb.scheduled_at).getTime() - new Date(ma.scheduled_at).getTime();
+  });
+
+  const isLoading =
+    matchesQuery.isLoading ||
+    teamsQuery.isLoading ||
+    roundsQuery.isLoading ||
+    predictionsQuery.isLoading;
+
+  if (isLoading) {
+    return <p className="text-sm text-muted-foreground">Carregant prediccions de partits…</p>;
+  }
+
+  if (predictionsQuery.isError) {
+    return <p className="text-sm text-destructive">No s'han pogut carregar les prediccions de partits.</p>;
+  }
+
+  if (sortedPredictions.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        No hi ha prediccions visibles en partits acabats.
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {sortedPredictions.map((prediction) => {
+        const match = matchById.get(prediction.match_id);
+        if (!match) return null;
+
+        const homeTeam = teamNameById.get(match.home_team_id) ?? 'Unknown';
+        const awayTeam = teamNameById.get(match.away_team_id) ?? 'Unknown';
+        const homeTeamLabel = teamLabelById.get(match.home_team_id) ?? homeTeam;
+        const awayTeamLabel = teamLabelById.get(match.away_team_id) ?? awayTeam;
+        const round = roundById.get(match.round_id);
+        const roundLabel = round ? getRoundLabel(round) : '';
+
+        return (
+          <FinishedMatchPredictionCard
+            key={prediction.id}
+            match={match}
+            prediction={prediction}
+            homeTeam={homeTeam}
+            awayTeam={awayTeam}
+            homeTeamLabel={homeTeamLabel}
+            awayTeamLabel={awayTeamLabel}
+            roundLabel={roundLabel}
+            scoreLabel="Predicció"
+            predictionLinePrefix="Predicció:"
+            collapsible
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 export default function LeaderboardUserPage() {
   const { userId } = useParams<{ userId: string }>();
   const [searchParams] = useSearchParams();
@@ -340,8 +446,12 @@ export default function LeaderboardUserPage() {
       ? `${state.firstName} ${state.lastName}`
       : 'Jugador';
 
-  const gameLabel = game === 'crystal-ball' ? 'Crystal Ball' : "Pick'em";
-  // gameLabel already in Catalan (proper nouns kept)
+  const gameLabel =
+    game === 'crystal-ball'
+      ? 'Crystal Ball'
+      : game === 'match'
+        ? 'Predicció de partits'
+        : "Pick'em";
 
   return (
     <div className="flex flex-col">
@@ -385,6 +495,8 @@ export default function LeaderboardUserPage() {
           </div>
         ) : game === 'crystal-ball' ? (
           <CrystalBallPredictions userId={userId} />
+        ) : game === 'match' ? (
+          <MatchPredictions userId={userId} />
         ) : (
           <PickemPredictions userId={userId} />
         )}
