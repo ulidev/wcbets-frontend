@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import {
   formatMatchMultiplier,
+  formatOpeningOdds,
   predictedOutcomeFromInputs,
   type OddsOutcome,
 } from '@/lib/match-odds';
@@ -26,13 +27,13 @@ interface MatchOddsBarProps {
 
 function OddsCell({
   label,
-  multiplier,
+  openingOdds,
   variant,
   teamName,
   isActive,
 }: {
   label: string;
-  multiplier: number | null;
+  openingOdds: number | null;
   variant: OddsOutcome;
   teamName: string;
   isActive: boolean;
@@ -42,7 +43,10 @@ function OddsCell({
   return (
     <div className={cn('match-odds-bar__cell', className)} style={style}>
       <span className="match-odds-bar__label">{label}</span>
-      <span className="match-odds-bar__value">{formatMatchMultiplier(multiplier)}</span>
+      <span className="match-odds-bar__value">{formatOpeningOdds(openingOdds)}</span>
+      <span className={cn('match-odds-bar__mult', isActive && 'text-wc-hermes')}>
+        {formatMatchMultiplier(openingOdds)}
+      </span>
     </div>
   );
 }
@@ -62,25 +66,25 @@ export function MatchOddsBar({
 
   return (
     <div className="match-odds-bar">
-      <p className="match-odds-bar__heading">Multiplicadors</p>
+      <p className="match-odds-bar__heading">Odds d&apos;obertura</p>
       <div className="match-odds-bar__row">
         <OddsCell
           label={OUTCOME_LABELS.home}
-          multiplier={match.home_win_odds}
+          openingOdds={match.home_win_odds}
           variant="home"
           teamName={homeTeamName}
           isActive={predicted === 'home'}
         />
         <OddsCell
           label={OUTCOME_LABELS.draw}
-          multiplier={match.draw_odds}
+          openingOdds={match.draw_odds}
           variant="draw"
           teamName=""
           isActive={predicted === 'draw'}
         />
         <OddsCell
           label={OUTCOME_LABELS.away}
-          multiplier={match.away_win_odds}
+          openingOdds={match.away_win_odds}
           variant="away"
           teamName={awayTeamName}
           isActive={predicted === 'away'}

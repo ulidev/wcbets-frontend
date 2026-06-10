@@ -21,8 +21,11 @@ import { AlertCircle, CheckCircle2, GripVertical, Info, LayoutGrid, List, Lock, 
 import { fetchPickemOverview, submitGroupStagePicks, submitBracketPicks } from '@/api/pickem';
 import { fetchTeams } from '@/api/matches';
 import { cn } from '@/lib/utils';
-import { wcBtnPrimaryFull, wcFontBody } from '@/lib/wc-ui';
+import { wcFontBody } from '@/lib/wc-ui';
 import { PageChrome } from '@/components/app/PageChrome';
+import { StickySaveBar } from '@/components/app/StickySaveBar';
+import { useRegisterUnsavedChanges } from '@/contexts/UnsavedChangesContext';
+import { areBracketPicksDirty, areGroupPicksDirty } from '@/pages/pickem/pickem-dirty';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import type { components } from '@/types/api';
 import { BracketTreeView } from '@/pages/pickem/BracketTreeView';
@@ -472,6 +475,8 @@ export default function PickemPage() {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<PickemTab>('groups');
   const [bracketView, setBracketView] = useState<BracketViewMode>('list');
+  const [groupSaveError, setGroupSaveError] = useState<string | null>(null);
+  const [bracketSaveError, setBracketSaveError] = useState<string | null>(null);
 
   const overviewQuery = useQuery({
     queryKey: ['pickem-overview'],
@@ -522,12 +527,22 @@ export default function PickemPage() {
 
   const groupMutation = useMutation({
     mutationFn: submitGroupStagePicks,
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['pickem-overview'] }),
+    onSuccess: () => {
+      setGroupSaveError(null);
+      void queryClient.invalidateQueries({ queryKey: ['pickem-overview'] });
+    },
+    onError: () =>
+      setGroupSaveError('No s\'han pogut guardar les prediccions. Torna-ho a provar.'),
   });
 
   const bracketMutation = useMutation({
     mutationFn: submitBracketPicks,
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['pickem-overview'] }),
+    onSuccess: () => {
+      setBracketSaveError(null);
+      void queryClient.invalidateQueries({ queryKey: ['pickem-overview'] });
+    },
+    onError: () =>
+      setBracketSaveError('No s\'han pogut guardar el bracket. Torna-ho a provar.'),
   });
 
   function handleGroupSubmit() {
@@ -565,6 +580,44 @@ export default function PickemPage() {
   const group_stage = overviewQuery.data?.group_stage;
   const bracket = overviewQuery.data?.bracket;
 
+  const groupsDirty = useMemo(
+    () =>
+      group_stage ? areGroupPicksDirty(groupPicks, group_stage.groups) : false,
+    [groupPicks, group_stage],
+  );
+
+  const bracketDirty = useMemo(
+    () => (bracket ? areBracketPicksDirty(bracketPicks, bracket.slots) : false),
+    [bracketPicks, bracket],
+  );
+
+  useRegisterUnsavedChanges(
+    'pickem-groups',
+    Boolean(group_stage?.editable && groupsDirty),
+  );
+  useRegisterUnsavedChanges(
+    'pickem-bracket',
+    Boolean(bracket?.editable && bracketDirty),
+  );
+
+  function handleTabChange(next: PickemTab) {
+    if (next === tab) return;
+
+    const leavingGroupsDirty = tab === 'groups' && groupsDirty && group_stage?.editable;
+    const leavingBracketDirty = tab === 'bracket' && bracketDirty && bracket?.editable;
+
+    if (
+      (leavingGroupsDirty || leavingBracketDirty) &&
+      !window.confirm(
+        'Tens canvis sense guardar en aquesta pestanya. Vols canviar sense enviar?',
+      )
+    ) {
+      return;
+    }
+
+    setTab(next);
+  }
+
   // Build team lookup from slot data — avoids a separate teams API call for the bracket
   const teamById = useMemo(() => {
     const map = new Map<string, TeamInfo>();
@@ -585,7 +638,7 @@ export default function PickemPage() {
           { id: 'bracket', label: 'Bracket' },
         ]}
         active={tab}
-        onChange={setTab}
+        onChange={handleTabChange}
       />
 
       {/* ── Group Stage Tab ── */}
@@ -661,30 +714,6 @@ export default function PickemPage() {
                 })}
               </div>
 
-              {/* Submit */}
-              {group_stage.is_available && group_stage.editable && (
-                <div className="flex flex-col gap-2 px-4 pb-4">
-                  <button
-                    onClick={handleGroupSubmit}
-                    disabled={groupMutation.isPending || groupPicks.length === 0}
-                    className={wcBtnPrimaryFull}
-                  >
-                    {groupMutation.isPending
-                      ? 'Guardant…'
-                      : group_stage.has_submitted
-                        ? 'Actualitzar prediccions'
-                        : 'Enviar prediccions'}
-                  </button>
-                  {groupMutation.isError && (
-                    <p className="text-center text-sm text-destructive">
-                      Error en guardar. Torna-ho a provar.
-                    </p>
-                  )}
-                  {groupMutation.isSuccess && (
-                    <p className="text-center text-sm text-green-500">Prediccions guardades!</p>
-                  )}
-                </div>
-              )}
             </>
           )}
         </>
@@ -815,33 +844,45 @@ export default function PickemPage() {
                 </p>
               )}
 
-              {/* Submit */}
-              {bracket.is_available && bracket.editable && (
-                <div className="flex flex-col gap-2 p-4">
-                  <button
-                    onClick={handleBracketSubmit}
-                    disabled={bracketMutation.isPending}
-                    className={wcBtnPrimaryFull}
-                  >
-                    {bracketMutation.isPending
-                      ? 'Guardant…'
-                      : bracket.has_submitted
-                        ? 'Actualitzar bracket'
-                        : 'Enviar bracket'}
-                  </button>
-                  {bracketMutation.isError && (
-                    <p className="text-center text-sm text-destructive">
-                      Error en guardar. Torna-ho a provar.
-                    </p>
-                  )}
-                  {bracketMutation.isSuccess && (
-                    <p className="text-center text-sm text-green-500">Bracket guardat!</p>
-                  )}
-                </div>
-              )}
             </>
           )}
         </>
+      )}
+
+      {tab === 'groups' && group_stage?.is_available && group_stage.editable && (
+        <StickySaveBar
+          hint={
+            groupsDirty
+              ? 'Tens canvis de fase de grups sense enviar.'
+              : group_stage.has_submitted
+                ? 'Prediccions de grups confirmades — pots actualitzar-les abans del termini.'
+                : 'Ordena els equips i envia les teves prediccions de grups.'
+          }
+          saveLabel={
+            group_stage.has_submitted ? 'Actualitzar prediccions' : 'Guardar prediccions'
+          }
+          saving={groupMutation.isPending}
+          saveError={groupSaveError}
+          onSave={handleGroupSubmit}
+          disabled={groupPicks.length === 0 || (group_stage.has_submitted && !groupsDirty)}
+        />
+      )}
+
+      {tab === 'bracket' && bracket?.is_available && bracket.editable && (
+        <StickySaveBar
+          hint={
+            bracketDirty
+              ? 'Tens canvis del bracket sense enviar.'
+              : bracket.has_submitted
+                ? 'Bracket confirmat — pots actualitzar-lo abans del termini.'
+                : 'Tria els guanyadors i envia el teu bracket.'
+          }
+          saveLabel={bracket.has_submitted ? 'Actualitzar bracket' : 'Guardar bracket'}
+          saving={bracketMutation.isPending}
+          saveError={bracketSaveError}
+          onSave={handleBracketSubmit}
+          disabled={bracket.has_submitted && !bracketDirty}
+        />
       )}
     </div>
   );
