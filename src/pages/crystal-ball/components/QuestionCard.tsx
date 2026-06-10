@@ -171,8 +171,8 @@ export function QuestionCard({
               onClick={() => handleRangeChange(rangeVal === range ? '' : range)}
               className={`rounded-full border px-3 py-1 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
                 rangeVal === range
-                  ? 'border-wc-gold bg-wc-gold text-wc-navy'
-                  : 'border-wc-light-gray bg-transparent text-wc-card-text hover:border-wc-gold'
+                  ? 'border-wc-hermes bg-wc-hermes text-white'
+                  : 'border-wc-light-gray bg-transparent text-wc-card-text hover:border-wc-hermes'
               }`}
             >
               {range}
