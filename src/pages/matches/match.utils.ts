@@ -89,7 +89,7 @@ export function teamCardBorderGradient(teamName: string, side: 'home' | 'away'):
   return `linear-gradient(${angle}, ${c1} 0%, color-mix(in srgb, ${c1} 45%, ${c2}) 22%, ${c2} 42%, color-mix(in srgb, ${c2} 45%, ${c3}) 62%, ${c3} 82%, color-mix(in srgb, ${c3} 35%, #ffffff) 100%)`;
 }
 
-export const WC_2026_CENTER_LOGO = '/FIFA World Cup 2026.jpeg';
+export { WC_2026_EMBLEM_SRC as WC_2026_CENTER_LOGO } from '@/components/app/WcLogo';
 
 /** Border-only highlight for MatchOddsBar when the user picks a score outcome. */
 export function getMatchOddsCellSurface(

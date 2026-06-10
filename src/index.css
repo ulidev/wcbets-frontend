@@ -136,6 +136,22 @@
   }
 }
 
+@layer utilities {
+  .h-app {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+}
+
 /* WC 2026 — shared page chrome, buttons, section titles */
 @layer components {
   .wc-page-title {
