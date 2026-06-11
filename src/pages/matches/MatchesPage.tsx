@@ -19,13 +19,14 @@ import { MatchScoreboard } from './components/MatchScoreboard';
 import { MatchPredictionBreakdown } from './components/MatchPredictionBreakdown';
 import { MatchOddsBar } from './components/MatchOddsBar';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { useRegisterUnsavedChanges } from '@/contexts/UnsavedChangesContext';
+import { isMatchPredictionDirty } from '@/lib/match-prediction-dirty';
 import { hasMatchOdds, shouldShowMatchOdds } from '@/lib/match-odds';
 import {
   getFinishedMatchCardStyle,
   getOverallPredictionTier,
   OVERALL_POINTS_STYLES,
 } from '@/lib/match-prediction-score';
-import { applyMatchOddsPlaceholder } from '@/fixtures/apply-match-odds-placeholder';
 
 type Match = components['schemas']['MatchResponse'];
 type Phase = components['schemas']['Phase'];
@@ -432,6 +433,9 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
     !isNaN(parseInt(homeInput, 10)) &&
     !isNaN(parseInt(awayInput, 10));
 
+  const isDirty = isMatchPredictionDirty(isEditable, homeInput, awayInput, mvpPlayerId, prediction);
+  useRegisterUnsavedChanges(`match-${match.id}`, isDirty);
+
   const homeWins = (isLive || isFinished) && match.home_goals > match.away_goals;
   const awayWins = (isLive || isFinished) && match.away_goals > match.home_goals;
 
@@ -649,7 +653,7 @@ export default function MatchesPage() {
   const roundMap = new Map((roundsQuery.data ?? []).map((r) => [r.id, r]));
   const predictionMap = new Map((predictionsQuery.data ?? []).map((p) => [p.match_id, p]));
 
-  const matches = applyMatchOddsPlaceholder(matchesQuery.data ?? []);
+  const matches = matchesQuery.data ?? [];
 
   // Group matches by day in Europe/Madrid timezone, sorted chronologically
   type DayGroup = { dateKey: string; matches: Match[] };

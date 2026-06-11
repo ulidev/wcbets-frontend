@@ -712,6 +712,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/predictions/matches/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get User Match Predictions */
+        get: operations["get_user_match_predictions_api_v1_predictions_matches_users__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/audit": {
         parameters: {
             query?: never;
@@ -1054,6 +1071,26 @@ export interface paths {
          * @description Trigger a match sync immediately, bypassing the scheduler.
          */
         post: operations["manual_sync_api_v1_pipeline_sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pipeline/fetch-odds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Manual Fetch Odds
+         * @description Trigger an odds fetch immediately, bypassing the scheduler.
+         */
+        post: operations["manual_fetch_odds_api_v1_pipeline_fetch_odds_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1414,8 +1451,7 @@ export interface components {
         CrystalBallAnswerResponse: {
             /** Selection Index */
             selection_index: number;
-            /** Player Id */
-            player_id: string | null;
+            player: components["schemas"]["PlayerResponse"] | null;
             /** Team Id */
             team_id: string | null;
             /** Range Value */
@@ -2106,10 +2142,27 @@ export interface components {
             /** Answers */
             answers: components["schemas"]["CrystalBallAnswerRequest"][];
         };
+        /** SubmitCrystalBallBatchError */
+        SubmitCrystalBallBatchError: {
+            /**
+             * Question Id
+             * Format: uuid
+             */
+            question_id: string;
+            /** Reason */
+            reason: string;
+        };
         /** SubmitCrystalBallBatchRequest */
         SubmitCrystalBallBatchRequest: {
             /** Predictions */
             predictions: components["schemas"]["SubmitCrystalBallAnswersRequest"][];
+        };
+        /** SubmitCrystalBallBatchResult */
+        SubmitCrystalBallBatchResult: {
+            /** Saved */
+            saved: components["schemas"]["CrystalBallPredictionResponse"][];
+            /** Errors */
+            errors: components["schemas"]["SubmitCrystalBallBatchError"][];
         };
         /** SubmitGroupStagePickemRequest */
         SubmitGroupStagePickemRequest: {
@@ -2746,6 +2799,7 @@ export interface operations {
         parameters: {
             query?: {
                 confederation?: string | null;
+                continent?: string | null;
             };
             header?: never;
             path?: never;
@@ -3829,6 +3883,37 @@ export interface operations {
             };
         };
     };
+    get_user_match_predictions_api_v1_predictions_matches_users__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MatchPredictionResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_audit_logs_api_v1_audit_get: {
         parameters: {
             query?: {
@@ -4064,7 +4149,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CrystalBallPredictionResponse"][];
+                    "application/json": components["schemas"]["SubmitCrystalBallBatchResult"];
                 };
             };
             /** @description Validation Error */
@@ -4487,6 +4572,28 @@ export interface operations {
         };
     };
     manual_sync_api_v1_pipeline_sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    manual_fetch_odds_api_v1_pipeline_fetch_odds_post: {
         parameters: {
             query?: never;
             header?: never;

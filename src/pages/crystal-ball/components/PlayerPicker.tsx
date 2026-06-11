@@ -12,6 +12,7 @@ type PlayerPickerProps = {
   maxSelections: number;
   onToggle: (playerId: string) => void;
   locked: boolean;
+  savedPlayerInfo?: Record<string, { name: string; teamId: string }>;
 };
 
 export function PlayerPicker({
@@ -20,10 +21,11 @@ export function PlayerPicker({
   maxSelections,
   onToggle,
   locked,
+  savedPlayerInfo,
 }: PlayerPickerProps) {
   const { query, onChange, players, isFetching } = usePlayerSearch();
   const [playerNames, setPlayerNames] = useState<Record<string, { name: string; teamId: string }>>(
-    {},
+    savedPlayerInfo ?? {},
   );
 
   const handleToggle = (player: PlayerResponse) => {

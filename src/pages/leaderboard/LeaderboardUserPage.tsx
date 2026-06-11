@@ -7,7 +7,7 @@ import {
   fetchPickemOverview,
   fetchGroups,
 } from '@/api/pickem';
-import { fetchUserCrystalBallAnswers, fetchCrystalBallQuestions, fetchTeams, fetchPlayers } from '@/api/crystal-ball';
+import { fetchUserCrystalBallAnswers, fetchCrystalBallQuestions, fetchTeams } from '@/api/crystal-ball';
 import { fetchDeadlines } from '@/api/crystal-ball';
 import { fetchTeams as fetchAllTeams, fetchMatches, fetchRounds, fetchUserMatchPredictions } from '@/api/matches';
 import { deadlineHasPassed } from '@/lib/deadlines';
@@ -258,11 +258,6 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
     queryFn: () => fetchTeams(),
     enabled: visible,
   });
-  const playersQuery = useQuery({
-    queryKey: ['players-all'],
-    queryFn: () => fetchPlayers({}),
-    enabled: visible,
-  });
 
   if (!visible) {
     return (
@@ -276,7 +271,6 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
   const answersByQuestion = new Map((answersQuery.data ?? []).map((a) => [a.question_id, a]));
   const teamNameById = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.name]));
   const teamLabelById = new Map((teamsQuery.data ?? []).map((t) => [t.id, t.label_ca ?? t.name]));
-  const playerNameById = new Map((playersQuery.data ?? []).map((p) => [p.id, p.name]));
 
   function renderAnswer(
     question: components['schemas']['CrystalBallQuestionResponse'],
@@ -295,8 +289,8 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
         </span>
       );
     }
-    if (question.answer_type === 'PLAYER' && answer.player_id) {
-      return <span className="uppercase">{playerNameById.get(answer.player_id) ?? 'Unknown'}</span>;
+    if (question.answer_type === 'PLAYER' && answer.player) {
+      return <span className="uppercase">{answer.player.name}</span>;
     }
     return <span className="text-muted-foreground">—</span>;
   }

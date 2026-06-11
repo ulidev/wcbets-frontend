@@ -17,6 +17,7 @@ import type {
   CrystalBallPredictionResponse,
   SubmitCrystalBallAnswersRequest,
 } from './crystal-ball.types';
+import { useRegisterUnsavedChanges } from '@/contexts/UnsavedChangesContext';
 import { draftsEqual, isDraftComplete, savedToDrafts } from './crystal-ball.utils';
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -34,7 +35,7 @@ export default function CrystalBallPage() {
     staleTime: 5 * 60_000,
   });
 
-  const { data: myAnswers = [], isLoading: loadingA } = useQuery({
+  const { data: myAnswers = [], isLoading: loadingA, isFetched: answersFetched } = useQuery({
     queryKey: ['crystal-ball-answers'],
     queryFn: fetchMyAnswers,
     staleTime: 60_000,
@@ -68,8 +69,13 @@ export default function CrystalBallPage() {
     [myAnswers],
   );
 
+  const resolveFormationId = (questionId: string) =>
+    formationIdByQuestion[questionId]
+    ?? predictionByQuestion[questionId]?.formation_id
+    ?? IDEAL_XI_DEFAULT_FORMATION_ID;
+
   useEffect(() => {
-    if (loadingA || answersHydrated.current) return;
+    if (!answersFetched || answersHydrated.current) return;
     answersHydrated.current = true;
     setDraftsByQuestion(
       Object.fromEntries(myAnswers.map((p) => [p.question_id, savedToDrafts(p.answers)])),
@@ -81,12 +87,29 @@ export default function CrystalBallPage() {
           .map((p) => [p.question_id, p.formation_id!]),
       ),
     );
-  }, [loadingA, myAnswers]);
+  }, [answersFetched, myAnswers]);
+
+  // Backfill formation from API when local state missed hydration (e.g. stale one-shot guard).
+  useEffect(() => {
+    if (!answersFetched) return;
+    setFormationIdByQuestion((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const p of myAnswers) {
+        if (p.formation_id && prev[p.question_id] === undefined) {
+          next[p.question_id] = p.formation_id;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [answersFetched, myAnswers]);
 
   const { mutateAsync, isPending: saving } = useMutation({
     mutationFn: submitAnswers,
-    onSuccess: (saved) => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['crystal-ball-answers'] });
+      const saved = result.saved;
       setDraftsByQuestion((prev) => ({
         ...prev,
         ...Object.fromEntries(saved.map((p) => [p.question_id, savedToDrafts(p.answers)])),
@@ -99,9 +122,13 @@ export default function CrystalBallPage() {
             .map((p) => [p.question_id, p.formation_id!]),
         ),
       }));
-      setSaveError(null);
+      if (result.errors.length > 0) {
+        setSaveError(`No s’han pogut guardar ${result.errors.length} predicció(ns). Torna-ho a provar.`);
+      } else {
+        setSaveError(null);
+      }
     },
-    onError: () => setSaveError('No s’han pogut guardar les prediccions. Torna-ho a provar.'),
+    onError: () => setSaveError("No s’han pogut guardar les prediccions. Torna-ho a provar."),
   });
 
   const predictionsToSave = questions
@@ -109,8 +136,7 @@ export default function CrystalBallPage() {
       const drafts = draftsByQuestion[q.id] ?? [];
       if (!isDraftComplete(q, drafts)) return null;
       const saved = answersByQuestion[q.id];
-      const currentFormation =
-        formationIdByQuestion[q.id] ?? IDEAL_XI_DEFAULT_FORMATION_ID;
+      const currentFormation = resolveFormationId(q.id);
       const savedFormation = predictionByQuestion[q.id]?.formation_id ?? null;
       const answersMatch = saved && draftsEqual(drafts, savedToDrafts(saved));
       const formationMatch =
@@ -133,6 +159,9 @@ export default function CrystalBallPage() {
     setSaveError(null);
     await mutateAsync({ predictions: predictionsToSave });
   };
+
+  const hasUnsaved = !isLocked && predictionsToSave.length > 0;
+  useRegisterUnsavedChanges('crystal-ball', hasUnsaved);
 
   const isLoading = loadingQ || loadingA;
 
@@ -190,7 +219,7 @@ export default function CrystalBallPage() {
                 setDraftsByQuestion((prev) => ({ ...prev, [q.id]: next }))
               }
               savedAnswers={answersByQuestion[q.id]}
-              formationId={formationIdByQuestion[q.id] ?? IDEAL_XI_DEFAULT_FORMATION_ID}
+              formationId={resolveFormationId(q.id)}
               savedFormationId={predictionByQuestion[q.id]?.formation_id}
               onFormationIdChange={(formationId) =>
                 setFormationIdByQuestion((prev) => ({ ...prev, [q.id]: formationId }))
