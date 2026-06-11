@@ -687,6 +687,22 @@
               ],
               "title": "Confederation"
             }
+          },
+          {
+            "name": "continent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Continent"
+            }
           }
         ],
         "responses": {
@@ -2303,6 +2319,58 @@
         }
       }
     },
+    "/api/v1/predictions/matches/users/{user_id}": {
+      "get": {
+        "tags": [
+          "predictions"
+        ],
+        "summary": "Get User Match Predictions",
+        "operationId": "get_user_match_predictions_api_v1_predictions_matches_users__user_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MatchPredictionResponse"
+                  },
+                  "title": "Response Get User Match Predictions Api V1 Predictions Matches Users  User Id  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/audit": {
       "get": {
         "tags": [
@@ -2699,11 +2767,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/CrystalBallPredictionResponse"
-                  },
-                  "type": "array",
-                  "title": "Response Submit Answers Api V1 Crystal Ball Answers Post"
+                  "$ref": "#/components/schemas/SubmitCrystalBallBatchResult"
                 }
               }
             }
@@ -3354,6 +3418,35 @@
                   "additionalProperties": true,
                   "type": "object",
                   "title": "Response Manual Sync Api V1 Pipeline Sync Post"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/pipeline/fetch-odds": {
+      "post": {
+        "tags": [
+          "pipeline"
+        ],
+        "summary": "Manual Fetch Odds",
+        "description": "Trigger an odds fetch immediately, bypassing the scheduler.",
+        "operationId": "manual_fetch_odds_api_v1_pipeline_fetch_odds_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Manual Fetch Odds Api V1 Pipeline Fetch Odds Post"
                 }
               }
             }
@@ -4393,17 +4486,15 @@
             "type": "integer",
             "title": "Selection Index"
           },
-          "player_id": {
+          "player": {
             "anyOf": [
               {
-                "type": "string",
-                "format": "uuid"
+                "$ref": "#/components/schemas/PlayerResponse"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Player Id"
+            ]
           },
           "team_id": {
             "anyOf": [
@@ -4432,7 +4523,7 @@
         "type": "object",
         "required": [
           "selection_index",
-          "player_id",
+          "player",
           "team_id",
           "range_value"
         ],
@@ -6044,6 +6135,25 @@
         ],
         "title": "SubmitCrystalBallAnswersRequest"
       },
+      "SubmitCrystalBallBatchError": {
+        "properties": {
+          "question_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Question Id"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_id",
+          "reason"
+        ],
+        "title": "SubmitCrystalBallBatchError"
+      },
       "SubmitCrystalBallBatchRequest": {
         "properties": {
           "predictions": {
@@ -6059,6 +6169,30 @@
           "predictions"
         ],
         "title": "SubmitCrystalBallBatchRequest"
+      },
+      "SubmitCrystalBallBatchResult": {
+        "properties": {
+          "saved": {
+            "items": {
+              "$ref": "#/components/schemas/CrystalBallPredictionResponse"
+            },
+            "type": "array",
+            "title": "Saved"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/SubmitCrystalBallBatchError"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "saved",
+          "errors"
+        ],
+        "title": "SubmitCrystalBallBatchResult"
       },
       "SubmitGroupStagePickemRequest": {
         "properties": {

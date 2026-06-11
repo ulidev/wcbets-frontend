@@ -85,8 +85,9 @@ export default function CrystalBallPage() {
 
   const { mutateAsync, isPending: saving } = useMutation({
     mutationFn: submitAnswers,
-    onSuccess: (saved) => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['crystal-ball-answers'] });
+      const saved = result.saved;
       setDraftsByQuestion((prev) => ({
         ...prev,
         ...Object.fromEntries(saved.map((p) => [p.question_id, savedToDrafts(p.answers)])),
@@ -99,9 +100,13 @@ export default function CrystalBallPage() {
             .map((p) => [p.question_id, p.formation_id!]),
         ),
       }));
-      setSaveError(null);
+      if (result.errors.length > 0) {
+        setSaveError(`No s’han pogut guardar ${result.errors.length} predicció(ns). Torna-ho a provar.`);
+      } else {
+        setSaveError(null);
+      }
     },
-    onError: () => setSaveError('No s’han pogut guardar les prediccions. Torna-ho a provar.'),
+    onError: () => setSaveError("No s’han pogut guardar les prediccions. Torna-ho a provar."),
   });
 
   const predictionsToSave = questions

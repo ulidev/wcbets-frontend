@@ -29,7 +29,7 @@ export function answerTypeHint(answerType: string, maxSelections: number): strin
 export function savedToDrafts(answers: CrystalBallAnswerResponse[]): AnswerDraft[] {
   return answers.map((a) => ({
     selection_index: a.selection_index,
-    player_id: a.player_id ?? undefined,
+    player_id: a.player?.id ?? undefined,
     team_id: a.team_id ?? undefined,
     range_value: a.range_value ?? undefined,
   }));

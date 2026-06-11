@@ -1,4 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, Lock } from 'lucide-react';
+import { fetchTeams } from '@/api/crystal-ball';
 import { IdealXIPitch } from '@/pages/crystal-ball/ideal-xi/IdealXIPitch';
 import { IDEAL_XI_DEFAULT_FORMATION_ID } from '@/pages/crystal-ball/ideal-xi/ideal-xi.data';
 import type { IdealXIAnswerDraft } from '@/pages/crystal-ball/ideal-xi/types';
@@ -41,6 +43,15 @@ export function QuestionCard({
   teams,
   locked,
 }: QuestionCardProps) {
+  const continent = question.answer_type === 'TEAM' && question.scope ? question.scope : undefined;
+  const { data: continentTeams } = useQuery({
+    queryKey: ['teams', { continent }],
+    queryFn: () => fetchTeams({ continent }),
+    enabled: continent != null,
+    staleTime: 10 * 60_000,
+  });
+  const teamOptions = continent != null ? (continentTeams ?? []) : teams;
+
   const isSaved = savedAnswers !== undefined && savedAnswers.length > 0;
   const formationDirty =
     question.type === 'IDEAL_XI' &&
@@ -193,7 +204,7 @@ export function QuestionCard({
 
       {question.answer_type === 'TEAM' && (
         <TeamPicker
-          teams={teams}
+          teams={teamOptions}
           selected={selectedIds}
           maxSelections={question.max_selections}
           onToggle={handleToggleTeam}
@@ -208,6 +219,15 @@ export function QuestionCard({
           maxSelections={question.max_selections}
           onToggle={handleTogglePlayer}
           locked={locked}
+          savedPlayerInfo={
+            savedAnswers
+              ? Object.fromEntries(
+                  savedAnswers
+                    .filter((a) => a.player != null)
+                    .map((a) => [a.player!.id, { name: a.player!.name, teamId: a.player!.team_id }]),
+                )
+              : undefined
+          }
         />
       )}
     </article>
