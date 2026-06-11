@@ -1,5 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { MobileSaveBarSlot, MobileSaveBarSlotProvider } from '@/contexts/MobileSaveBarSlotContext';
+import { UnsavedChangesProvider } from '@/contexts/UnsavedChangesContext';
 import { TopBar } from './TopBar';
 import { BottomNav } from './BottomNav';
 import { Sidebar } from './Sidebar';
@@ -14,22 +16,31 @@ export function Layout() {
 
   if (isDesktop) {
     return (
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto">
-          <Outlet />
-        </main>
-      </div>
+      <MobileSaveBarSlotProvider>
+        <UnsavedChangesProvider>
+          <div className="flex h-app overflow-hidden">
+            <Sidebar />
+            <main className="flex-1 overflow-y-auto">
+              <Outlet />
+            </main>
+          </div>
+        </UnsavedChangesProvider>
+      </MobileSaveBarSlotProvider>
     );
   }
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      <TopBar title={title} />
-      <main className="flex-1 overflow-y-auto">
-        <Outlet />
-      </main>
-      <BottomNav />
-    </div>
+    <MobileSaveBarSlotProvider>
+      <UnsavedChangesProvider>
+        <div className="flex h-app flex-col overflow-hidden">
+          <TopBar title={title} />
+          <main className="min-h-0 flex-1 overflow-y-auto">
+            <Outlet />
+          </main>
+          <MobileSaveBarSlot />
+          <BottomNav />
+        </div>
+      </UnsavedChangesProvider>
+    </MobileSaveBarSlotProvider>
   );
 }
