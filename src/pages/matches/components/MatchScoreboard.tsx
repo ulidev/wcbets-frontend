@@ -27,6 +27,17 @@ type MatchScoreboardProps = {
   awayWin?: boolean;
 };
 
+const MAX_SCORE_DIGITS = 2;
+
+function sanitizeScoreInput(raw: string): string {
+  if (raw === '') return '';
+  const digits = raw.replace(/\D/g, '').slice(0, MAX_SCORE_DIGITS);
+  if (digits === '') return '';
+  const value = Number.parseInt(digits, 10);
+  if (Number.isNaN(value) || value < 0) return '';
+  return String(value);
+}
+
 function ScoreValue({
   value,
   editable,
@@ -43,19 +54,21 @@ function ScoreValue({
   if (editable) {
     return (
       <input
-        type="number"
-        min={0}
-        max={20}
+        type="text"
         value={value}
-        onChange={(e) => {
-          const raw = e.target.value;
-          if (raw === '' || /^\d{1,2}$/.test(raw)) onChange?.(raw);
+        maxLength={MAX_SCORE_DIGITS}
+        onChange={(e) => onChange?.(sanitizeScoreInput(e.target.value))}
+        onPaste={(e) => {
+          e.preventDefault();
+          onChange?.(sanitizeScoreInput(e.clipboardData.getData('text')));
         }}
         className={cn(
           'match-scoreboard-score-input',
           side === 'home' ? 'match-scoreboard-score-input--home' : 'match-scoreboard-score-input--away',
         )}
         inputMode="numeric"
+        autoComplete="off"
+        aria-label={side === 'home' ? 'Gols local' : 'Gols visitant'}
         placeholder="–"
       />
     );

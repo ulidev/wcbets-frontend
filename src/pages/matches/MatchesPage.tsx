@@ -20,7 +20,9 @@ import { MatchPredictionBreakdown } from './components/MatchPredictionBreakdown'
 import { MatchOddsBar } from './components/MatchOddsBar';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { useRegisterUnsavedChanges } from '@/contexts/UnsavedChangesContext';
+import { useToast } from '@/contexts/ToastContext';
 import { isMatchPredictionDirty } from '@/lib/match-prediction-dirty';
+import { upsertMyMatchPrediction } from '@/lib/match-predictions-cache';
 import { hasMatchOdds, shouldShowMatchOdds } from '@/lib/match-odds';
 import {
   getFinishedMatchCardStyle,
@@ -346,6 +348,7 @@ interface PredictionCardProps {
 
 function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabel, roundLabel, prediction }: PredictionCardProps) {
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
   const isDesktop = useBreakpoint(768);
   const isLive = match.status === 'STARTED' || match.status === 'HALF_TIME';
   const isFinished = match.status === 'FINISHED';
@@ -423,7 +426,13 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         mvp_player_id: mvpPlayerId,
       });
     },
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['my-predictions'] }),
+    onSuccess: (saved) => {
+      upsertMyMatchPrediction(queryClient, saved);
+      setHomeInput(String(saved.home_goals));
+      setAwayInput(String(saved.away_goals));
+      setMvpPlayerId(saved.mvp_player_id ?? null);
+      showToast('Guardat!');
+    },
   });
 
   const canSave =
@@ -556,19 +565,19 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
         <div className="border-t border-border px-4 pb-3 pt-2.5">
           <button
             onClick={() => mutation.mutate()}
-            disabled={!canSave || mutation.isPending}
+            disabled={!canSave || mutation.isPending || (Boolean(prediction) && !isDirty)}
             className={cn(
               wcBtnPrimaryFull,
-              prediction && 'bg-wc-dark-gray shadow-none hover:bg-wc-dark-gray/90',
+              mutation.isPending && 'wc-btn-primary--loading',
+              prediction &&
+                !isDirty &&
+                'bg-wc-dark-gray shadow-none hover:bg-wc-dark-gray/90 disabled:opacity-70',
             )}
           >
             {mutation.isPending ? 'Guardant…' : prediction ? 'Actualitzar predicció' : 'Guardar predicció'}
           </button>
           {mutation.isError && (
             <p className="mt-1 text-center text-xs text-destructive">Error en guardar. Torna-ho a provar.</p>
-          )}
-          {mutation.isSuccess && (
-            <p className="mt-1 text-center text-xs text-green-500">Guardat!</p>
           )}
         </div>
       )}
@@ -633,6 +642,49 @@ function SkeletonCard() {
   );
 }
 
+type DayGroup = { dateKey: string; matches: Match[] };
+
+interface MatchesDaySectionProps extends DayGroup {
+  teamMap: Map<string, string>;
+  teamLabelMap: Map<string, string>;
+  roundMap: Map<string, RoundResponse>;
+  predictionMap: Map<string, MatchPrediction>;
+}
+
+function MatchesDaySection({
+  dateKey,
+  matches,
+  teamMap,
+  teamLabelMap,
+  roundMap,
+  predictionMap,
+}: MatchesDaySectionProps) {
+  return (
+    <section>
+      <div className="sticky top-0 z-10 border-b border-wc-light-gray bg-white/90 px-4 py-2 backdrop-blur">
+        <h2 className="wc-day-heading">{formatDayHeader(dateKey)}</h2>
+      </div>
+      <div className="grid grid-cols-1 items-start gap-3 p-4 sm:grid-cols-2">
+        {matches.map((match) => {
+          const round = roundMap.get(match.round_id);
+          return (
+            <PredictionCard
+              key={match.id}
+              match={match}
+              homeTeam={teamMap.get(match.home_team_id) ?? '—'}
+              homeTeamLabel={teamLabelMap.get(match.home_team_id) ?? '—'}
+              awayTeam={teamMap.get(match.away_team_id) ?? '—'}
+              awayTeamLabel={teamLabelMap.get(match.away_team_id) ?? '—'}
+              roundLabel={round ? getRoundLabel(round) : ''}
+              prediction={predictionMap.get(match.id)}
+            />
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 export default function MatchesPage() {
   const matchesQuery = useQuery({ queryKey: ['matches'], queryFn: fetchMatches });
   const teamsQuery = useQuery({ queryKey: ['teams'], queryFn: fetchTeams });
@@ -656,7 +708,6 @@ export default function MatchesPage() {
   const matches = matchesQuery.data ?? [];
 
   // Group matches by day in Europe/Madrid timezone, sorted chronologically
-  type DayGroup = { dateKey: string; matches: Match[] };
   const activeDayGroups: DayGroup[] = [];
   const finishedDayGroups: DayGroup[] = [];
 
@@ -683,32 +734,12 @@ export default function MatchesPage() {
   const totalDayGroups = activeDayGroups.length + finishedDayGroups.length;
   const finishedMatchCount = finishedDayGroups.reduce((n, g) => n + g.matches.length, 0);
 
-  function DaySection({ dateKey, matches }: DayGroup) {
-    return (
-      <section key={dateKey}>
-        <div className="sticky top-0 z-10 border-b border-wc-light-gray bg-white/90 px-4 py-2 backdrop-blur">
-          <h2 className="wc-day-heading">{formatDayHeader(dateKey)}</h2>
-        </div>
-        <div className="grid grid-cols-1 items-start gap-3 p-4 sm:grid-cols-2">
-          {matches.map((match) => {
-            const round = roundMap.get(match.round_id);
-            return (
-              <PredictionCard
-                key={match.id}
-                match={match}
-                homeTeam={teamMap.get(match.home_team_id) ?? '—'}
-                homeTeamLabel={teamLabelMap.get(match.home_team_id) ?? '—'}
-                awayTeam={teamMap.get(match.away_team_id) ?? '—'}
-                awayTeamLabel={teamLabelMap.get(match.away_team_id) ?? '—'}
-                roundLabel={round ? getRoundLabel(round) : ''}
-                prediction={predictionMap.get(match.id)}
-              />
-            );
-          })}
-        </div>
-      </section>
-    );
-  }
+  const daySectionProps = {
+    teamMap,
+    teamLabelMap,
+    roundMap,
+    predictionMap,
+  };
 
   return (
     <div className="flex flex-col">
@@ -757,13 +788,13 @@ export default function MatchesPage() {
             />
           </button>
           {pastExpanded && finishedDayGroups.map((group) => (
-            <DaySection key={group.dateKey} {...group} />
+            <MatchesDaySection key={group.dateKey} {...group} {...daySectionProps} />
           ))}
         </div>
       )}
 
       {!isLoading && !isError && activeDayGroups.map((group) => (
-        <DaySection key={group.dateKey} {...group} />
+        <MatchesDaySection key={group.dateKey} {...group} {...daySectionProps} />
       ))}
     </div>
   );

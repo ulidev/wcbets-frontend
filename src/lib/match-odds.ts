@@ -11,7 +11,7 @@ const LIVE_OR_UPCOMING: MatchStatus[] = [
   'PENALTIES',
 ];
 
-/** Same formula as `Match.normalize_odds` in the backend. */
+/** Same formula as `Match.normalize_odds` in the backend (raw bookmaker odds → ×1–×2). */
 export function normalizeMatchOdds(odds: number | null | undefined): number {
   if (odds == null) return 1.0;
   return Math.round((1.0 + (Math.min(odds, 10.0) - 1.0) / 9.0) * 100) / 100;
@@ -25,17 +25,11 @@ export function shouldShowMatchOdds(status: MatchStatus): boolean {
   return LIVE_OR_UPCOMING.includes(status);
 }
 
-/** Raw opening odds from the API (e.g. 1.45). */
-export function formatOpeningOdds(value: number | null | undefined): string {
-  if (value == null) return '—';
-  return value.toFixed(2);
-}
-
-/** Scoring multiplier derived from opening odds (×1.0 – ×2.0). */
+/** Scoring multiplier from the API (already normalized ×1.0 – ×2.0 in `home_win_odds`, etc.). */
 export function formatMatchMultiplier(value: number | null | undefined): string {
   if (value == null) return '—';
-  const mult = normalizeMatchOdds(value);
-  return mult === 1 ? '×1' : `×${mult.toFixed(2).replace(/\.?0+$/, '')}`;
+  if (value === 1) return '1';
+  return value.toFixed(2).replace(/\.?0+$/, '');
 }
 
 export type OddsOutcome = 'home' | 'draw' | 'away';
@@ -50,15 +44,13 @@ export function openingOddsForPredictedScore(
   return match.draw_odds;
 }
 
-/** Normalized multiplier for the predicted 1X2 outcome (used in scoring). */
+/** Multiplier for the predicted 1X2 outcome (API values are already normalized). */
 export function multiplierForPredictedScore(
   homeGoals: number,
   awayGoals: number,
   match: Pick<MatchResponse, 'home_win_odds' | 'draw_odds' | 'away_win_odds'>,
 ): number | null {
-  const raw = openingOddsForPredictedScore(homeGoals, awayGoals, match);
-  if (raw == null) return null;
-  return normalizeMatchOdds(raw);
+  return openingOddsForPredictedScore(homeGoals, awayGoals, match);
 }
 
 export function predictedOutcomeFromInputs(homeInput: string, awayInput: string): OddsOutcome | null {

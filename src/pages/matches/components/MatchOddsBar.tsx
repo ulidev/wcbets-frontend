@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils';
 import {
   formatMatchMultiplier,
-  formatOpeningOdds,
   predictedOutcomeFromInputs,
   type OddsOutcome,
 } from '@/lib/match-odds';
@@ -27,13 +26,13 @@ interface MatchOddsBarProps {
 
 function OddsCell({
   label,
-  openingOdds,
+  multiplier,
   variant,
   teamName,
   isActive,
 }: {
   label: string;
-  openingOdds: number | null;
+  multiplier: number | null;
   variant: OddsOutcome;
   teamName: string;
   isActive: boolean;
@@ -43,9 +42,8 @@ function OddsCell({
   return (
     <div className={cn('match-odds-bar__cell', className)} style={style}>
       <span className="match-odds-bar__label">{label}</span>
-      <span className="match-odds-bar__value">{formatOpeningOdds(openingOdds)}</span>
-      <span className={cn('match-odds-bar__mult', isActive && 'text-wc-hermes')}>
-        {formatMatchMultiplier(openingOdds)}
+      <span className={cn('match-odds-bar__value', isActive && 'text-wc-hermes')}>
+        {formatMatchMultiplier(multiplier)}
       </span>
     </div>
   );
@@ -66,25 +64,25 @@ export function MatchOddsBar({
 
   return (
     <div className="match-odds-bar">
-      <p className="match-odds-bar__heading">Odds d&apos;obertura</p>
+      <p className="match-odds-bar__heading">Multiplicador de punts</p>
       <div className="match-odds-bar__row">
         <OddsCell
           label={OUTCOME_LABELS.home}
-          openingOdds={match.home_win_odds}
+          multiplier={match.home_win_odds}
           variant="home"
           teamName={homeTeamName}
           isActive={predicted === 'home'}
         />
         <OddsCell
           label={OUTCOME_LABELS.draw}
-          openingOdds={match.draw_odds}
+          multiplier={match.draw_odds}
           variant="draw"
           teamName=""
           isActive={predicted === 'draw'}
         />
         <OddsCell
           label={OUTCOME_LABELS.away}
-          openingOdds={match.away_win_odds}
+          multiplier={match.away_win_odds}
           variant="away"
           teamName={awayTeamName}
           isActive={predicted === 'away'}
