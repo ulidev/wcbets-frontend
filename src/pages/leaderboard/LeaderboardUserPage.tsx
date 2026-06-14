@@ -11,7 +11,7 @@ import { fetchUserCrystalBallAnswers, fetchCrystalBallQuestions, fetchTeams } fr
 import { fetchDeadlines } from '@/api/crystal-ball';
 import { fetchTeams as fetchAllTeams, fetchMatches, fetchRounds, fetchUserMatchPredictions } from '@/api/matches';
 import { deadlineHasPassed } from '@/lib/deadlines';
-import { cn, getAvatarColor, getInitials } from '@/lib/utils';
+import { cn, getAvatarColor, getInitials, fmtPts } from '@/lib/utils';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import { PHASE_LABELS, slotsByPhaseOrdered, BRACKET_PHASE_ORDER } from '@/pages/pickem/bracket-utils';
 import { FinishedMatchPredictionCard } from '@/pages/matches/components/FinishedMatchPredictionCard';
@@ -218,7 +218,7 @@ function PickemPredictions({ userId }: { userId: string }) {
                                 <span className="truncate">{winnerName}</span>
                               </span>
                               {pick && pick.points_awarded > 0 && (
-                                <span className="text-xs font-bold text-primary">+{pick.points_awarded} pts</span>
+                                <span className="text-xs font-bold text-primary">+{fmtPts(pick.points_awarded)} pts</span>
                               )}
                             </div>
                           ) : (
@@ -312,7 +312,7 @@ function CrystalBallPredictions({ userId }: { userId: string }) {
             <div className="mb-3 flex items-start justify-between gap-3">
               <h3 className="text-sm font-semibold uppercase">{question.label}</h3>
               {prediction && prediction.points_awarded > 0 && (
-                <span className="shrink-0 text-xs font-bold text-primary">+{prediction.points_awarded} pts</span>
+                <span className="shrink-0 text-xs font-bold text-primary">+{fmtPts(prediction.points_awarded)} pts</span>
               )}
             </div>
             {sortedAnswers.length === 0 ? (
@@ -474,7 +474,7 @@ export default function LeaderboardUserPage() {
           </div>
           {state.points != null && (
             <div className="shrink-0 text-right">
-              <span className="text-sm font-bold tabular-nums">{state.points}</span>
+              <span className="text-sm font-bold tabular-nums">{fmtPts(state.points)}</span>
               <span className="ml-1 text-xs text-muted-foreground">pts</span>
             </div>
           )}

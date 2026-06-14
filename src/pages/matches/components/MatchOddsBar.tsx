@@ -1,6 +1,5 @@
 import { cn } from '@/lib/utils';
 import {
-  formatMatchMultiplier,
   formatOpeningOdds,
   predictedOutcomeFromInputs,
   type OddsOutcome,
@@ -44,9 +43,6 @@ function OddsCell({
     <div className={cn('match-odds-bar__cell', className)} style={style}>
       <span className="match-odds-bar__label">{label}</span>
       <span className="match-odds-bar__value">{formatOpeningOdds(openingOdds)}</span>
-      <span className={cn('match-odds-bar__mult', isActive && 'text-wc-hermes')}>
-        {formatMatchMultiplier(openingOdds)}
-      </span>
     </div>
   );
 }

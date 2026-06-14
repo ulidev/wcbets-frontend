@@ -22,3 +22,9 @@ export function getAvatarColor(id: string) {
   const hash = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
+
+/** Round points to 1 decimal, dropping the trailing .0 for whole numbers. */
+export function fmtPts(pts: number): string {
+  const v = Math.round(pts * 10) / 10;
+  return v % 1 === 0 ? String(v) : v.toFixed(1);
+}

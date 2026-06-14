@@ -10,7 +10,7 @@ import { fetchDeadlines } from '@/api/crystal-ball';
 import { deadlineHasPassed } from '@/lib/deadlines';
 import type { components } from '@/types/api';
 import { useAuth } from '@/hooks/useAuth';
-import { cn, getInitials, getAvatarColor } from '@/lib/utils';
+import { cn, getInitials, getAvatarColor, fmtPts } from '@/lib/utils';
 import { PageChrome } from '@/components/app/PageChrome';
 
 type LeaderboardEntry = components['schemas']['LeaderboardEntryResponse'];
@@ -84,7 +84,7 @@ function EntryRow({
       </div>
 
       <div className="flex shrink-0 items-center gap-2 text-right">
-        <span className="text-sm font-bold tabular-nums">{entry.points}</span>
+        <span className="text-sm font-bold tabular-nums">{fmtPts(entry.points)}</span>
         <span className="text-xs text-muted-foreground">pts</span>
         {clickable && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
       </div>

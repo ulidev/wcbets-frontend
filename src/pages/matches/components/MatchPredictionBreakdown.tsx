@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn, fmtPts } from '@/lib/utils';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import {
   getResultAccuracyTier,
@@ -24,7 +24,7 @@ function PointChip({ label, pts, tone }: { label: string; pts: number; tone: Acc
       )}
     >
       {label}
-      <span className="font-bold tabular-nums">{pts > 0 ? `+${pts}` : '0'}</span>
+      <span className="font-bold tabular-nums">{pts > 0 ? `+${fmtPts(pts)}` : '0'}</span>
     </span>
   );
 }

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMatchPlayers } from '@/api/matches';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
-import { cn } from '@/lib/utils';
+import { cn, fmtPts } from '@/lib/utils';
 import { MatchScoreboard } from '@/pages/matches/components/MatchScoreboard';
 import { MatchPredictionBreakdown } from '@/pages/matches/components/MatchPredictionBreakdown';
 import {
@@ -101,7 +101,7 @@ export function FinishedMatchPredictionCard({
 
   const predictionSuffix = (
     <span className={cn('font-bold', pointsStyle)}>
-      {prediction.points_awarded > 0 ? `+${prediction.points_awarded}` : '0'}
+      {prediction.points_awarded > 0 ? `+${fmtPts(prediction.points_awarded)}` : '0'}
     </span>
   );
 
@@ -119,7 +119,7 @@ export function FinishedMatchPredictionCard({
         {statusBadge ?? (
           <span className={cn('text-xs font-bold', pointsStyle)}>
             {prediction.points_awarded > 0
-              ? `+${prediction.points_awarded} pts`
+              ? `+${fmtPts(prediction.points_awarded)} pts`
               : '0 pts'}
           </span>
         )}
