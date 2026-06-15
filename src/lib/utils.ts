@@ -22,3 +22,8 @@ export function getAvatarColor(id: string) {
   const hash = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
+
+/** Format points to exactly 1 decimal place. */
+export function fmtPts(pts: number): string {
+  return (Math.round(pts * 10) / 10).toFixed(1);
+}

@@ -146,10 +146,23 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
 
+  .safe-area-pt-bar {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+  }
+
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+}
+
+/* Prevent iOS Safari auto-zoom on input focus (triggers when font-size < 16px) */
+@media screen and (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }
 
 /* WC 2026 — shared page chrome, buttons, section titles */
@@ -998,15 +1011,20 @@
 .match-team-card--home {
   border-width: 2px 2px 2px 2px;
   background-image:
-    linear-gradient(#ffffff, #ffffff),
+    linear-gradient(var(--card-bg, #ffffff), var(--card-bg, #ffffff)),
     var(--team-border);
 }
 
 .match-team-card--away {
   border-width: 2px 2px 2px 2px;
   background-image:
-    linear-gradient(#ffffff, #ffffff),
+    linear-gradient(var(--card-bg, #ffffff), var(--card-bg, #ffffff)),
     var(--team-border);
+}
+
+.match-team-card--warning {
+  --card-bg: oklch(0.95 0.08 55);
+  --team-border: linear-gradient(oklch(0.72 0.19 50), oklch(0.65 0.21 44));
 }
 
 .match-team-card__inner {
@@ -1044,6 +1062,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.match-team-card__warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  margin-top: 0.25rem;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: oklch(0.48 0.21 44);
 }
 
 .match-scoreboard-center {
@@ -1105,6 +1136,18 @@
   text-align: center;
   outline: none;
   appearance: textfield;
+}
+
+.match-scoreboard-score-input--warning {
+  width: 2.8rem;
+  background: oklch(0.95 0.07 55);
+  color: oklch(0.48 0.2 45);
+  caret-color: oklch(0.48 0.2 45);
+}
+
+.match-scoreboard-score-input.match-scoreboard-score-input--warning:focus {
+  background: oklch(0.93 0.08 55);
+  color: oklch(0.48 0.2 45);
 }
 
 .match-scoreboard-score-input::-webkit-inner-spin-button,
@@ -1264,7 +1307,7 @@
 }
 
 .match-odds-bar__value {
-  font-size: 0.8125rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--color-wc-card-text);

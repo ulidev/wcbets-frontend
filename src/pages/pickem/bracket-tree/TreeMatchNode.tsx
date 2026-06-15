@@ -1,7 +1,7 @@
 import { CheckCircle2, Trophy, XCircle } from 'lucide-react';
 import type { CSSProperties } from 'react';
 import { TeamFlag } from '@/components/app/TeamFlag';
-import { cn } from '@/lib/utils';
+import { cn, fmtPts } from '@/lib/utils';
 import { wcFontBody } from '@/lib/wc-ui';
 import {
   type BracketSlotPickemOverview,
@@ -99,7 +99,7 @@ export function TreeMatchNode({
         {isCorrect && (
           <span className="flex items-center gap-0.5 text-[10px] text-wc-green">
             <CheckCircle2 className="h-3 w-3" />
-            {slot.points_awarded != null && slot.points_awarded > 0 ? `+${slot.points_awarded}` : '✓'}
+            {slot.points_awarded != null && slot.points_awarded > 0 ? `+${fmtPts(slot.points_awarded)}` : '✓'}
           </span>
         )}
         {isWrong && (

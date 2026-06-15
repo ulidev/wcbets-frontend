@@ -11,7 +11,7 @@ import {
   updateMatchPrediction,
 } from '@/api/matches';
 import type { components } from '@/types/api';
-import { cn } from '@/lib/utils';
+import { cn, fmtPts } from '@/lib/utils';
 import { wcBtnPrimaryFull, wcFontBody } from '@/lib/wc-ui';
 import { PageChrome } from '@/components/app/PageChrome';
 import { TeamFlag } from '@/components/app/TeamFlag';
@@ -455,7 +455,7 @@ function PredictionCard({ match, homeTeam, homeTeamLabel, awayTeam, awayTeamLabe
   const predictionSuffix =
     isFinished && prediction && overallTier != null ? (
       <span className={cn('font-bold', OVERALL_POINTS_STYLES[overallTier])}>
-        {prediction.points_awarded > 0 ? `+${prediction.points_awarded}` : '0'}
+        {prediction.points_awarded > 0 ? `+${fmtPts(prediction.points_awarded)}` : '0'}
       </span>
     ) : null;
 

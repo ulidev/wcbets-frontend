@@ -5365,11 +5365,11 @@
             "title": "Mvp Player Id"
           },
           "points_awarded": {
-            "type": "integer",
+            "type": "number",
             "title": "Points Awarded"
           },
           "result_pts_awarded": {
-            "type": "integer",
+            "type": "number",
             "title": "Result Pts Awarded"
           },
           "mvp_pts_awarded": {
@@ -5424,11 +5424,11 @@
             "title": "Mvp Player Id"
           },
           "points_awarded": {
-            "type": "integer",
+            "type": "number",
             "title": "Points Awarded"
           },
           "result_pts_awarded": {
-            "type": "integer",
+            "type": "number",
             "title": "Result Pts Awarded"
           },
           "mvp_pts_awarded": {

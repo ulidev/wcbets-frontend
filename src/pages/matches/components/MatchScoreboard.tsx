@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { AlertTriangle, ChevronDown } from 'lucide-react';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import { cn } from '@/lib/utils';
 import { teamCardBorderGradient, teamFifaCode, WC_2026_CENTER_LOGO } from '../match.utils';
@@ -41,11 +41,12 @@ function ScoreValue({
   side: 'home' | 'away';
 }) {
   if (editable) {
+    const isWarning = value.length > 1;
     return (
       <input
-        type="number"
-        min={0}
-        max={20}
+        type="text"
+        inputMode="numeric"
+        maxLength={2}
         value={value}
         onChange={(e) => {
           const raw = e.target.value;
@@ -54,8 +55,8 @@ function ScoreValue({
         className={cn(
           'match-scoreboard-score-input',
           side === 'home' ? 'match-scoreboard-score-input--home' : 'match-scoreboard-score-input--away',
+          isWarning && 'match-scoreboard-score-input--warning',
         )}
-        inputMode="numeric"
         placeholder="–"
       />
     );
@@ -81,12 +82,14 @@ function TeamCard({
   code,
   winning,
   align,
+  warning,
 }: {
   teamName: string;
   teamLabel?: string | null;
   code: string;
   winning?: boolean;
   align: 'home' | 'away';
+  warning?: boolean;
 }) {
   const borderGradient = teamCardBorderGradient(teamName, align);
 
@@ -95,8 +98,9 @@ function TeamCard({
       className={cn(
         'match-team-card',
         align === 'home' ? 'match-team-card--home' : 'match-team-card--away',
+        warning && 'match-team-card--warning',
       )}
-      style={{ '--team-border': borderGradient } as CSSProperties}
+      style={warning ? undefined : ({ '--team-border': borderGradient } as CSSProperties)}
     >
       <div className="match-team-card__inner">
         <div className="match-team-card__row">
@@ -106,6 +110,12 @@ function TeamCard({
           <TeamFlag teamName={teamName} size="md" />
         </div>
         {teamLabel && <span className="match-team-card__label">{teamLabel}</span>}
+        {warning && (
+          <div className="match-team-card__warning">
+            <AlertTriangle className="h-2.5 w-2.5 shrink-0" />
+            <span>Resultat inusual</span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -141,6 +151,9 @@ export function MatchScoreboard({
   const awayDisplay =
     editable ? awayInput : awayGoals != null ? String(awayGoals) : '–';
 
+  const homeWarning = editable && homeInput.length > 1;
+  const awayWarning = editable && awayInput.length > 1;
+
   const liveLabel =
     isLive && matchMinute
       ? `${matchMinute}${addedTime ? ` ${addedTime}` : ''}`
@@ -155,6 +168,7 @@ export function MatchScoreboard({
           code={homeCode}
           winning={homeWin}
           align="home"
+          warning={homeWarning}
         />
 
         <div className="match-scoreboard-center">
@@ -185,6 +199,7 @@ export function MatchScoreboard({
           code={awayCode}
           winning={awayWin}
           align="away"
+          warning={awayWarning}
         />
       </div>
 
