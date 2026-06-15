@@ -23,8 +23,7 @@ export function getAvatarColor(id: string) {
   return AVATAR_COLORS[hash % AVATAR_COLORS.length];
 }
 
-/** Round points to 1 decimal, dropping the trailing .0 for whole numbers. */
+/** Format points to exactly 1 decimal place. */
 export function fmtPts(pts: number): string {
-  const v = Math.round(pts * 10) / 10;
-  return v % 1 === 0 ? String(v) : v.toFixed(1);
+  return (Math.round(pts * 10) / 10).toFixed(1);
 }
