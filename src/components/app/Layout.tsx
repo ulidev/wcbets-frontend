@@ -32,7 +32,7 @@ export function Layout() {
   return (
     <MobileSaveBarSlotProvider>
       <UnsavedChangesProvider>
-        <div className="flex h-app flex-col overflow-hidden">
+        <div className="fixed inset-0 flex flex-col overflow-hidden">
           <TopBar title={title} />
           <main className="min-h-0 flex-1 overflow-y-auto">
             <Outlet />
