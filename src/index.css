@@ -146,10 +146,23 @@
     padding-top: env(safe-area-inset-top, 0px);
   }
 
+  .safe-area-pt-bar {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+  }
+
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
+}
+
+/* Prevent iOS Safari auto-zoom on input focus (triggers when font-size < 16px) */
+@media screen and (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }
 
 /* WC 2026 — shared page chrome, buttons, section titles */
