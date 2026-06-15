@@ -1,6 +1,7 @@
 import { LogOut, Shield } from 'lucide-react';
 import { AdminUsersPanel } from '@/components/app/AdminUsersPanel';
 import { SuperAdminMatchOverridePanel } from '@/components/app/SuperAdminMatchOverridePanel';
+import { SuperAdminRecalculatePanel } from '@/components/app/SuperAdminRecalculatePanel';
 import { useAuth } from '@/hooks/useAuth';
 import { cn, getInitials, getAvatarColor } from '@/lib/utils';
 import type { components } from '@/types/api';
@@ -56,6 +57,12 @@ export default function ProfilePage() {
         {isSuperAdmin && (
           <div className="mt-6 w-full max-w-lg">
             <SuperAdminMatchOverridePanel />
+          </div>
+        )}
+
+        {isSuperAdmin && (
+          <div className="mt-6 w-full max-w-lg">
+            <SuperAdminRecalculatePanel />
           </div>
         )}
 
