@@ -60,8 +60,17 @@ export const BRACKET_HALF_COUNTS: Record<BracketPhase, number> = {
   FINAL: 0,
 };
 
-export function formatMatchLabel(slotIndex: number): string {
+export function formatMatchLabel(
+  slotIndex: number,
+  matchNumber?: number | null,
+): string {
+  if (matchNumber != null) return `P${matchNumber}`;
   return `M${slotIndex}`;
+}
+
+/** Sort key for list view (chronological / FIFA match number). */
+export function bracketMatchOrder(slot: BracketSlotPickemOverview): number {
+  return slot.match_number ?? slot.slot_index;
 }
 
 /** Expected slot_index for a grid cell when the slot is not in the API yet. */
@@ -78,6 +87,7 @@ export function expectedSlotIndex(
 
 export function slotsByPhaseOrdered(
   slots: BracketSlotPickemOverview[],
+  sortBy: 'tree' | 'match' = 'tree',
 ): Map<BracketPhase, BracketSlotPickemOverview[]> {
   const map = new Map<BracketPhase, BracketSlotPickemOverview[]>();
   for (const slot of slots) {
@@ -87,7 +97,11 @@ export function slotsByPhaseOrdered(
     map.set(phase, list);
   }
   for (const list of map.values()) {
-    list.sort((a, b) => a.slot_index - b.slot_index);
+    list.sort((a, b) =>
+      sortBy === 'match'
+        ? bracketMatchOrder(a) - bracketMatchOrder(b)
+        : a.slot_index - b.slot_index,
+    );
   }
   return map;
 }
@@ -175,6 +189,6 @@ export function slotFeedLabel(
   const src = allSlots.find((s) => s.slot_id === slotId);
   if (!src) return null;
   return isLoser
-    ? `L. ${formatMatchLabel(src.slot_index)}`
-    : `W. ${formatMatchLabel(src.slot_index)}`;
+    ? `L. ${formatMatchLabel(src.slot_index, src.match_number)}`
+    : `W. ${formatMatchLabel(src.slot_index, src.match_number)}`;
 }

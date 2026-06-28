@@ -405,7 +405,7 @@ function BracketMatchCard({
       <div className="mb-2.5 flex items-center justify-between">
         {/* Left: match number + score */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{formatMatchLabel(slot.slot_index)}</span>
+          <span className="text-xs text-muted-foreground">{formatMatchLabel(slot.slot_index, slot.match_number)}</span>
           {isFinished && slot.home_goals != null && slot.away_goals != null && (
             <span className="text-xs font-bold text-foreground tabular-nums">
               {slot.home_goals}–{slot.away_goals}
@@ -567,7 +567,7 @@ export default function PickemPage() {
   const slotsByPhase = useMemo(
     () =>
       overviewQuery.data
-        ? slotsByPhaseOrdered(overviewQuery.data.bracket.slots)
+        ? slotsByPhaseOrdered(overviewQuery.data.bracket.slots, 'match')
         : new Map<BracketPhase, BracketSlotPickemOverview[]>(),
     [overviewQuery.data],
   );

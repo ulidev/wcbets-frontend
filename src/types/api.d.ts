@@ -1237,6 +1237,8 @@ export interface components {
             slot_id: string;
             /** Slot Index */
             slot_index: number;
+            /** Official FIFA match number (P73–P104), when known */
+            match_number?: number | null;
             /** Phase */
             phase: string;
             /** Home Feeds From Slot Id */
