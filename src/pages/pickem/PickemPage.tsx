@@ -20,11 +20,14 @@ import { CSS } from '@dnd-kit/utilities';
 import { AlertCircle, CheckCircle2, GripVertical, Info, LayoutGrid, List, Lock, Trophy, XCircle } from 'lucide-react';
 import { fetchPickemOverview, submitGroupStagePicks, submitBracketPicks } from '@/api/pickem';
 import { fetchTeams } from '@/api/matches';
+import { isTopTwoSwap, computeGroupStagePoints } from '@/lib/pickem-scoring-help';
 import { cn } from '@/lib/utils';
 import { wcFontBody } from '@/lib/wc-ui';
 import { PageChrome } from '@/components/app/PageChrome';
+import { PickemScoringHelp } from '@/components/app/scoring-help/PickemScoringHelp';
 import { StickySaveBar } from '@/components/app/StickySaveBar';
 import { useRegisterUnsavedChanges } from '@/contexts/UnsavedChangesContext';
+import { usePageHeaderExtras } from '@/contexts/PageHeaderExtrasContext';
 import { areBracketPicksDirty, areGroupPicksDirty } from '@/pages/pickem/pickem-dirty';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import type { components } from '@/types/api';
@@ -133,7 +136,8 @@ function SortableTeamRow({
 
   const hasResult = team.actual_position != null;
   const isCorrect = hasResult && team.actual_position === position;
-  const isWrong = hasResult && team.actual_position !== position;
+  const isSwap = hasResult && !isCorrect && isTopTwoSwap(position, team.actual_position!);
+  const isWrong = hasResult && !isCorrect && !isSwap;
 
   return (
     <div
@@ -174,6 +178,11 @@ function SortableTeamRow({
       {hasResult ? (
         isCorrect ? (
           <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />
+        ) : isSwap ? (
+          <span className="flex shrink-0 items-center gap-1 text-xs tabular-nums">
+            <span className="text-muted-foreground/40 line-through">#{position}</span>
+            <span className="font-bold text-amber-600">→ #{team.actual_position}</span>
+          </span>
         ) : (
           <span className="flex shrink-0 items-center gap-1 text-xs tabular-nums">
             <span className="text-muted-foreground/40 line-through">#{position}</span>
@@ -226,8 +235,9 @@ function GroupCard({
 
   const scoredCount = group.teams.filter((t) => t.actual_position != null).length;
   const correctCount = group.teams.filter(
-    (t) => t.actual_position != null && t.actual_position === t.predicted_position,
+    (t, idx) => t.actual_position != null && t.actual_position === idx + 1,
   ).length;
+  const displayPoints = pointsAwarded ?? computeGroupStagePoints(group.teams);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -245,18 +255,23 @@ function GroupCard({
         style={{ backgroundColor: color }}
       >
         <h3 className="wc-group-card-title">{group.name}</h3>
-        <div className="flex items-center gap-2">
-          {scoredCount > 0 && (
-            <span className="text-xs text-white/70">
+        {scoredCount > 0 && (
+          <span className="flex items-center gap-1.5 text-xs tabular-nums text-white">
+            <span className="font-medium text-white/85">
               {correctCount}/{scoredCount}✓
             </span>
-          )}
-          {pointsAwarded != null && (
-            <span className="rounded-full bg-black/25 px-2 py-0.5 text-xs font-bold tabular-nums text-white">
-              +{pointsAwarded} pts
-            </span>
-          )}
-        </div>
+            {displayPoints != null && (
+              <>
+                <span className="text-white/50" aria-hidden>
+                  ·
+                </span>
+                <span className="rounded-full bg-black/25 px-2 py-0.5 font-bold text-white">
+                  +{displayPoints} pts
+                </span>
+              </>
+            )}
+          </span>
+        )}
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext
@@ -405,7 +420,7 @@ function BracketMatchCard({
       <div className="mb-2.5 flex items-center justify-between">
         {/* Left: match number + score */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{formatMatchLabel(slot.slot_index)}</span>
+          <span className="text-xs text-muted-foreground">{formatMatchLabel(slot.slot_index, slot.match_number)}</span>
           {isFinished && slot.home_goals != null && slot.away_goals != null && (
             <span className="text-xs font-bold text-foreground tabular-nums">
               {slot.home_goals}–{slot.away_goals}
@@ -473,6 +488,7 @@ function GroupSkeleton() {
 
 export default function PickemPage() {
   const queryClient = useQueryClient();
+  usePageHeaderExtras(useMemo(() => <PickemScoringHelp />, []));
   const [tab, setTab] = useState<PickemTab>('groups');
   const [bracketView, setBracketView] = useState<BracketViewMode>('list');
   const [groupSaveError, setGroupSaveError] = useState<string | null>(null);
@@ -504,14 +520,30 @@ export default function PickemPage() {
   useEffect(() => {
     if (!overviewQuery.data) return;
 
+    const serverGroups = overviewQuery.data.group_stage.groups;
+
     if (!groupInitialized.current) {
       groupInitialized.current = true;
       setGroupPicks(
-        overviewQuery.data.group_stage.groups.map((g) => ({
+        serverGroups.map((g) => ({
           group_id: g.group_id,
           name: g.name,
           teams: [...g.teams].sort((a, b) => a.predicted_position - b.predicted_position),
         })),
+      );
+    } else {
+      setGroupPicks((prev) =>
+        prev.map((g) => {
+          const server = serverGroups.find((sg) => sg.group_id === g.group_id);
+          if (!server) return g;
+          return {
+            ...g,
+            teams: g.teams.map((t) => {
+              const serverTeam = server.teams.find((st) => st.team_id === t.team_id);
+              return serverTeam ? { ...t, actual_position: serverTeam.actual_position } : t;
+            }),
+          };
+        }),
       );
     }
 
@@ -567,7 +599,7 @@ export default function PickemPage() {
   const slotsByPhase = useMemo(
     () =>
       overviewQuery.data
-        ? slotsByPhaseOrdered(overviewQuery.data.bracket.slots)
+        ? slotsByPhaseOrdered(overviewQuery.data.bracket.slots, 'match')
         : new Map<BracketPhase, BracketSlotPickemOverview[]>(),
     [overviewQuery.data],
   );
@@ -633,6 +665,7 @@ export default function PickemPage() {
       <PageChrome<PickemTab>
         title="Pick'em"
         description="Prediu la classificació de grups i el bracket eliminatori"
+        titleHelp={<PickemScoringHelp />}
         tabs={[
           { id: 'groups', label: 'Fase de grups' },
           { id: 'bracket', label: 'Bracket' },

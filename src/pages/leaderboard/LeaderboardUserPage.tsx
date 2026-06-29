@@ -23,8 +23,8 @@ type Phase = components['schemas']['Phase'];
 
 const MATCH_PHASE_LABELS: Record<Phase, string> = {
   GROUP_STAGE: 'Fase de grups',
-  ROUND_OF_32: 'Vuitens de final',
-  ROUND_OF_16: 'Setzens de final',
+  ROUND_OF_32: 'Setzens de final',
+  ROUND_OF_16: 'Vuitens de final',
   QUARTER_FINAL: 'Quarts de final',
   SEMI_FINAL: 'Semifinals',
   THIRD_FOURTH_POSITION: 'Tercer i quart lloc',

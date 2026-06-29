@@ -9,6 +9,7 @@ import {
   fetchPendingUsers,
 } from '@/api/users';
 import { listUserGroups } from '@/api/user-groups';
+import { AdminGroupStandingsContent } from '@/components/app/AdminGroupStandingsPanel';
 import { useAuth } from '@/hooks/useAuth';
 import { cn, getAvatarColor, getInitials } from '@/lib/utils';
 import { wcBtnPrimary, wcFontBody } from '@/lib/wc-ui';
@@ -16,7 +17,7 @@ import type { components } from '@/types/api';
 
 type UserAdminView = components['schemas']['UserAdminView'];
 type UserGroupResponse = components['schemas']['UserGroupResponse'];
-type Tab = 'pending' | 'all';
+type Tab = 'pending' | 'all' | 'groups';
 
 function GroupSelect({
   groups,
@@ -305,8 +306,8 @@ export function AdminUsersPanel() {
   if (!me) return null;
 
   const busy = approving || denying || assigningGroup;
-  const isLoading = tab === 'pending' ? loadingPending : loadingAll;
-  const isError = tab === 'pending' ? errorPending : errorAll;
+  const isLoading = tab === 'pending' ? loadingPending : tab === 'all' ? loadingAll : false;
+  const isError = tab === 'pending' ? errorPending : tab === 'all' ? errorAll : false;
 
   return (
     <section className="w-full">
@@ -323,16 +324,23 @@ export function AdminUsersPanel() {
         <button
           type="button"
           onClick={() => setTab('pending')}
-          className={cn('wc-tab', tab === 'pending' && 'wc-tab-active')}
+          className={cn('wc-tab flex-1 justify-center', tab === 'pending' && 'wc-tab-active')}
         >
           {pending.length > 0 ? `Pendents (${pending.length})` : 'Pendents'}
         </button>
         <button
           type="button"
           onClick={() => setTab('all')}
-          className={cn('wc-tab', tab === 'all' && 'wc-tab-active')}
+          className={cn('wc-tab flex-1 justify-center', tab === 'all' && 'wc-tab-active')}
         >
           Tots
+        </button>
+        <button
+          type="button"
+          onClick={() => setTab('groups')}
+          className={cn('wc-tab flex-1 justify-center', tab === 'groups' && 'wc-tab-active')}
+        >
+          Grups
         </button>
       </div>
 
@@ -415,6 +423,12 @@ export function AdminUsersPanel() {
             </div>
           )}
         </>
+      )}
+
+      {tab === 'groups' && (
+        <div className="overflow-hidden rounded-[18px] border border-wc-light-gray bg-white p-4 shadow-sm">
+          <AdminGroupStandingsContent />
+        </div>
       )}
     </section>
   );
