@@ -22,7 +22,6 @@ export const submitBracketPicks = (
 
 type GroupStagePredictionPublicResponse = components['schemas']['GroupStagePredictionPublicResponse'];
 type BracketPredictionPublicResponse = components['schemas']['BracketPredictionPublicResponse'];
-type GroupResponse = components['schemas']['GroupResponse'];
 
 export const fetchUserGroupPickem = (userId: string): Promise<GroupStagePredictionPublicResponse[]> =>
   api.get(`api/v1/picks/groups/users/${userId}`).json<GroupStagePredictionPublicResponse[]>();
@@ -30,5 +29,4 @@ export const fetchUserGroupPickem = (userId: string): Promise<GroupStagePredicti
 export const fetchUserBracketPickem = (userId: string): Promise<BracketPredictionPublicResponse[]> =>
   api.get(`api/v1/picks/bracket/users/${userId}`).json<BracketPredictionPublicResponse[]>();
 
-export const fetchGroups = (): Promise<GroupResponse[]> =>
-  api.get('api/v1/tournament/groups').json<GroupResponse[]>();
+export { fetchGroups } from './groups';

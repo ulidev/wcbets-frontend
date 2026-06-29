@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle, ChevronDown, Clock, Search, X } from 'lucide-react';
 import {
@@ -14,6 +14,8 @@ import type { components } from '@/types/api';
 import { cn, fmtPts } from '@/lib/utils';
 import { wcBtnPrimaryFull, wcFontBody } from '@/lib/wc-ui';
 import { PageChrome } from '@/components/app/PageChrome';
+import { MatchScoringHelp } from '@/components/app/scoring-help/MatchScoringHelp';
+import { usePageHeaderExtras } from '@/contexts/PageHeaderExtrasContext';
 import { TeamFlag } from '@/components/app/TeamFlag';
 import { MatchScoreboard } from './components/MatchScoreboard';
 import { MatchPredictionBreakdown } from './components/MatchPredictionBreakdown';
@@ -36,7 +38,7 @@ type PlayerResponse = components['schemas']['PlayerResponse'];
 
 const PHASE_LABELS: Record<Phase, string> = {
   GROUP_STAGE: 'Fase de grups',
-  ROUND_OF_32: 'Vuitens de final',
+  ROUND_OF_32: 'Setzens de final (8a)',
   ROUND_OF_16: 'Setzens de final',
   QUARTER_FINAL: 'Quarts de final',
   SEMI_FINAL: 'Semifinals',
@@ -634,6 +636,7 @@ function SkeletonCard() {
 }
 
 export default function MatchesPage() {
+  usePageHeaderExtras(useMemo(() => <MatchScoringHelp />, []));
   const matchesQuery = useQuery({ queryKey: ['matches'], queryFn: fetchMatches });
   const teamsQuery = useQuery({ queryKey: ['teams'], queryFn: fetchTeams });
   const roundsQuery = useQuery({ queryKey: ['rounds'], queryFn: fetchRounds });
@@ -719,6 +722,7 @@ export default function MatchesPage() {
       <PageChrome
         title="Partits"
         description="Prediu el resultat dels partits del Mundial 2026"
+        titleHelp={<MatchScoringHelp />}
       />
 
       {isLoading && (
