@@ -17,8 +17,8 @@ export function MatchScoringHelp() {
             <div className="flex flex-col gap-3">
               <HelpRule>
                 Resultat (excloents): tendència 2 pts · diferència de gols 4 pts · marcador exacte
-                6 pts. A fase de grups es multiplica per ×0,8. El MVP suma +2 (fix, sense
-                multiplicador de ronda ni d&apos;odds).
+                6 pts, multiplicats per la ronda i per les odds d&apos;obertura. El MVP suma +2 (fix,
+                sense multiplicador de ronda ni d&apos;odds).
               </HelpRule>
               <HelpExample label="Multiplicadors de ronda">
                 <PointsLine label="Fase de grups" value="×0,8" />
@@ -101,7 +101,7 @@ export function MatchScoringHelp() {
           content: (
             <div className="flex flex-col gap-3">
               <HelpMatchCard
-                metaLine="Setzens de final"
+                metaLine="Vuitens de final"
                 homeTeam="Morocco"
                 awayTeam="Portugal"
                 homeTeamLabel="Marroc"
@@ -110,7 +110,7 @@ export function MatchScoringHelp() {
                 awayGoals={1}
                 predHome={2}
                 predAway={1}
-                pointsLabel="+32,4 pts"
+                pointsLabel="+21,6 pts"
                 cardStyle="bg-wc-green/10"
                 pointsStyle="text-wc-green"
                 oddsMultipliers={OUTSIDER_ODDS}
@@ -118,11 +118,11 @@ export function MatchScoringHelp() {
               />
               <p className="text-xs sm:text-sm">
                 Vas predir victòria de{' '}
-                <span className="font-semibold text-foreground">Marroc</span> amb marcador exacte i
-                multiplicador ×1,8.
+                <span className="font-semibold text-foreground">Marroc</span> amb marcador exacte,
+                multiplicador d&apos;odds ×1,8 i de ronda ×2 (vuitens de final).
               </p>
               <div className="flex flex-col gap-1">
-                <PointsLine label="Marcador exacte (6 × 1,8 × 3)" value="32,4 pts" highlight />
+                <PointsLine label="Marcador exacte (6 × 1,8 × 2)" value="21,6 pts" highlight />
                 <PointsLine label="MVP (si l&apos;encertes)" value="+2 pts" />
               </div>
             </div>
