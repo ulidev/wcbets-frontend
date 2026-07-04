@@ -656,11 +656,7 @@ export default function MatchesPage() {
   const roundMap = new Map((roundsQuery.data ?? []).map((r) => [r.id, r]));
   const predictionMap = new Map((predictionsQuery.data ?? []).map((p) => [p.match_id, p]));
 
-  // Knockout matches are predicted in Pick'em bracket — hide them here until Partits supports them.
-  const matches = (matchesQuery.data ?? []).filter((m) => {
-    const round = roundMap.get(m.round_id);
-    return round?.phase === 'GROUP_STAGE';
-  });
+  const matches = matchesQuery.data ?? [];
 
   // Group matches by day in Europe/Madrid timezone, sorted chronologically
   type DayGroup = { dateKey: string; matches: Match[] };
