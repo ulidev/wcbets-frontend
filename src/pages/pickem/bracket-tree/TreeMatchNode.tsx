@@ -94,7 +94,7 @@ export function TreeMatchNode({
     <div className="bracket-tree-match" style={style}>
       <div className="mb-1 flex items-center justify-between gap-1 px-0.5">
         <span className="text-[10px] font-medium text-wc-dark-gray">
-          {formatMatchLabel(slot.slot_index)}
+          {formatMatchLabel(slot.slot_index, slot.match_number)}
         </span>
         {isCorrect && (
           <span className="flex items-center gap-0.5 text-[10px] text-wc-green">

@@ -19,7 +19,7 @@ type BracketTreeCanvasProps = {
 };
 
 function nodeLabel(node: PlacedNode): string {
-  if (node.slot) return formatMatchLabel(node.slot.slot_index);
+  if (node.slot) return formatMatchLabel(node.slot.slot_index, node.slot.match_number);
   if (node.side === 'center') return formatMatchLabel(node.matchIndex + 1);
   return formatMatchLabel(expectedSlotIndex(node.phase, node.side, node.matchIndex));
 }

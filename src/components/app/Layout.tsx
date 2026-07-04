@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { useBreakpoint } from '@/hooks/useBreakpoint';
 import { MobileSaveBarSlot, MobileSaveBarSlotProvider } from '@/contexts/MobileSaveBarSlotContext';
+import { PageHeaderExtrasProvider } from '@/contexts/PageHeaderExtrasContext';
 import { UnsavedChangesProvider } from '@/contexts/UnsavedChangesContext';
 import { TopBar } from './TopBar';
 import { BottomNav } from './BottomNav';
@@ -32,14 +33,16 @@ export function Layout() {
   return (
     <MobileSaveBarSlotProvider>
       <UnsavedChangesProvider>
-        <div className="fixed inset-0 flex flex-col overflow-hidden">
-          <TopBar title={title} />
-          <main className="min-h-0 flex-1 overflow-y-auto">
-            <Outlet />
-          </main>
-          <MobileSaveBarSlot />
-          <BottomNav />
-        </div>
+        <PageHeaderExtrasProvider>
+          <div className="fixed inset-0 flex flex-col overflow-hidden">
+            <TopBar title={title} />
+            <main className="min-h-0 flex-1 overflow-y-auto">
+              <Outlet />
+            </main>
+            <MobileSaveBarSlot />
+            <BottomNav />
+          </div>
+        </PageHeaderExtrasProvider>
       </UnsavedChangesProvider>
     </MobileSaveBarSlotProvider>
   );
